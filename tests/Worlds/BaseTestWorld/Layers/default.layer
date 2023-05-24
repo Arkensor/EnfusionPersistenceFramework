@@ -1,0 +1,9 @@
+SCR_DestructibleEntity : "{622F9989DDC4865B}PrefabLibrary/Props/Civilian/Recreation/TableRecreation_01/TableRecreation_01.et" {
+ coords 906.775 39.001 2646.451
+ {
+  GenericEntity EPF_ForceEmptyForTesting1 : "{63E8322E2ADD4AA7}Prefabs/Weapons/Rifles/AK74/Rifle_AK74_GP25.et" {
+   coords -0.018 0.909 -0.106
+   angleZ 90
+  }
+ }
+}

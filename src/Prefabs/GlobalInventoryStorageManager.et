@@ -1,0 +1,12 @@
+EPF_GlobalInventoryStorageManager {
+ ID "5A132634841129BA"
+ components {
+  UniversalInventoryStorageComponent "{5A132637760E62B6}" {
+  }
+  EPF_GlobalInventoryStorageManagerComponent "{5A132637212FF074}" {
+  }
+  RplComponent "{5A13263492F99E69}" {
+   Streamable Disabled
+  }
+ }
+}

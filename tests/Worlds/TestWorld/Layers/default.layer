@@ -1,0 +1,99 @@
+EPF_BaseSceneNameProxyEntity Rifle_AK74_GP25_5D6F01990DDEB458 {
+ coords 906.757 39.91 2646.345
+ angleZ 90
+ m_rTarget "{63E8322E2ADD4AA7}Prefabs/Weapons/Rifles/AK74/Rifle_AK74_GP25.et"
+}
+SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/Civilian/SignPub_01.et" {
+ components {
+  ActionsManagerComponent "{5D6ED6C21D96CB70}" {
+   ActionContexts {
+    UserActionContext "{5D6ED6C21A72111F}" {
+     ContextName "main"
+     Position PointInfo "{5D6EDE39CAA10466}" {
+     }
+     Radius 1
+    }
+   }
+   additionalActions {
+    EPF_RunTestsAction "{5D6EDE39D7678964}" {
+     ParentContextList {
+      "main"
+     }
+     UIInfo UIInfo "{5D6EDE39FB20AB4C}" {
+      Name "Run Unit Tests"
+     }
+    }
+    EPF_TriggerSaveAction "{5D6EDE39D0F20D8D}" {
+     ParentContextList {
+      "main"
+     }
+     UIInfo UIInfo "{5D6EDE39F87F9688}" {
+      Name "Trigger Persistence Auto-Save"
+     }
+    }
+   }
+  }
+ }
+ coords 906.619 39.001 2644.922
+ angleY 90
+}
+SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civilian/Recreation/TableRecreation_01/TableRecreation_01.et" {
+ coords 906.775 39.001 2647.763
+ {
+  GenericEntity Backpack_ALICE_Medium_5D6EE937732E33A5 : "{06B68C58B72EAAC6}Prefabs/Items/Equipment/Backpacks/Backpack_ALICE_Medium.et" {
+   coords -0.397 0.899 -0.196
+  }
+  GenericEntity Binoculars_M22_5D6EE9376A25640D : "{0CF54B9A85D8E0D4}Prefabs/Items/Equipment/Binoculars/Binoculars_M22.et" {
+   coords -0.277 0.954 -0.522
+  }
+  GenericEntity PaperMap_01_folded_5D6EE9369B671256 : "{13772C903CB5E4F7}Prefabs/Items/Equipment/Maps/PaperMap_01_folded.et" {
+   coords -0.231 0.899 0.456
+  }
+  GenericEntity ArmyCrackers_Soviet_01_5D6EE9374E310218 : "{50A68300B537EDFA}Prefabs/Items/Food/ArmyCrackers_Soviet_01.et" {
+   coords -0.48 0.899 0.518
+  }
+  GameEntity Flashlight_Soviet_01_5D6EE9369FB38793 : "{575EA58E67448C2A}Prefabs/Items/Equipment/Flashlights/Flashlight_Soviet_01.et" {
+   coords -0.43 0.899 -0.541
+  }
+  GenericEntity Watch_Vostok_5D6EE9368CDD46BD : "{6FD6C96121905202}Prefabs/Items/Equipment/Watches/Watch_Vostok.et" {
+   coords -0.54 0.899 0.125
+  }
+  GenericEntity Radio_ANPRC68_5D6EE93690B79821 : "{73950FBA2D7DB5C5}Prefabs/Items/Equipment/Radios/Radio_ANPRC68.et" {
+   coords -0.276 0.899 0.271
+  }
+  GenericEntity Smoke_RDG2_5D6EE93509BF2441 : "{77EAE5E07DC4678A}Prefabs/Weapons/Grenades/Smoke_RDG2.et" {
+   coords -0.524 1.02 -0.523
+  }
+  GenericEntity Vest_ALICE_sniper_5D6EE936BE9B09DB : "{9CEA24A1A9CC2675}Prefabs/Characters/Vests/Vest_ALICE/Variants/Vest_ALICE_sniper.et" {
+   coords 0.315 0.958 -0.338
+  }
+  GameEntity Jacket_M88_5D6EE936B925B31A : "{9F546CCA2582D16F}Prefabs/Characters/Uniforms/Jacket_M88.et" {
+   coords 0.38 0.899 0.404
+  }
+  GenericEntity AspirinBottle_5D6EE93743969E14 : "{C98FCC6CA6C56069}Prefabs/Items/Medicine/AspirinBottle.et" {
+   coords -0.537 0.899 0.247
+  }
+  GenericEntity Gauze_01_5D6EE937403B4596 : "{CDCC313B2FB76FE7}Prefabs/Items/Medicine/Gauze_01.et" {
+   coords -0.417 0.899 0.242
+  }
+  GenericEntity CombatBoots_US_01_5D6EE9399EE49647 : "{DAAFD15478BDE1C3}Prefabs/Characters/Footwear/CombatBoots_US_01.et" {
+   coords 0.356 1.044 0.378
+  }
+  GameEntity Pants_M88_5D6EE936B5836B5D : "{DCF980831E880F6A}Prefabs/Characters/Uniforms/Pants_M88.et" {
+   coords 0.386 0.969 0.385
+   angleY 90
+  }
+  GenericEntity MRE_5D6EE9374A250742 : "{EB21D26B8D5A3232}Prefabs/Items/Food/MRE.et" {
+   coords -0.463 0.899 0.374
+   angleY 90
+  }
+ }
+}
+Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB_MERDC.et" {
+ components {
+  SCR_VehicleDamageManagerComponent "{141326E9FD94FE40}" {
+   m_fVehicleDestroyDamage 12912.9
+  }
+ }
+ coords 908.561 39.001 2650.991
+}

@@ -1,0 +1,6 @@
+enum EPF_ESaveType
+{
+	MANUAL,
+	SHUTDOWN,
+	INTERVAL_SHUTDOWN
+}

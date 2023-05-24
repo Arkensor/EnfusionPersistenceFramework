@@ -1,0 +1,23 @@
+Vehicle {
+ ID "BBCBA43A9778AE21"
+ components {
+  EPF_PersistenceComponent "{5A0D2D215F2F2559}" {
+   m_pSaveData EPF_VehicleSaveDataClass "{5A0D2D215C6BFA59}" {
+    m_aComponents {
+     EPF_HitZoneContainerComponentSaveDataClass "{5A0D2D2153DEF1D3}" {
+     }
+     EPF_BaseInventoryStorageComponentSaveDataClass "{5A13060F41A7788F}" {
+     }
+     EPF_VehicleControllerSaveDataClass "{5A308829FFA1BEC6}" {
+     }
+     EPF_FuelManagerComponentSaveDataClass "{5A308829FB2663B7}" {
+     }
+     EPF_BaseLightManagerComponentSaveDataClass "{5A309BE3FE6421AC}" {
+     }
+     EPF_SlotManagerComponentSaveDataClass "{5D46776070A12985}" {
+     }
+    }
+   }
+  }
+ }
+}

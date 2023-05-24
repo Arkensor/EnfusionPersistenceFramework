@@ -1,0 +1,20 @@
+SCR_BaseGameMode Gamemode {
+ components {
+  EPF_PersistenceManagerComponent "{5D6ED6C2AD953A40}" {
+   m_pConnectionInfo EDF_JsonFileDbConnectionInfo "{5D6ED6C2A3CA0970}" {
+    m_sDatabaseName "EnfusionPersistenceFramework.Tests"
+   }
+  }
+  EPF_RespawnHandlerComponent "{5D6EDE3951D4BFDC}" {
+  }
+  EPF_RespawnSytemComponent "{5D6EDE394C827A8A}" {
+  }
+  RplComponent "{5D6ED6C2B5A94993}" {
+   Streamable Disabled
+  }
+ }
+}
+EPF_SpawnPoint Spawnpoint {
+ coords 904.683 39.001 2645.768
+ angleY 90
+}

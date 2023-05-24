@@ -1,0 +1,15 @@
+MetaFileClass {
+ Name "{2DC1D07F182DF8A5}Worlds/BaseTestWorld/BaseTestWorld.ent"
+ Configurations {
+  ENTResourceClass PC {
+  }
+  ENTResourceClass XBOX_ONE : PC {
+  }
+  ENTResourceClass XBOX_SERIES : PC {
+  }
+  ENTResourceClass PS4 : PC {
+  }
+  ENTResourceClass HEADLESS : PC {
+  }
+ }
+}

@@ -1,0 +1,13 @@
+GenericEntity {
+ ID "CA6BE4D6BB2D1077"
+ components {
+  EPF_PersistenceComponent "{5A28749FCBB07AFB}" {
+   m_pSaveData EPF_ItemSaveDataClass "{5A28749FC8348188}" {
+    m_aComponents {
+     EPF_BaseMagazineComponentSaveDataClass "{5D24EAF739BA4614}" {
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,13 @@
+GenericEntity {
+ ID "508AB2013EEE1E00"
+ components {
+  EPF_PersistenceComponent "{5A0D2D213B33ECD8}" {
+   m_pSaveData EPF_ItemSaveDataClass "{5A0D2D2139A3D7EC}" {
+    m_aComponents {
+     EPF_BaseInventoryStorageComponentSaveDataClass "{5A1306108DCB1AD6}" {
+     }
+    }
+   }
+  }
+ }
+}

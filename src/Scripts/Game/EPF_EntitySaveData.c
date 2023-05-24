@@ -1,0 +1,569 @@
+enum EPF_ETransformSaveFlags
+{
+	COORDS = 0x01,
+	ANGLES = 0x02,
+	SCALE = 0x04
+};
+
+[BaseContainerProps()]
+class EPF_EntitySaveDataClass
+{
+	[Attribute("1", desc: "Trim default values from the save data to minimize storage and avoid default value entires in the database.\nE.g. there is no need to persist that a cars engine is off.")]
+	bool m_bTrimDefaults;
+
+	[Attribute("3", UIWidgets.Flags, desc: "Choose which aspects from the entity transformation are persisted.", enums: ParamEnumArray.FromEnum(EPF_ETransformSaveFlags))]
+	EPF_ETransformSaveFlags m_eTranformSaveFlags;
+
+	[Attribute("1", desc: "Only relevant if the world contains an active GarbageManager.")]
+	bool m_bSaveRemainingLifetime;
+
+	[Attribute(desc: "Components to persist.")]
+	ref array<ref EPF_ComponentSaveDataClass> m_aComponents;
+};
+
+class EPF_EntitySaveData : EPF_MetaDataDbEntity
+{
+	ResourceName m_rPrefab;
+	ref EPF_PersistentTransformation m_pTransformation;
+	float m_fRemainingLifetime;
+	ref map<typename, ref array<ref EPF_ComponentSaveData>> m_mComponentsSaveData;
+
+	//------------------------------------------------------------------------------------------------
+	//! Spawn the world entity based on this save-data instance
+	//! \param isRoot true if the current entity is a world root (not a stored item inside a storage)
+	//! \return world entity or null if it could not be correctly spawned/loaded
+	IEntity Spawn(bool isRoot = true)
+	{
+		return EPF_PersistenceManager.GetInstance().SpawnWorldEntity(this, isRoot);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Reads the save-data from the world entity
+	//! \param entity to read the save-data from
+	//! \param attributes the class-class shared configuration attributes assigned in the world editor
+	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, NODATA for all default values
+	EPF_EReadResult ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
+	{
+		EPF_EReadResult resultCode = EPF_EReadResult.DEFAULT;
+		if (!attributes.m_bTrimDefaults) resultCode = EPF_EReadResult.OK;
+
+		EPF_PersistenceComponent persistenceComponent = EPF_Component<EPF_PersistenceComponent>.Find(entity);
+		ReadMetaData(persistenceComponent);
+
+		// Prefab
+		m_rPrefab = EPF_Utils.GetPrefabName(entity);
+
+		// Transform
+		m_pTransformation = new EPF_PersistentTransformation();
+		// We save it on root entities and always on characters (in case the parent vehicle is not loaded back in)
+		// We can skip transform for baked entities that were not moved.
+		EPF_EPersistenceFlags flags = persistenceComponent.GetFlags();
+		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
+			(!EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.BAKED) || EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.WAS_MOVED)))
+		{
+			if (m_pTransformation.ReadFrom(entity, attributes))
+				resultCode = EPF_EReadResult.OK;
+		}
+
+		// Lifetime
+		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
+			attributes.m_bSaveRemainingLifetime)
+		{
+			GarbageManager garbageManager = GetGame().GetGarbageManager();
+			if (garbageManager)
+				m_fRemainingLifetime = garbageManager.GetRemainingLifetime(entity);
+
+			if (m_fRemainingLifetime == -1)
+			{
+				m_fRemainingLifetime = 0;
+			}
+			else if (m_fRemainingLifetime > 0)
+			{
+				resultCode = EPF_EReadResult.OK;
+			}
+		}
+
+		// Components
+		m_mComponentsSaveData = new map<typename, ref array<ref EPF_ComponentSaveData>>();
+
+		array<Managed> processedComponents();
+
+		// Go through hierarchy sorted component types
+		foreach (EPF_ComponentSaveDataClass componentSaveDataClass : attributes.m_aComponents)
+		{
+			array<ref EPF_ComponentSaveData> componentsSaveData();
+
+			typename saveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
+			if (!saveDataType) return false;
+
+			array<Managed> outComponents();
+			entity.FindComponents(EPF_ComponentSaveDataType.Get(componentSaveDataClass.Type()), outComponents);
+			foreach (Managed componentRef : outComponents)
+			{
+				// Ingore base class find machtes if a parent class was already processed
+				if (processedComponents.Contains(componentRef)) continue;
+				processedComponents.Insert(componentRef);
+
+				EPF_ComponentSaveData componentSaveData = EPF_ComponentSaveData.Cast(saveDataType.Spawn());
+				if (!componentSaveData) return EPF_EReadResult.ERROR;
+
+				componentSaveDataClass.m_bTrimDefaults = attributes.m_bTrimDefaults;
+				EPF_EReadResult componentRead = componentSaveData.ReadFrom(entity, GenericComponent.Cast(componentRef), componentSaveDataClass);
+				if (componentRead == EPF_EReadResult.ERROR) return componentRead;
+				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults) continue;
+
+				componentsSaveData.Insert(componentSaveData);
+			}
+
+			if (componentsSaveData.Count() > 0)
+			{
+				m_mComponentsSaveData.Set(saveDataType, componentsSaveData);
+				resultCode = EPF_EReadResult.OK;
+			}
+		}
+
+		return resultCode;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Applies the save-data a world entity
+	//! \param entity to apply the data to
+	//! \param attributes the class-class shared configuration attributes assigned in the world editor
+	//! \return true if save-data could be applied, false if something failed.
+	EPF_EApplyResult ApplyTo(IEntity entity, EPF_EntitySaveDataClass attributes)
+	{
+		EPF_EApplyResult result = EPF_EApplyResult.OK;
+
+		// Transform
+		if (m_pTransformation && !m_pTransformation.IsDefault())
+			EPF_Utils.ForceTransform(entity, m_pTransformation.m_vOrigin, m_pTransformation.m_vAngles, m_pTransformation.m_fScale);
+
+		// Lifetime
+		if (attributes.m_bSaveRemainingLifetime)
+		{
+			GarbageManager garbageManager = GetGame().GetGarbageManager();
+			if (garbageManager && m_fRemainingLifetime > 0)
+				garbageManager.Insert(entity, m_fRemainingLifetime);
+		}
+
+		// Components
+		set<Managed> processedComponents();
+		set<typename> processedSaveDataTypes();
+		foreach (EPF_ComponentSaveDataClass componentSaveDataClass : attributes.m_aComponents)
+		{
+			EPF_EApplyResult componentResult = ApplyComponent(componentSaveDataClass, entity, processedSaveDataTypes, processedComponents, attributes);
+
+			if (componentResult == EPF_EApplyResult.ERROR)
+				return EPF_EApplyResult.ERROR;
+
+			if (componentResult == EPF_EApplyResult.AWAIT_COMPLETION)
+				result = EPF_EApplyResult.AWAIT_COMPLETION;
+		}
+
+		// Update any non character entity. On character this can cause fall through ground.
+		if (!ChimeraCharacter.Cast(entity))
+			entity.Update();
+
+		return result;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Compare entity save-data instances to see if there is any noteable difference
+	//! \param other entity save-data to compare against
+	//! \return true if save-data is considered to describe the same data. False on differences.
+	bool Equals(notnull EPF_EntitySaveData other)
+	{
+		// Same prefab?
+		if (m_rPrefab != other.m_rPrefab)
+			return false;
+
+		// Same transformation?
+		if ((vector.Distance(m_pTransformation.m_vOrigin, other.m_pTransformation.m_vOrigin) > 0.0001) ||
+			(vector.Distance(m_pTransformation.m_vAngles, other.m_pTransformation.m_vAngles) > 0.0001) ||
+			((m_pTransformation.m_fScale != float.INFINITY || other.m_pTransformation.m_fScale != float.INFINITY) &&
+				!float.AlmostEqual(m_pTransformation.m_fScale, other.m_pTransformation.m_fScale)))
+		{
+			return false;
+		}
+
+		// Same lifetime?
+		if (m_fRemainingLifetime != other.m_fRemainingLifetime)
+			return false;
+
+		// See if we can match all component save-data instances
+		foreach (typename saveDataType, array<ref EPF_ComponentSaveData> components : m_mComponentsSaveData)
+		{
+			array<ref EPF_ComponentSaveData> otherComponents = other.m_mComponentsSaveData.Get(saveDataType);
+			if (!otherComponents || otherComponents.Count() != components.Count())
+				return false;
+
+			foreach (int idx, EPF_ComponentSaveData componentSaveData : components)
+			{
+				// Try same index first as they are likely to be the correct ones.
+				if (componentSaveData.Equals(otherComponents.Get(idx)))
+					continue;
+
+				bool found;
+				foreach (int compareIdx, EPF_ComponentSaveData otherComponent : otherComponents)
+				{
+					if (compareIdx == idx)
+						continue; // Already tried in idx direct compare
+
+					if (componentSaveData.Equals(otherComponent))
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					return false; //Unable to find any matching component save-data
+			}
+		}
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected EPF_EApplyResult ApplyComponent(
+		EPF_ComponentSaveDataClass componentSaveDataClass,
+		IEntity entity,
+		set<typename> processedSaveDataTypes,
+		set<Managed> processedComponents,
+		EPF_EntitySaveDataClass attributes)
+	{
+		EPF_EApplyResult result = EPF_EApplyResult.OK;
+
+		typename componentSaveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
+
+		// Skip already processed save-data
+		if (processedSaveDataTypes.Contains(componentSaveDataType)) return result;
+		processedSaveDataTypes.Insert(componentSaveDataType);
+
+		// Make sure required save-data is already applied
+		array<ref EPF_ComponentSaveData> componentsSaveData = m_mComponentsSaveData.Get(componentSaveDataType);
+		if (!componentsSaveData || componentsSaveData.IsEmpty()) return result;
+
+		array<typename> requiredSaveDataClasses = componentSaveDataClass.Requires();
+		if (requiredSaveDataClasses)
+		{
+			foreach (typename requiredSaveDataClass : requiredSaveDataClasses)
+			{
+				if (!requiredSaveDataClass.ToString().EndsWith("Class"))
+				{
+					Debug.Error(string.Format("Save-data class '%1' lists invalid (non xyzClass) requirement type '%2'. Fix or remove it.", componentSaveDataClass.Type().ToString(), requiredSaveDataClass));
+					return EPF_EApplyResult.ERROR;
+				}
+
+				foreach (EPF_ComponentSaveDataClass possibleComponentClass : attributes.m_aComponents)
+				{
+					if (possibleComponentClass == componentSaveDataClass ||
+						!possibleComponentClass.IsInherited(requiredSaveDataClass)) continue;
+
+					EPF_EApplyResult componentResult = ApplyComponent(possibleComponentClass, entity, processedSaveDataTypes, processedComponents, attributes);
+
+					if (componentResult == EPF_EApplyResult.ERROR)
+						return EPF_EApplyResult.ERROR;
+
+					if (componentResult == EPF_EApplyResult.AWAIT_COMPLETION)
+						result = EPF_EApplyResult.AWAIT_COMPLETION;
+				}
+			}
+		}
+
+		// Apply save-data to matching components
+		array<Managed> outComponents();
+		entity.FindComponents(EPF_ComponentSaveDataType.Get(componentSaveDataClass.Type()), outComponents);
+		foreach (EPF_ComponentSaveData componentSaveData : componentsSaveData)
+		{
+			bool applied = false;
+			foreach (Managed componentRef : outComponents)
+			{
+				if (!processedComponents.Contains(componentRef) && componentSaveData.IsFor(entity, GenericComponent.Cast(componentRef), componentSaveDataClass))
+				{
+					EPF_EApplyResult componentResult = componentSaveData.ApplyTo(entity, GenericComponent.Cast(componentRef), componentSaveDataClass);
+
+					if (componentResult == EPF_EApplyResult.ERROR)
+						return EPF_EApplyResult.ERROR;
+
+					if (componentResult == EPF_EApplyResult.AWAIT_COMPLETION &&
+						EPF_DeferredApplyResult.SetEntitySaveData(componentSaveData, this))
+					{
+						result = EPF_EApplyResult.AWAIT_COMPLETION;
+					}
+
+					processedComponents.Insert(componentRef);
+					applied = true;
+					break;
+				}
+			}
+
+			if (!applied)
+			{
+				Print(string.Format("No matching component for '%1' found on entity '%2'@%3", componentSaveData.Type().ToString(), EPF_Utils.GetPrefabName(entity), entity.GetOrigin()), LogLevel.VERBOSE);
+			}
+		}
+
+		return result;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	{
+		if (!saveContext.IsValid()) return false;
+
+		bool isJson = ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BaseJsonSerializationSaveContainer);
+
+		SerializeMetaData(saveContext);
+
+		// Prefab
+		string prefabString = m_rPrefab;
+		#ifndef PERSISTENCE_DEBUG
+		if (prefabString.StartsWith("{")) prefabString = m_rPrefab.Substring(1, 16);
+		#endif
+		saveContext.WriteValue("m_rPrefab", prefabString);
+
+		// Transform
+		saveContext.WriteValue("m_pTransformation", m_pTransformation);
+
+		// Lifetime
+		if (m_fRemainingLifetime > 0 || !isJson)
+			saveContext.WriteValue("m_fRemainingLifetime", m_fRemainingLifetime);
+
+		// Components
+		array<ref EPF_PersistentComponentSaveData> componentSaveDataWrapper();
+		foreach (typename type, array<ref EPF_ComponentSaveData> componentsSaveData : m_mComponentsSaveData)
+		{
+			foreach (EPF_ComponentSaveData component : componentsSaveData)
+			{
+				EPF_PersistentComponentSaveData container();
+				container.m_pData = component;
+				componentSaveDataWrapper.Insert(container);
+			}
+		}
+
+		if (!componentSaveDataWrapper.IsEmpty() || !isJson)
+			saveContext.WriteValue("m_aComponents", componentSaveDataWrapper);
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	{
+		if (!loadContext.IsValid()) return false;
+
+		DeserializeMetaData(loadContext);
+
+		// Prefab
+		loadContext.ReadValue("m_rPrefab", m_rPrefab);
+		if (m_rPrefab && m_rPrefab[0] != "{") m_rPrefab = string.Format("{%1}", m_rPrefab);
+
+		// Transform
+		loadContext.ReadValue("m_pTransformation", m_pTransformation);
+
+		// Lifetime
+		loadContext.ReadValue("m_fRemainingLifetime", m_fRemainingLifetime);
+
+		// Components
+		m_mComponentsSaveData = new map<typename, ref array<ref EPF_ComponentSaveData>>();
+
+		array<ref EPF_PersistentComponentSaveData> componentSaveDataWrapper();
+		loadContext.ReadValue("m_aComponents", componentSaveDataWrapper);
+		foreach (EPF_PersistentComponentSaveData container : componentSaveDataWrapper)
+		{
+			typename componentSaveDataType = container.m_pData.Type();
+
+			if (!m_mComponentsSaveData.Contains(componentSaveDataType))
+			{
+				m_mComponentsSaveData.Set(componentSaveDataType, {container.m_pData});
+				continue;
+			}
+
+			m_mComponentsSaveData.Get(componentSaveDataType).Insert(container.m_pData);
+		}
+
+		return true;
+	}
+};
+
+class EPF_PersistentTransformation
+{
+	vector m_vOrigin;
+	vector m_vAngles;
+	float m_fScale;
+
+	//------------------------------------------------------------------------------------------------
+	void Reset()
+	{
+		m_vOrigin = EPF_Const.VEC_INFINITY;
+		m_vAngles = EPF_Const.VEC_INFINITY;
+		m_fScale = float.INFINITY;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	bool IsDefault()
+	{
+		return m_vOrigin == EPF_Const.VEC_INFINITY &&
+			m_vAngles == EPF_Const.VEC_INFINITY &&
+			m_fScale == float.INFINITY;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	bool ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
+	{
+		bool anyData;
+
+		vector angles, transform[4];
+		float scale = entity.GetScale();
+
+		// For chars (in vehicles) we want to keep the world transform
+		// for if the parent vehicle is deleted they can still spawn
+		if (!ChimeraCharacter.Cast(entity) && entity.GetParent())
+		{
+			entity.GetLocalTransform(transform);
+			angles = entity.GetLocalYawPitchRoll();
+		}
+		else
+		{
+			entity.GetWorldTransform(transform);
+			angles = entity.GetYawPitchRoll();
+		}
+
+		vector origin = transform[3];
+
+		if ((attributes.m_eTranformSaveFlags & EPF_ETransformSaveFlags.COORDS) &&
+			(!attributes.m_bTrimDefaults || (origin != vector.Zero)))
+		{
+			m_vOrigin = origin;
+			anyData = true;
+		}
+
+		if ((attributes.m_eTranformSaveFlags & EPF_ETransformSaveFlags.ANGLES) &&
+			(!attributes.m_bTrimDefaults || (angles != vector.Zero)))
+		{
+			m_vAngles = angles;
+			anyData = true;
+		}
+
+		if ((attributes.m_eTranformSaveFlags & EPF_ETransformSaveFlags.SCALE) &&
+			(!attributes.m_bTrimDefaults || (scale != 1.0)))
+		{
+			m_fScale = scale;
+			anyData = true;
+		}
+
+		return anyData;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	{
+		if (!saveContext.IsValid()) return false;
+
+		// For binary stream the info which of the 3 possible props will be written after needs to be known.
+		// JSON just has the keys or not, so there it is not a problem.
+		EPF_ETransformSaveFlags flags;
+		if (m_vOrigin != EPF_Const.VEC_INFINITY)
+			flags |= EPF_ETransformSaveFlags.COORDS;
+
+		if (m_vAngles != EPF_Const.VEC_INFINITY)
+			flags |= EPF_ETransformSaveFlags.ANGLES;
+
+		if (m_fScale != float.INFINITY)
+			flags |= EPF_ETransformSaveFlags.SCALE;
+
+		if (ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BinSaveContainer))
+			saveContext.WriteValue("transformSaveFlags", flags);
+
+		if (flags & EPF_ETransformSaveFlags.COORDS)
+			saveContext.WriteValue("m_vOrigin", m_vOrigin);
+
+		if (flags & EPF_ETransformSaveFlags.ANGLES)
+			saveContext.WriteValue("m_vAngles", m_vAngles);
+
+		if (flags & EPF_ETransformSaveFlags.SCALE)
+			saveContext.WriteValue("m_fScale", m_fScale);
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	{
+		if (!loadContext.IsValid()) return false;
+
+		EPF_ETransformSaveFlags flags = EPF_ETransformSaveFlags.COORDS | EPF_ETransformSaveFlags.ANGLES | EPF_ETransformSaveFlags.SCALE;
+		if (ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(BinLoadContainer))
+			loadContext.ReadValue("transformSaveFlags", flags);
+
+		if (flags & EPF_ETransformSaveFlags.COORDS)
+			loadContext.ReadValue("m_vOrigin", m_vOrigin);
+
+		if (flags & EPF_ETransformSaveFlags.ANGLES)
+			loadContext.ReadValue("m_vAngles", m_vAngles);
+
+		if (flags & EPF_ETransformSaveFlags.SCALE)
+			loadContext.ReadValue("m_fScale", m_fScale);
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	void EPF_PersistentTransformation()
+	{
+		Reset();
+	}
+};
+
+class EPF_PersistentComponentSaveData
+{
+	ref EPF_ComponentSaveData m_pData;
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	{
+		if (!saveContext.IsValid())
+			return false;
+
+		saveContext.WriteValue("dataType", EDF_DbName.Get(m_pData.Type()));
+		saveContext.WriteValue("m_pData", m_pData);
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	{
+		if (!loadContext.IsValid())
+			return false;
+
+		string dataTypeString;
+		loadContext.ReadValue("dataType", dataTypeString);
+		typename dataType = EDF_DbName.GetTypeByName(dataTypeString);
+		if (!dataType)
+			return false;
+
+		m_pData = EPF_ComponentSaveData.Cast(dataType.Spawn());
+		loadContext.ReadValue("m_pData", m_pData);
+
+		return true;
+	}
+};
+
+class EPF_ComponentSaveDataGetter<Class T>
+{
+	//------------------------------------------------------------------------------------------------
+	static T GetFirst(EPF_EntitySaveData saveData)
+	{
+		if (!saveData)
+			return null;
+
+		array<ref EPF_ComponentSaveData> componentsSaveData = saveData.m_mComponentsSaveData.Get(T);
+		if (!componentsSaveData || componentsSaveData.IsEmpty())
+			return null;
+
+		return T.Cast(componentsSaveData[0]);
+	}
+};
+

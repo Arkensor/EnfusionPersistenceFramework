@@ -1,0 +1,9 @@
+GenericEntity {
+ ID "5244C46FA7C5E08C"
+ components {
+  EPF_PersistenceComponent "{5A28749CA7978529}" {
+   m_pSaveData EPF_ItemSaveDataClass "{5A28749CA447A720}" {
+   }
+  }
+ }
+}

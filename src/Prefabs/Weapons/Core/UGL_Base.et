@@ -1,0 +1,13 @@
+GenericEntity : "{2E0E3D7D1DD0FF8F}Prefabs/Weapons/Core/Attachment_Base.et" {
+ ID "50D6D3D8D7C645EE"
+ components {
+  EPF_PersistenceComponent "{5A28749FA22EC9AC}" {
+   m_pSaveData EPF_ItemSaveDataClass "{5A28749FA0C6FB38}" {
+    m_aComponents {
+     EPF_MuzzleInMagComponentSaveDataClass "{5D6ED2DDBB8B7AA9}" {
+     }
+    }
+   }
+  }
+ }
+}
