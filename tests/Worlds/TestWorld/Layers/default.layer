@@ -10,6 +10,7 @@ SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/
     UserActionContext "{5D6ED6C21A72111F}" {
      ContextName "main"
      Position PointInfo "{5D6EDE39CAA10466}" {
+      Offset 0 0.9635 0
      }
      Radius 1
     }
