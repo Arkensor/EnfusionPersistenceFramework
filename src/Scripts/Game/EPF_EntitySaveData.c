@@ -44,8 +44,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, NODATA for all default values
 	EPF_EReadResult ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
 	{
-		EPF_EReadResult resultCode = EPF_EReadResult.DEFAULT;
-		if (!attributes.m_bTrimDefaults) resultCode = EPF_EReadResult.OK;
+		EPF_EReadResult statusCode = EPF_EReadResult.DEFAULT;
+		if (!attributes.m_bTrimDefaults) statusCode = EPF_EReadResult.OK;
 
 		EPF_PersistenceComponent persistenceComponent = EPF_Component<EPF_PersistenceComponent>.Find(entity);
 		ReadMetaData(persistenceComponent);
@@ -62,7 +62,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			(!EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.BAKED) || EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.WAS_MOVED)))
 		{
 			if (m_pTransformation.ReadFrom(entity, attributes))
-				resultCode = EPF_EReadResult.OK;
+				statusCode = EPF_EReadResult.OK;
 		}
 
 		// Lifetime
@@ -79,7 +79,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			}
 			else if (m_fRemainingLifetime > 0)
 			{
-				resultCode = EPF_EReadResult.OK;
+				statusCode = EPF_EReadResult.OK;
 			}
 		}
 
@@ -118,11 +118,11 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			if (componentsSaveData.Count() > 0)
 			{
 				m_mComponentsSaveData.Set(saveDataType, componentsSaveData);
-				resultCode = EPF_EReadResult.OK;
+				statusCode = EPF_EReadResult.OK;
 			}
 		}
 
-		return resultCode;
+		return statusCode;
 	}
 
 	//------------------------------------------------------------------------------------------------

@@ -515,10 +515,10 @@ class EPF_PersistentScriptedStateProxyContext
 class EPF_PersistentScriptedStateProxyCreateCallback : EDF_DbFindCallbackSingle<EPF_ScriptedStateSaveData>
 {
 	//------------------------------------------------------------------------------------------------
-	override void OnSuccess(EPF_ScriptedStateSaveData resultData, Managed context)
+	override void OnSuccess(EPF_ScriptedStateSaveData result, Managed context)
 	{
 		auto contextTyped = EPF_PersistentScriptedStateProxyContext.Cast(context);
-		if (resultData && contextTyped.m_pProxy.Load(resultData))
-			contextTyped.m_pCallback.Invoke(resultData);
+		if (result && contextTyped.m_pProxy.Load(result))
+			contextTyped.m_pCallback.Invoke(result);
 	}
 };

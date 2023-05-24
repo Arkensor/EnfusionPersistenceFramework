@@ -135,15 +135,15 @@ class EPF_ScriptedStateLoaderProcessorCallbackSingle : EDF_DbFindCallbackSingle<
 	typename m_tCreateType;
 
 	//------------------------------------------------------------------------------------------------
-	override void OnSuccess(EPF_ScriptedStateSaveData resultData, Managed context)
+	override void OnSuccess(EPF_ScriptedStateSaveData result, Managed context)
 	{
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 
 		EPF_PersistentScriptedState resultScriptedState;
 
-		if (resultData)
+		if (result)
 		{
-			resultScriptedState = EPF_PersistentScriptedState.Cast(persistenceManager.SpawnScriptedState(resultData))
+			resultScriptedState = EPF_PersistentScriptedState.Cast(persistenceManager.SpawnScriptedState(result))
 		}
 		else if (m_bCreateSingleton)
 		{
@@ -154,7 +154,7 @@ class EPF_ScriptedStateLoaderProcessorCallbackSingle : EDF_DbFindCallbackSingle<
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnFailure(EDF_EDbOperationStatusCode resultCode, Managed context)
+	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
 		GetGame().GetScriptModule().Call(m_pCallbackInvoker, "Invoke", false, null, null);
 	}
@@ -173,12 +173,12 @@ class EPF_ScriptedStateLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMulti
 	ref EPF_ScriptedStateLoaderCallbackInvokerBase m_pCallbackInvoker;
 
 	//------------------------------------------------------------------------------------------------
-	override void OnSuccess(array<ref EPF_ScriptedStateSaveData> resultData, Managed context)
+	override void OnSuccess(array<ref EPF_ScriptedStateSaveData> results, Managed context)
 	{
-		array<ref EPF_PersistentScriptedState> resultReferences();
-		
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		foreach (EPF_ScriptedStateSaveData saveData : resultData)
+
+		array<ref EPF_PersistentScriptedState> resultReferences();
+		foreach (EPF_ScriptedStateSaveData saveData : results)
 		{
 			EPF_PersistentScriptedState resultScriptedState = EPF_PersistentScriptedState.Cast(persistenceManager.SpawnScriptedState(saveData));
 			if (resultScriptedState)
@@ -192,7 +192,7 @@ class EPF_ScriptedStateLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMulti
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnFailure(EDF_EDbOperationStatusCode resultCode, Managed context)
+	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
 		GetGame().GetScriptModule().Call(m_pCallbackInvoker, "Invoke", false, null);
 	}

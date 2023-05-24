@@ -148,15 +148,15 @@ class EPF_WorldEntityLoaderProcessorCallbackSingle : EDF_DbFindCallbackSingle<EP
 	ref EDF_DataCallbackSingle<IEntity> m_pOuterCallback;
 
 	//------------------------------------------------------------------------------------------------
-	override void OnSuccess(EPF_EntitySaveData resultData, Managed context)
+	override void OnSuccess(EPF_EntitySaveData result, Managed context)
 	{
-		IEntity resultWorldEntity = EPF_PersistenceManager.GetInstance().SpawnWorldEntity(resultData);
+		IEntity resultWorldEntity = EPF_PersistenceManager.GetInstance().SpawnWorldEntity(result);
 		if (m_pOuterCallback) 
 			m_pOuterCallback.Invoke(resultWorldEntity);
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnFailure(EDF_EDbOperationStatusCode resultCode, Managed context)
+	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
 		if (m_pOuterCallback) 
 			m_pOuterCallback.Invoke(null);
@@ -174,19 +174,15 @@ class EPF_WorldEntityLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMultipl
 	ref EDF_DataCallbackMultiple<IEntity> m_pOuterCallback;
 
 	//------------------------------------------------------------------------------------------------
-	override void OnSuccess(array<ref EPF_EntitySaveData> resultData, Managed context)
+	override void OnSuccess(array<ref EPF_EntitySaveData> results, Managed context)
 	{
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+
 		array<IEntity> resultEntities();
-
-		if (resultData)
+		foreach (EPF_EntitySaveData saveData : results)
 		{
-			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-
-			foreach (EPF_EntitySaveData saveData : resultData)
-			{
-				IEntity entity = persistenceManager.SpawnWorldEntity(saveData);
-				if (entity) resultEntities.Insert(entity);
-			}
+			IEntity entity = persistenceManager.SpawnWorldEntity(saveData);
+			if (entity) resultEntities.Insert(entity);
 		}
 
 		if (m_pOuterCallback) 
@@ -194,7 +190,7 @@ class EPF_WorldEntityLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMultipl
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnFailure(EDF_EDbOperationStatusCode resultCode, Managed context)
+	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
 		if (m_pOuterCallback) 
 			m_pOuterCallback.Invoke(new array<IEntity>());
