@@ -109,30 +109,6 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 		if (!System.GetCLIParam("ConnectionString", connectionString))
 			return null;
 
-		int driverEndIdx = connectionString.IndexOf("://");
-		if (driverEndIdx == -1)
-		{
-			Debug.Error(string.Format("Invalid -ConnectionString=... parameter value '%1'.", connectionString));
-			return null;
-		}
-
-		string driverName = connectionString.Substring(0, driverEndIdx);
-		string connectionInfoString = connectionString.Substring(driverEndIdx + 3, connectionString.Length() - (driverName.Length() + 3));
-
-		typename driverType = EDF_DbDriverRegistry.Get(driverName);
-		if (!driverType.IsInherited(EDF_DbDriver))
-		{
-			Debug.Error(string.Format("Incompatible database driver type '%1'.", driverType));
-			return null;
-		}
-
-		typename connectionInfoType = EDF_DbConnectionInfoDriverType.GetConnectionInfoType(driverType);
-		EDF_DbConnectionInfoBase connectionInfo = EDF_DbConnectionInfoBase.Cast(connectionInfoType.Spawn());
-		if (!connectionInfo)
-			return null;
-
-		connectionInfo.Parse(connectionInfoString);
-
-		return connectionInfo;
+		return EDF_DbConnectionInfoBase.Parse(connectionString);
 	}
 };
