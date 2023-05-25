@@ -101,29 +101,22 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 	override EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
 		SlotManagerComponent slotManager = SlotManagerComponent.Cast(component);
-
 		array<EntitySlotInfo> outSlotInfos();
 		slotManager.GetSlotInfos(outSlotInfos);
 
-		array<ref EPF_EntitySlotPrefabInfo> slotinfos = EPF_EntitySlotPrefabInfo.GetSlotInfos(owner, slotManager);
-
 		EPF_EApplyResult result = EPF_EApplyResult.OK;
-
-		// TODO: Refactor to use find by name etc once we have https://feedback.bistudio.com/T171679
 		foreach (EPF_PersistentEntitySlot slot : m_aSlots)
 		{
-			foreach (int idx, EPF_EntitySlotPrefabInfo slotInfo : slotinfos)
-			{
-				if (slotInfo.m_sName == slot.m_sName)
-				{
-					EPF_EApplyResult slotResult = ApplySlot(outSlotInfos.Get(idx), slot.m_pEntity);
-					if (slotResult == EPF_EApplyResult.ERROR)
-						return EPF_EApplyResult.ERROR;
+			EntitySlotInfo slot = slotManager.GetSlotByName(slot.m_sName);
+			if (!slot)
+				continue;
 
-					if (slotResult == EPF_EApplyResult.AWAIT_COMPLETION)
-						result = EPF_EApplyResult.AWAIT_COMPLETION;
-				}
-			}
+			EPF_EApplyResult slotResult = ApplySlot(outSlotInfos.Get(idx), slot.m_pEntity);
+			if (slotResult == EPF_EApplyResult.ERROR)
+				return EPF_EApplyResult.ERROR;
+
+			if (slotResult == EPF_EApplyResult.AWAIT_COMPLETION)
+				result = EPF_EApplyResult.AWAIT_COMPLETION;
 		}
 
 		return result;
