@@ -105,13 +105,13 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		slotManager.GetSlotInfos(outSlotInfos);
 
 		EPF_EApplyResult result = EPF_EApplyResult.OK;
-		foreach (EPF_PersistentEntitySlot slot : m_aSlots)
+		foreach (EPF_PersistentEntitySlot persistentSlot : m_aSlots)
 		{
-			EntitySlotInfo slot = slotManager.GetSlotByName(slot.m_sName);
+			EntitySlotInfo slot = slotManager.GetSlotByName(persistentSlot.m_sName);
 			if (!slot)
 				continue;
 
-			EPF_EApplyResult slotResult = ApplySlot(outSlotInfos.Get(idx), slot.m_pEntity);
+			EPF_EApplyResult slotResult = ApplySlot(slot, persistentSlot.m_pEntity);
 			if (slotResult == EPF_EApplyResult.ERROR)
 				return EPF_EApplyResult.ERROR;
 
