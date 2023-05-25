@@ -112,7 +112,7 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 					}
 				}
 
-				// Apply quick item slots serverside to avoid inital sync back from client with same data
+				// Apply quick item slots serverside to avoid initial sync back from client with same data
 				inventoryStorage.EPF_Rpc_UpdateQuickSlotItems(quickBarRplIds);
 
 				SCR_RespawnComponent respawnComponent = SCR_RespawnComponent.Cast(GetGame().GetPlayerManager().GetPlayerRespawnComponent(playerId));

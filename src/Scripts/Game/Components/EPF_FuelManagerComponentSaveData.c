@@ -35,9 +35,9 @@ class EPF_FuelManagerComponentSaveData : EPF_ComponentSaveData
 					continue;
 
 				// Remove relfection getter when https://feedback.bistudio.com/T171947 is resolved in 0.9.9
-				float initalFuelState;
-				if (EDF_ReflectionUtilsT<float>.Get(fuelNode, "m_fInitialFuelTankState", initalFuelState) &&
-					float.AlmostEqual(persistentFuelNode.m_fFuel, initalFuelState)) continue;
+				float initialFuelState;
+				if (EDF_ReflectionUtilsT<float>.Get(fuelNode, "m_fInitialFuelTankState", initialFuelState) &&
+					float.AlmostEqual(persistentFuelNode.m_fFuel, initialFuelState)) continue;
 			}
 
 			m_aFuelNodes.Insert(persistentFuelNode);

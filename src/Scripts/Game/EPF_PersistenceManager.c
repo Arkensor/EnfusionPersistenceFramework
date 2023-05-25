@@ -609,7 +609,7 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	event void OnWorldPostProcess(World world)
 	{
-		Print("Persistence inital world load started...", LogLevel.DEBUG);
+		Print("Persistence initial world load started...", LogLevel.DEBUG);
 
 		FlushRegistrations();
 		SetState(EPF_EPersistenceManagerState.SETUP);
@@ -638,7 +638,7 @@ class EPF_PersistenceManager
 			m_pRootEntityCollection.m_aRemovedBackedRootEntities.RemoveItem(staleId);
 		}
 
-		// Collect type and ids of inital world entities for bulk load
+		// Collect type and ids of initial world entities for bulk load
 		map<typename, ref array<string>> bulkLoad();
 		foreach (typename saveType, array<string> persistentIds : m_pRootEntityCollection.m_mSelfSpawnDynamicEntities)
 		{
@@ -663,7 +663,7 @@ class EPF_PersistenceManager
 			loadIds.Insert(id);
 		}
 
-		// Load all known inital entity types from db, both baked and dynamic in one bulk operation
+		// Load all known initial entity types from db, both baked and dynamic in one bulk operation
 		foreach (typename saveDataType, array<string> persistentIds : bulkLoad)
 		{
 			array<ref EDF_DbEntity> findResults = m_pDbContext.FindAll(saveDataType, EDF_DbFind.Id().EqualsAnyOf(persistentIds)).GetEntities();
@@ -699,7 +699,7 @@ class EPF_PersistenceManager
 
 		SetState(EPF_EPersistenceManagerState.ACTIVE);
 
-		Print("Persistence inital world load complete.", LogLevel.DEBUG);
+		Print("Persistence initial world load complete.", LogLevel.DEBUG);
 	}
 
 	//------------------------------------------------------------------------------------------------
