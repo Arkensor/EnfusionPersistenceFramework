@@ -23,12 +23,6 @@ sealed class EPF_PersistenceComponentClass : ScriptComponentClass
 	typename m_tSaveDataType;
 
 	//------------------------------------------------------------------------------------------------
-	static override bool DependsOn(string className)
-	{
-		return true; // Required for child prefab EOnInit order somehow ...
-	}
-
-	//------------------------------------------------------------------------------------------------
 	static override array<typename> CannotCombine(IEntityComponentSource src)
 	{
 		return {EPF_PersistenceComponent}; //Prevent multiple persistence components from being added.
@@ -354,8 +348,6 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 				m_mLastSaveData = new map<EPF_PersistenceComponent, ref EPF_EntitySaveData>();
 		}
 
-		SetEventMask(owner, EntityEvent.INIT);
-
 		if (settings.m_bStorageRoot)
 			EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.ROOT);
 
@@ -388,13 +380,6 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 			EventHandlerManagerComponent ev = EPF_Component<EventHandlerManagerComponent>.Find(owner);
 			if (ev) ev.RegisterScriptHandler("OnCompartmentEntered", this, OnCompartmentEntered);
 		}
-	}
-
-	//------------------------------------------------------------------------------------------------
-	override protected void EOnInit(IEntity owner)
-	{
-		EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.INITIALIZED);
-		EPF_DefaultPrefabItemsInfo.Finalize(owner);
 
 		// TODO remove after https://feedback.bistudio.com/T172461 has been fixed
 		IEntity parent = owner.GetParent();
@@ -405,28 +390,23 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 	//------------------------------------------------------------------------------------------------
 	override event protected void OnAddedToParent(IEntity child, IEntity parent)
 	{
+		// Todo: On 0.9.9 use this event to subscribe to entity slots and and inventory item invoker, remove postinit + eoninit workaround
 		if (!EPF_PersistenceManager.IsPersistenceMaster())
 			return;
 
-		// TODO: Remove workaround check after https://feedback.bistudio.com/T172461 was fixed
-		if (EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.HACK_PARENT_RAN))
-			return;
-
-		EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.HACK_PARENT_RAN);
-
 		// TODO: Replace with subscribe to all parent slots after https://feedback.bistudio.com/T171945 is added.
-		ResourceName prefab = EPF_Utils.GetPrefabName(child);
 		array<Managed> outComponents();
 		parent.FindComponents(SlotManagerComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
 		{
 			SlotManagerComponent slotManager = SlotManagerComponent.Cast(componentRef);
-			array<ref EPF_EntitySlotPrefabInfo> slotinfos = EPF_EntitySlotPrefabInfo.GetSlotInfos(parent, slotManager);
-			foreach (EPF_EntitySlotPrefabInfo slotInfo : slotinfos)
+			array<EntitySlotInfo> outSlotInfos();
+			slotManager.GetSlotInfos(outSlotInfos);
+			foreach (EntitySlotInfo slotInfo : outSlotInfos)
 			{
-				if (prefab == slotInfo.m_rPrefab)
+				if (child == slotInfo.GetAttachedEntity())
 				{
-					OnParentAdded();
+					OnParentAdded(slotInfo);
 					return;
 				}
 			}
@@ -434,23 +414,26 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 		parent.FindComponents(BaseSlotComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
 		{
-			EPF_EntitySlotPrefabInfo slotInfo = EPF_EntitySlotPrefabInfo.GetSlotInfo(parent, BaseSlotComponent.Cast(componentRef));
-			if (prefab == slotInfo.GetEnabledSlotPrefab())
+			BaseSlotComponent baseSlot = BaseSlotComponent.Cast(componentRef);
+			if (child == baseSlot.GetAttachedEntity())
 			{
-				OnParentAdded();
+				OnParentAdded(baseSlot.GetSlotInfo());
 				return;
 			}
 		}
+		/*
+		// For weapons rely on EquipedWeaponStorageComponent
 		parent.FindComponents(WeaponSlotComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
 		{
-			EPF_EntitySlotPrefabInfo slotInfo = EPF_EntitySlotPrefabInfo.GetSlotInfo(parent, WeaponSlotComponent.Cast(componentRef));
-			if (prefab == slotInfo.GetEnabledSlotPrefab())
+			WeaponSlotComponent weaponSlot = WeaponSlotComponent.Cast(componentRef);
+			if (child == weaponSlot.GetWeaponEntity())
 			{
-				OnParentAdded();
+				OnParentAdded(null); // Don't have that info here.
 				return;
 			}
 		}
+		*/
 
 		InventoryItemComponent invItem = EPF_Component<InventoryItemComponent>.Find(child);
 		if (invItem)
@@ -460,38 +443,77 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 	//------------------------------------------------------------------------------------------------
 	protected void OnParentSlotChanged(InventoryStorageSlot oldSlot, InventoryStorageSlot newSlot)
 	{
-		OnParentAdded(newSlot);
+		if (oldSlot)
+			OnParentRemoved(oldSlot);
+
+		if (newSlot)
+			OnParentAdded(newSlot);
 	}
 
 	//------------------------------------------------------------------------------------------------
-	// TODO: Change signatur to entity slot so event can be reused with slot manager etc
-	protected void OnParentAdded(InventoryStorageSlot newSlot = null)
+	protected void OnParentAdded(EntitySlotInfo newSlot)
 	{
+		// TODO: Remove this hack in 0.9.9, only needed because we manually trigger OnAddedToParent from OnPostInit
+		if (!EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.ROOT))
+			return;
+
 		IEntity owner = GetOwner();
+		IEntity parent = newSlot.GetOwner();
+
 		EPF_BitFlags.ClearFlags(m_eFlags, EPF_EPersistenceFlags.ROOT);
+		FlagAsMoved();
 
-		if (newSlot)
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		InventoryStorageSlot newInvSlot = InventoryStorageSlot.Cast(newSlot);
+		if (newInvSlot)
 		{
-			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(newSlot.GetOwner());
-			if (parentPersistence && !EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.INITIALIZED))
-			{
-				EPF_DefaultPrefabItemsInfo.Add(owner, newSlot);
-			}
-			else
-			{
-				FlagAsMoved();
-			}
-
-			if (EPF_Utils.IsInstanceAnyInherited(newSlot.GetStorage(), {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
+			if (EPF_Utils.IsInstanceAnyInherited(newInvSlot.GetStorage(), {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
 				EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.WAS_EQUIPPED);
-		}
-		else
-		{
-			StopMoveTracking();
+
+			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(parent);
+			if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
+				parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			{
+				EPF_BakedStorageChange.OnAdded(this, newInvSlot);
+			}
 		}
 
 		if (m_sId && !EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PAUSE_TRACKING))
-			EPF_PersistenceManager.GetInstance().UpdateRootStatus(this, m_sId, EPF_ComponentData<EPF_PersistenceComponentClass>.Get(owner), false);
+			persistenceManager.UpdateRootStatus(this, m_sId, EPF_ComponentData<EPF_PersistenceComponentClass>.Get(owner), false);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void OnParentRemoved(EntitySlotInfo oldSlot)
+	{
+		// TODO: For 0.9.9 entity slot detach event subscribe should fire this removed event too.
+		IEntity owner = GetOwner();
+
+		if (!EPF_PersistenceManager.IsPersistenceMaster() ||
+			EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.ROOT)) //Must have been non root, avoid event for remove from stuff like generic organizer layer entity
+			return;
+
+		EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(owner);
+		if (!settings.m_bStorageRoot)
+			return;
+
+		EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.ROOT);
+		FlagAsMoved();
+
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+
+		InventoryStorageSlot oldInvSlot = InventoryStorageSlot.Cast(oldSlot);
+		if (oldInvSlot)
+		{
+			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(oldInvSlot.GetOwner());
+			if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
+				parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			{
+				EPF_BakedStorageChange.OnRemoved(this, oldInvSlot);
+			}
+		}
+
+		if (m_sId && !EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PAUSE_TRACKING))
+			persistenceManager.UpdateRootStatus(this, m_sId, settings, true);
 
 		// We only needed to know which slot we got attached to, so unsubscribe again
 		InventoryItemComponent invItem = EPF_Component<InventoryItemComponent>.Find(owner);
@@ -499,26 +521,6 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 			invItem.m_OnParentSlotChangedInvoker.Remove(OnParentSlotChanged);
 
 		// TODO: Also unsubscribe any entity slots
-
-		EPF_BitFlags.ClearFlags(m_eFlags, EPF_EPersistenceFlags.HACK_PARENT_RAN);
-	}
-
-	//------------------------------------------------------------------------------------------------
-	override event protected void OnRemovedFromParent(IEntity child, IEntity parent)
-	{
-		if (!EPF_PersistenceManager.IsPersistenceMaster() ||
-			EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.ROOT)) //Must have been non root, avoid event for remove from stuff like generic organizer layer entity
-			return;
-
-		EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(child);
-		if (!settings.m_bStorageRoot)
-			return;
-
-		EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.ROOT);
-		FlagAsMoved();
-
-		if (m_sId && !EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PAUSE_TRACKING))
-			EPF_PersistenceManager.GetInstance().UpdateRootStatus(this, m_sId, settings, true);
 	}
 
 	//------------------------------------------------------------------------------------------------

@@ -23,19 +23,34 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 		{
 			IEntity slotEntity = storageComponent.Get(nSlot);
 			ResourceName prefab = EPF_Utils.GetPrefabName(slotEntity);
-			ResourceName defaultSlotPrefab = EPF_DefaultPrefabItemsInfo.GetDefaultPrefab(storageComponent, nSlot);
-
+			EPF_BakedStorageChange slotChange = EPF_BakedStorageChange.Get(storageComponent, nSlot);
 			EPF_PersistenceComponent slotPersistence = EPF_Component<EPF_PersistenceComponent>.Find(slotEntity);
+
+			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(owner);
+			bool baked = EPF_BitFlags.CheckFlags(persistence.GetFlags(), EPF_EPersistenceFlags.BAKED);
+
+			bool bakedParent = true;
+			IEntity parent = owner.GetParent();
+			if (parent)
+			{
+				EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(parent);
+				if (parentPersistence)
+					bakedParent = EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED);
+			}
+
 			if (!slotPersistence)
 			{
-				// Storage normally has a default prefab spawned onto this slot idx, but it is not persistent so it needs to be removed.
-				if (defaultSlotPrefab)
+				// Item on slot that has no persistece component needs to be explictly removed or else on load there would be nothing removing it
+				// Also remove if slot is now empty but a slot change was recorded (can only be a removal then)
+				if (baked && bakedParent && (slotEntity || slotChange))
 				{
 					EPF_PersistentInventoryStorageSlot persistentSlot();
 					persistentSlot.m_iSlotIndex = nSlot;
 					m_aSlots.Insert(persistentSlot);
 				}
 
+				// Skip emtpy slots for non baked, they will wipe any items not mentioned in save-data on load,
+				// they always save all items to know the ids even if no changes on items
 				continue;
 			}
 
@@ -46,13 +61,31 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 
 			// We can safely ignore baked objects with default info on them, but anything else needs to be saved.
 			if (attributes.m_bTrimDefaults &&
-				prefab == defaultSlotPrefab &&
+				readResult == EPF_EReadResult.DEFAULT &&
 				EPF_BitFlags.CheckFlags(slotPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED) &&
-				readResult == EPF_EReadResult.DEFAULT)
+				baked &&
+				bakedParent &&
+				!slotChange)
 			{
-				// Ignore only if no parent or parent is also baked
-				EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(owner.GetParent());
-				if (!parentPersistence || EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+				// Double check parent slot that there is no baked storage change detected
+				bool canSkip = true;
+				InventoryStorageSlot parentSlot = storageComponent.GetParentSlot();
+				while (parentSlot)
+				{
+					if (EPF_BakedStorageChange.Has(parentSlot.GetStorage(), parentSlot.GetID()))
+					{
+						canSkip = false;
+						break;
+					}
+
+					BaseInventoryStorageComponent storage = parentSlot.GetStorage();
+					if (!storage)
+						break;
+
+					parentSlot = storage.GetParentSlot();
+				}
+
+				if (canSkip)
 					continue;
 			}
 
@@ -89,13 +122,41 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 			// Found matching entity, no need to spawn, just apply save-data
 			if (slot.m_pEntity &&
 				slotEntity &&
-				EPF_Utils.GetPrefabName(slotEntity) == EPF_DefaultPrefabItemsInfo.GetDefaultPrefab(storageComponent, slot.m_iSlotIndex))
+				EPF_Utils.GetPrefabName(slotEntity) == slot.m_pEntity.m_rPrefab)
 			{
 				EPF_PersistenceComponent slotPersistence = EPF_Component<EPF_PersistenceComponent>.Find(slotEntity);
 				if (slotPersistence && !slotPersistence.Load(slot.m_pEntity, false))
 					return EPF_EApplyResult.ERROR;
 
 				continue;
+			}
+
+			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(owner);
+			if (EPF_BitFlags.CheckFlags(persistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			{
+				EPF_BakedStorageChange change();
+				if (slotEntity)
+				{
+					EPF_PersistenceComponent slotPersistence = EPF_Component<EPF_PersistenceComponent>.Find(slotEntity);
+					if (!slotPersistence)
+					{
+						// Non persistence slot removals can only be overridden by dynamic entity placed into them
+						change.m_sRemovedItemId = "PERMANENT_BAKED_REMOVAL";
+					}
+					else
+					{
+						// Remember slot removals
+						change.m_sRemovedItemId = slotPersistence.GetPersistentId();
+					}
+
+				}
+				else
+				{
+					// Remember slot replacement on baked entities
+					change.m_bReplaced = true;
+				}
+
+				EPF_BakedStorageChange.Set(storageComponent, slot.m_iSlotIndex, change);
 			}
 
 			// Slot did not match save-data, delete current entity on it

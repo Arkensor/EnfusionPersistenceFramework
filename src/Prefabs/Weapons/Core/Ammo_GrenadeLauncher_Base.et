@@ -1,0 +1,9 @@
+Projectile {
+ ID "50C6F965BA00F9FA"
+ components {
+  EPF_PersistenceComponent "{5D74D249CCC332DA}" {
+   m_pSaveData EPF_ItemSaveDataClass "{5D74D249CD31FE32}" {
+   }
+  }
+ }
+}
