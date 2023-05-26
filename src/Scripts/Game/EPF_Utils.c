@@ -203,20 +203,30 @@ class EPF_Utils
 
 		return sortedHierachy;
 	}
-	
+
 	//------------------------------------------------------------------------------------------------
-	static bool IsAnyInherited(Class instance, notnull array<typename> from)
+	static bool IsAnyInherited(typename type, notnull array<typename> from)
 	{
-		if (instance)
+		if (type)
 		{
-			typename type = instance.Type();
 			foreach (typename candiate : from)
 			{
-				if (type.IsInherited(candiate)) return true;
+				if (type.IsInherited(candiate))
+					return true;
 			}
 		}
 
 		return false;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	static bool IsInstanceAnyInherited(Class instance, notnull array<typename> from)
+	{
+		if (!instance)
+			return false;
+
+		typename type = instance.Type();
+		return IsAnyInherited(type, from);
 	}
 
 	//------------------------------------------------------------------------------------------------

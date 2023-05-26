@@ -482,7 +482,7 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 				FlagAsMoved();
 			}
 
-			if (EPF_Utils.IsAnyInherited(newSlot.GetStorage(), {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
+			if (EPF_Utils.IsInstanceAnyInherited(newSlot.GetStorage(), {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
 				EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.WAS_EQUIPPED);
 		}
 		else
