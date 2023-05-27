@@ -502,13 +502,16 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 
 		InventoryStorageSlot oldInvSlot = InventoryStorageSlot.Cast(oldSlot);
-		if (oldInvSlot)
+		if (oldInvSlot && persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE)
 		{
 			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(oldInvSlot.GetOwner());
-			if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
-				parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			if (parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
 			{
 				EPF_BakedStorageChange.OnRemoved(this, oldInvSlot);
+			}
+			else
+			{
+				EPF_StorageChangeDetection.MarkAsDirty(oldInvSlot.GetStorage());
 			}
 		}
 

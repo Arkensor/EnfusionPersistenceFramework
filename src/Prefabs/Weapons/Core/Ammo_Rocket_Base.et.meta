@@ -1,0 +1,15 @@
+MetaFileClass {
+ Name "{C0BDA86B5AA5648C}Prefabs/Weapons/Core/Ammo_Rocket_Base.et"
+ Configurations {
+  EntityTemplateResourceClass PC {
+  }
+  EntityTemplateResourceClass XBOX_ONE : PC {
+  }
+  EntityTemplateResourceClass XBOX_SERIES : PC {
+  }
+  EntityTemplateResourceClass PS4 : PC {
+  }
+  EntityTemplateResourceClass HEADLESS : PC {
+  }
+ }
+}

@@ -733,8 +733,8 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	protected static void Reset()
 	{
-		EPF_BakedStorageChange.Reset();
 		EPF_EntitySlotPrefabInfo.Reset();
+		EPF_StorageChangeDetection.Reset();
 		EPF_PersistenceIdGenerator.Reset();
 		EPF_PersistentScriptedStateProxy.s_mProxies = null;
 		s_pInstance = null;

@@ -95,7 +95,7 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 			m_aSlots.Insert(persistentSlot);
 		}
 
-		if (m_aSlots.IsEmpty())
+		if (m_aSlots.IsEmpty() && !EPF_StorageChangeDetection.IsDirty(storageComponent))
 			return EPF_EReadResult.DEFAULT;
 
 		return EPF_EReadResult.OK;
@@ -115,8 +115,16 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 		InventoryStorageManagerComponent storageManager = InventoryStorageManagerComponent.Cast(storageComponent.GetOwner().FindComponent(InventoryStorageManagerComponent));
 		if (!storageManager) storageManager = EPF_GlobalInventoryStorageManagerComponent.GetInstance();
 
+		bool isNotBaked = !EPF_BitFlags.CheckFlags(EPF_Component<EPF_PersistenceComponent>.Find(owner).GetFlags(), EPF_EPersistenceFlags.BAKED);
+		set<int> processedSlots;
+		if (isNotBaked)
+			processedSlots = new set<int>();
+
 		foreach (EPF_PersistentInventoryStorageSlot slot : m_aSlots)
 		{
+			if (isNotBaked)
+				processedSlots.Insert(slot.m_iSlotIndex);
+
 			IEntity slotEntity = storageComponent.Get(slot.m_iSlotIndex);
 
 			// Found matching entity, no need to spawn, just apply save-data
@@ -173,6 +181,20 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 			// Unable to add it to the storage parent, so put it on the ground at the parent origin
 			if (!storageManager.TryInsertItemInStorage(slotEntity, storageComponent, slot.m_iSlotIndex))
 				EPF_Utils.Teleport(slotEntity, storageComponent.GetOwner().GetOrigin(), storageComponent.GetOwner().GetYawPitchRoll()[0]);
+		}
+
+		// Delte any items not found in the storage data for non bakes that always save all slots
+		if (isNotBaked)
+		{
+			for (int nSlot = 0, count = storageComponent.GetSlotsCount(); nSlot < count; nSlot++)
+			{
+				if (!processedSlots.Contains(nSlot))
+				{
+					IEntity slotEntity = storageComponent.Get(nSlot);
+					if (slotEntity && slotEntity.FindComponent(EPF_PersistenceComponent))
+						storageManager.TryDeleteItem(slotEntity);
+				}
+			}
 		}
 
 		return EPF_EApplyResult.OK;
