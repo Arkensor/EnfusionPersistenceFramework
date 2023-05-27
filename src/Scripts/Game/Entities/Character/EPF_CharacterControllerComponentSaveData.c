@@ -16,6 +16,9 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 	EEquipItemType m_eRightHandType;
 	bool m_bRightHandRaised;
 
+	[NonSerialized()]
+	protected SCR_CharacterControllerComponent m_pCharacterController;
+
 	//------------------------------------------------------------------------------------------------
 	override EPF_EReadResult ReadFrom(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
@@ -55,24 +58,24 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 		EPF_EApplyResult result = EPF_EApplyResult.OK;
 
 		// Apply stance
-		SCR_CharacterControllerComponent characterController = SCR_CharacterControllerComponent.Cast(component);
-		if (characterController.GetStance() != m_eStance)
+		m_pCharacterController = SCR_CharacterControllerComponent.Cast(component);
+		if (m_pCharacterController.GetStance() != m_eStance)
 		{
 			switch (m_eStance)
 			{
 				case ECharacterStance.STAND:
 				{
-					characterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOERECTED);
+					m_pCharacterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOERECTED);
 					break;
 				}
 				case ECharacterStance.CROUCH:
 				{
-					characterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOCROUCH);
+					m_pCharacterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOCROUCH);
 					break;
 				}
 				case ECharacterStance.PRONE:
 				{
-					characterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOPRONE);
+					m_pCharacterController.SetStanceChange(ECharacterStanceChange.STANCECHANGE_TOPRONE);
 					break;
 				}
 			}
@@ -83,19 +86,29 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 		IEntity rightHandEntity = persistenceManager.FindEntityByPersistentId(m_sRightHandItemId);
 		if (rightHandEntity)
 		{
-			BaseWeaponManagerComponent weaponManager = EPF_Component<BaseWeaponManagerComponent>.Find(characterController.GetOwner());
+			BaseWeaponManagerComponent weaponManager = EPF_Component<BaseWeaponManagerComponent>.Find(m_pCharacterController.GetOwner());
 			if (weaponManager)
 			{
-				EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::RightHandItemEquipped");
-				weaponManager.m_OnWeaponChangeCompleteInvoker.Insert(OnWeaponChangeComplete);
-				characterController.TryEquipRightHandItem(rightHandEntity, m_eRightHandType, false);
+				WeaponSlotComponent curWeaponSlot = weaponManager.GetCurrentSlot();
+				if (!curWeaponSlot || curWeaponSlot.GetWeaponEntity() != rightHandEntity)
+				{
+					// Because of MP ownership transfer mid animation issues, we wait for the animation event of weapon change instead of the weapon manager scripted events
+					EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::RightHandItemEquipped");
+					m_pCharacterController.GetOnAnimationEvent().Insert(ListenForWeaponEquipComplete);
+					m_pCharacterController.TryEquipRightHandItem(rightHandEntity, m_eRightHandType, false);
+				}
+				else if (m_bRightHandRaised)
+				{
+					StartWeaponRaise();
+				}
+
 				result = EPF_EApplyResult.AWAIT_COMPLETION;
 			}
 		}
 		else if (m_sLeftHandItemId)
 		{
 			// No weapon so gadget can be equipped as soon as manager is ready
-			SCR_GadgetManagerComponent gadgetMananger = SCR_GadgetManagerComponent.GetGadgetManager(characterController.GetOwner());
+			SCR_GadgetManagerComponent gadgetMananger = SCR_GadgetManagerComponent.GetGadgetManager(m_pCharacterController.GetOwner());
 			if (gadgetMananger)
 			{
 				EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::GadgetEquipped");
@@ -108,39 +121,51 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnWeaponChangeComplete(BaseWeaponComponent newWeaponSlot)
+	protected void ListenForWeaponEquipComplete(AnimationEventID animEventType)
 	{
-		if (newWeaponSlot)
+		if (GameAnimationUtils.GetEventString(animEventType) != "EquipComplete")
+			return;
+
+		m_pCharacterController.GetOnAnimationEvent().Remove(ListenForWeaponEquipComplete);
+
+		if (m_bRightHandRaised)
 		{
-			IEntity owner = newWeaponSlot.GetOwner();
-			SCR_CharacterControllerComponent characterController = EPF_Component<SCR_CharacterControllerComponent>.Find(owner);
-
-			BaseWeaponManagerComponent weaponManager = EPF_Component<BaseWeaponManagerComponent>.Find(owner);
-			weaponManager.m_OnWeaponChangeCompleteInvoker.Remove(OnWeaponChangeComplete);
-
-			if (m_bRightHandRaised)
-			{
-				EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::WeaponRaised");
-				characterController.SetWeaponRaised(m_bRightHandRaised);
-				// Hardcode weapon raise complete after fixed amount of time until we have a nice even for OnRaiseFinished or something
-				GetGame().GetCallqueue().CallLater(OnRaiseFinished, 1000);
-			}
-
-			if (m_sLeftHandItemId)
-			{
-				// By the time a weapon was equipped the manager will be ready so we can take gadget to hands now
-				EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::GadgetEquipped");
-				OnGadgetInitDone(owner, SCR_GadgetManagerComponent.GetGadgetManager(owner));
-			}
+			StartWeaponRaise();
+		}
+		else if (m_sLeftHandItemId)
+		{
+			StartInitGadget();
 		}
 
 		EPF_DeferredApplyResult.SetFinished(this, "CharacterControllerComponentSaveData::RightHandItemEquipped");
 	}
 
 	//------------------------------------------------------------------------------------------------
+	protected void StartWeaponRaise()
+	{
+		EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::WeaponRaised");
+		m_pCharacterController.SetWeaponRaised(true);
+
+		// There is a "StanceTrans" event for when char is erect, but in crouch there is no anim event we could wait for, so for now we just hardcode it.
+		// TODO: Refactor when https://feedback.bistudio.com/T172051 is merged.
+		GetGame().GetCallqueue().CallLater(OnRaiseFinished, 1000);
+	}
+
+	//------------------------------------------------------------------------------------------------
 	protected void OnRaiseFinished()
 	{
+		if (m_sLeftHandItemId)
+			StartInitGadget();
+
 		EPF_DeferredApplyResult.SetFinished(this, "CharacterControllerComponentSaveData::WeaponRaised");
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void StartInitGadget()
+	{
+		EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::GadgetEquipped");
+		IEntity owner = m_pCharacterController.GetOwner();
+		OnGadgetInitDone(owner, SCR_GadgetManagerComponent.GetGadgetManager(owner));
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -150,17 +175,27 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 		if (!leftHandEntity)
 			return;
 
+		m_pCharacterController.m_OnGadgetStateChangedInvoker.Insert(OnGadgetStateChanged);
 		gadgetMananger.HandleInput(leftHandEntity, 1);
-
-		SCR_CharacterControllerComponent characterController = EPF_Component<SCR_CharacterControllerComponent>.Find(owner);
-		characterController.m_OnGadgetStateChangedInvoker.Insert(OnGadgetStateChanged);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	protected void OnGadgetStateChanged(IEntity gadget, bool isInHand, bool isOnGround)
 	{
-		if (isInHand)
-			EPF_DeferredApplyResult.SetFinished(this, "CharacterControllerComponentSaveData::GadgetEquipped");
+		if (!isInHand)
+			return;
+
+		m_pCharacterController.m_OnGadgetStateChangedInvoker.Remove(OnGadgetStateChanged);
+
+		// Ever so slight delay until animation is really completed.
+		// Wait it out so no MP animation issues arise from network ownership transfer too early.
+		GetGame().GetCallqueue().CallLater(OnGadgetStateChangedCompleted, 500);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void OnGadgetStateChangedCompleted()
+	{
+		EPF_DeferredApplyResult.SetFinished(this, "CharacterControllerComponentSaveData::GadgetEquipped");
 	}
 
 	//------------------------------------------------------------------------------------------------
