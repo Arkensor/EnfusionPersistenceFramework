@@ -14,7 +14,6 @@ class EPF_TimeAndWeatherSaveData : EPF_EntitySaveData
 	//------------------------------------------------------------------------------------------------
 	override EPF_EReadResult ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
 	{
-
 		ReadMetaData(EPF_Component<EPF_PersistenceComponent>.Find(entity));
 
 		TimeAndWeatherManagerEntity timeAndWeatherManager = TimeAndWeatherManagerEntity.Cast(entity);

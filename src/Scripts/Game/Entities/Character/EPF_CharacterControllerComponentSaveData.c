@@ -47,7 +47,10 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 			!m_sLeftHandItemId &&
 			!m_sRightHandItemId &&
 			m_eRightHandType == EEquipItemType.EEquipTypeNone &&
-			!m_bRightHandRaised) return EPF_EReadResult.DEFAULT;
+			!m_bRightHandRaised)
+		{
+			return EPF_EReadResult.DEFAULT;
+		}
 
 		return EPF_EReadResult.OK;
 	}

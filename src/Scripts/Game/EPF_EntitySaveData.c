@@ -45,7 +45,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	EPF_EReadResult ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
 	{
 		EPF_EReadResult statusCode = EPF_EReadResult.DEFAULT;
-		if (!attributes.m_bTrimDefaults) statusCode = EPF_EReadResult.OK;
+		if (!attributes.m_bTrimDefaults)
+			statusCode = EPF_EReadResult.OK;
 
 		EPF_PersistenceComponent persistenceComponent = EPF_Component<EPF_PersistenceComponent>.Find(entity);
 		ReadMetaData(persistenceComponent);
@@ -310,7 +311,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	//------------------------------------------------------------------------------------------------
 	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
 	{
-		if (!saveContext.IsValid()) return false;
+		if (!saveContext.IsValid())
+			return false;
 
 		bool isJson = ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BaseJsonSerializationSaveContainer);
 
@@ -351,7 +353,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	//------------------------------------------------------------------------------------------------
 	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
 	{
-		if (!loadContext.IsValid()) return false;
+		if (!loadContext.IsValid())
+			return false;
 
 		DeserializeMetaData(loadContext);
 

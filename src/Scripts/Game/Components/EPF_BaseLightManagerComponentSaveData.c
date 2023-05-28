@@ -25,6 +25,7 @@ class EPF_BaseLightManagerComponentSaveData : EPF_ComponentSaveData
 			persistentLightSlot.m_bFunctional = lightSlot.IsLightFunctional();
 			persistentLightSlot.m_bState = lightManager.GetLightsState(persistentLightSlot.m_eType, persistentLightSlot.m_iSide);
 
+			// Skip slots when trimming and the are not broken and not turned on
 			if (attributes.m_bTrimDefaults && persistentLightSlot.m_bFunctional && !persistentLightSlot.m_bState)
 				continue;
 
