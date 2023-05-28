@@ -75,11 +75,11 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		EPF_PersistenceComponentClass slotAttributes = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(slotEntity);
 		if (saveData.m_pTransformation.ReadFrom(slotEntity, slotAttributes.m_pSaveData))
 		{
-			if (saveData.m_pTransformation.m_vOrigin != EPF_Const.VEC_INFINITY &&
+			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vOrigin) &&
 				vector.Distance(saveData.m_pTransformation.m_vOrigin, prefabInfo.m_vOffset) > 0.001)
 				readResult = EPF_EReadResult.OK;
 
-			if (saveData.m_pTransformation.m_vAngles != EPF_Const.VEC_INFINITY)
+			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vAngles))
 			{
 				vector localFixedAngles = slotEntity.GetLocalAngles();
 				if (float.AlmostEqual(localFixedAngles[0], -180))
@@ -166,10 +166,10 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		{
 			vector transform[4];
 
-			if (persistentTransform.m_vOrigin != EPF_Const.VEC_INFINITY)
+			if (!EPF_Const.IsNan(persistentTransform.m_vOrigin))
 				transform[3] = persistentTransform.m_vOrigin;
 
-			if (persistentTransform.m_vAngles != EPF_Const.VEC_INFINITY)
+			if (!EPF_Const.IsNan(persistentTransform.m_vAngles))
 			{
 				Math3D.AnglesToMatrix(persistentTransform.m_vAngles, transform);
 			}

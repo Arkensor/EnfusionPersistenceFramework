@@ -396,17 +396,15 @@ class EPF_PersistentTransformation
 	//------------------------------------------------------------------------------------------------
 	void Reset()
 	{
-		m_vOrigin = EPF_Const.VEC_INFINITY;
-		m_vAngles = EPF_Const.VEC_INFINITY;
-		m_fScale = float.INFINITY;
+		m_vOrigin = EPF_Const.VECTOR_NAN;
+		m_vAngles = EPF_Const.VECTOR_NAN;
+		m_fScale = EPF_Const.FLOAT_NAN;
 	}
 
 	//------------------------------------------------------------------------------------------------
 	bool IsDefault()
 	{
-		return m_vOrigin == EPF_Const.VEC_INFINITY &&
-			m_vAngles == EPF_Const.VEC_INFINITY &&
-			m_fScale == float.INFINITY;
+		return EPF_Const.IsNan(m_vOrigin) && EPF_Const.IsNan(m_vAngles) && EPF_Const.IsNan(m_fScale);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -464,13 +462,13 @@ class EPF_PersistentTransformation
 		// For binary stream the info which of the 3 possible props will be written after needs to be known.
 		// JSON just has the keys or not, so there it is not a problem.
 		EPF_ETransformSaveFlags flags;
-		if (m_vOrigin != EPF_Const.VEC_INFINITY)
+		if (!EPF_Const.IsNan(m_vOrigin))
 			flags |= EPF_ETransformSaveFlags.COORDS;
 
-		if (m_vAngles != EPF_Const.VEC_INFINITY)
+		if (!EPF_Const.IsNan(m_vAngles))
 			flags |= EPF_ETransformSaveFlags.ANGLES;
 
-		if (m_fScale != float.INFINITY)
+		if (!EPF_Const.IsNan(m_fScale))
 			flags |= EPF_ETransformSaveFlags.SCALE;
 
 		if (ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BinSaveContainer))
