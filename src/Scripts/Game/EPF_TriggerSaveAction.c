@@ -6,6 +6,6 @@ class EPF_TriggerSaveAction : ScriptedUserAction
 		if (replication && !replication.IsOwner()) return;
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		if(persistenceManager) persistenceManager.AutoSave();
+		if (persistenceManager) persistenceManager.AutoSave();
 	}
-}
+};

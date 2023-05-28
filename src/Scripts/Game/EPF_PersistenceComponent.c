@@ -511,7 +511,7 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 			}
 			else
 			{
-				EPF_StorageChangeDetection.MarkAsDirty(oldInvSlot.GetStorage());
+				EPF_StorageChangeDetection.SetDirty(oldInvSlot.GetStorage());
 			}
 		}
 
@@ -585,6 +585,9 @@ sealed class EPF_PersistenceComponent : ScriptComponent
 	{
 		if (m_mLastSaveData)
 			m_mLastSaveData.Remove(this);
+
+		// Clean up storages 
+		EPF_StorageChangeDetection.Cleanup(owner);
 
 		// Check that we are not in session dtor phase
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);

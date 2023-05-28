@@ -3,7 +3,7 @@ class EPF_StorageChangeDetection
 	protected static ref set<BaseInventoryStorageComponent> s_aDirtyStorages = new set<BaseInventoryStorageComponent>();
 
 	//------------------------------------------------------------------------------------------------
-	static void MarkAsDirty(notnull BaseInventoryStorageComponent storage)
+	static void SetDirty(notnull BaseInventoryStorageComponent storage)
 	{
 		s_aDirtyStorages.Insert(storage);
 	}
@@ -12,6 +12,17 @@ class EPF_StorageChangeDetection
 	static bool IsDirty(notnull BaseInventoryStorageComponent storage)
 	{
 		return s_aDirtyStorages.Contains(storage);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	static void Cleanup(notnull IEntity owner)
+	{
+		array<Managed> storages();
+		owner.FindComponents(BaseInventoryStorageComponent, storages);
+		foreach (Managed storageRef : storages)
+		{
+			s_aDirtyStorages.RemoveItem(BaseInventoryStorageComponent.Cast(storageRef));
+		}
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -32,8 +43,6 @@ class EPF_BakedStorageChange
 	//------------------------------------------------------------------------------------------------
 	static void OnAdded(EPF_PersistenceComponent childPersistence, InventoryStorageSlot parentSlot)
 	{
-		//PrintFormat("Baked %1 was changed due to item add of %2.", EPF_Utils.GetPrefabName(parentSlot.GetOwner()), EPF_Utils.GetPrefabName(owner));
-
 		int slotId = parentSlot.GetID();
 		BaseInventoryStorageComponent storage = parentSlot.GetStorage();
 
@@ -58,12 +67,12 @@ class EPF_BakedStorageChange
 
 		if (!change)
 		{
-			PrintFormat("Baked %1 was returned to default because removed item was added back.", storageKey);
+			//PrintFormat("Baked %1 was returned to default because removed item was added back.", storageKey);
 			s_mStorageChanges.Remove(storageKey);
 			return;
 		}
 
-		PrintFormat("Baked %1 was changed with new item in slot.", storageKey);
+		//PrintFormat("Baked %1 was changed with new item in slot.", storageKey);
 		change.m_bReplaced = true;
 		s_mStorageChanges.Set(storageKey, change);
 	}
@@ -71,9 +80,6 @@ class EPF_BakedStorageChange
 	//------------------------------------------------------------------------------------------------
 	static void OnRemoved(EPF_PersistenceComponent childPersistence, InventoryStorageSlot parentSlot)
 	{
-		//IEntity owner = childPersistence.GetOwner();
-		//PrintFormat("Baked %1 was changed due to item removal of %2.", EPF_Utils.GetPrefabName(parentSlot.GetOwner()), EPF_Utils.GetPrefabName(owner));
-
 		string storageKey = string.Format("%1:%2", parentSlot.GetStorage(), parentSlot.GetID());
 
 		EPF_BakedStorageChange change = s_mStorageChanges.Get(storageKey);
@@ -81,19 +87,19 @@ class EPF_BakedStorageChange
 		{
 			change = new EPF_BakedStorageChange();
 			change.m_sRemovedItemId = childPersistence.GetPersistentId();
-			PrintFormat("Baked %1 was changed because baked item was removed.", storageKey);
+			//PrintFormat("Baked %1 was changed because baked item was removed.", storageKey);
 			s_mStorageChanges.Set(storageKey, change);
 		}
 		else if (change)
 		{
 			if (!change.m_sRemovedItemId)
 			{
-				PrintFormat("Baked %1 was returned to default because added dynamic item was removed again.", storageKey);
+				//PrintFormat("Baked %1 was returned to default because added dynamic item was removed again.", storageKey);
 				s_mStorageChanges.Remove(storageKey);
 				return;
 			}
 
-			PrintFormat("Baked %1 was is still removed, but no longer replaced.", storageKey);
+			//PrintFormat("Baked %1 is still removed, but no longer replaced.", storageKey);
 			change.m_bReplaced = false;
 		}
 	}
@@ -116,7 +122,6 @@ class EPF_BakedStorageChange
 	static void Set(BaseInventoryStorageComponent storage, int slotId, EPF_BakedStorageChange change)
 	{
 		string storageKey = string.Format("%1:%2", storage, slotId);
-
 		s_mStorageChanges.Set(storageKey, change);
 	}
 
