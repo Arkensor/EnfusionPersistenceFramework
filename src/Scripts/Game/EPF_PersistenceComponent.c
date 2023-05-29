@@ -1,5 +1,5 @@
 [ComponentEditorProps(category: "Persistence", description: "Used to make an entity persistent.")]
-sealed class EPF_PersistenceComponentClass : ScriptComponentClass
+/*sealed*/ class EPF_PersistenceComponentClass : ScriptComponentClass
 {
 	[Attribute(defvalue: EPF_ESaveType.INTERVAL_SHUTDOWN.ToString(), uiwidget: UIWidgets.ComboBox, desc: "Should the entity be saved automatically and if so only on shutdown or regulary.\nThe interval is configured in the persitence manager component on your game mode.", enums: ParamEnumArray.FromEnum(EPF_ESaveType))]
 	EPF_ESaveType m_eSaveType;
@@ -29,7 +29,7 @@ sealed class EPF_PersistenceComponentClass : ScriptComponentClass
 	}
 };
 
-sealed class EPF_PersistenceComponent : ScriptComponent
+/*sealed*/ class EPF_PersistenceComponent : ScriptComponent
 {
 	private string m_sId;
 
