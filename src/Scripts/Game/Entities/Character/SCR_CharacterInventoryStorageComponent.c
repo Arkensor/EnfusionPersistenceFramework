@@ -7,26 +7,26 @@ modded class SCR_CharacterInventoryStorageComponent
 	{
 		super.StoreItemToQuickSlot(pItem, iSlotIndex, isForced);
 
-		// Debounce sync to configured interval after the last change.
-		RplComponent replication = RplComponent.Cast(GetOwner().FindComponent(RplComponent));
-		if (replication && replication.IsOwnerProxy())
-		{
-			if (m_iEPFDebounceTime == -1)
-			{
-				EPF_PersistenceComponent persistence = EPF_PersistenceComponent.Cast(GetOwner().FindComponent(EPF_PersistenceComponent));
-				if (persistence)
-				{
-					auto charInvSaveDataClass = EPF_CharacterInventoryStorageComponentSaveDataClass.Cast(persistence.GetAttributeClass(EPF_CharacterInventoryStorageComponentSaveDataClass));
-					if (charInvSaveDataClass) m_iEPFDebounceTime = charInvSaveDataClass.m_iMaxQuickbarSaveTime * 1000; // Convert to ms from seconds
-				}
-			}
+		if (!EPF_NetworkUtils.IsOwnerProxy(GetOwner()))
+			return;
 
-			if (m_iEPFDebounceTime != -1)
+		// Debounce sync to configured interval after the last change.
+		if (m_iEPFDebounceTime == -1)
+		{
+			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(GetOwner());
+			if (persistence)
 			{
-				ScriptCallQueue callQueue = GetGame().GetCallqueue();
-				if (callQueue.GetRemainingTime(EPF_SyncQuickSlots) == -1)
-					callQueue.CallLater(EPF_SyncQuickSlots, m_iEPFDebounceTime);
+				auto charInvSaveDataClass = EPF_CharacterInventoryStorageComponentSaveDataClass.Cast(persistence.GetAttributeClass(EPF_CharacterInventoryStorageComponentSaveDataClass));
+				if (charInvSaveDataClass)
+					m_iEPFDebounceTime = charInvSaveDataClass.m_iMaxQuickbarSaveTime * 1000; // Convert to ms from seconds
 			}
+		}
+
+		if (m_iEPFDebounceTime != -1)
+		{
+			ScriptCallQueue callQueue = GetGame().GetCallqueue();
+			if (callQueue.GetRemainingTime(EPF_SyncQuickSlots) == -1)
+				callQueue.CallLater(EPF_SyncQuickSlots, m_iEPFDebounceTime);
 		}
 	}
 
@@ -56,26 +56,24 @@ modded class SCR_CharacterInventoryStorageComponent
 	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
 	void EPF_Rpc_UpdateQuickSlotItems(array<RplId> rplIds)
 	{
-		if (!rplIds || (m_aQuickSlots.Count() != rplIds.Count())) return;
+		if (!rplIds || (m_aQuickSlots.Count() != rplIds.Count()))
+			return;
 
 		// Dequeue any pending update if we just received data from server
 		RplComponent replication = RplComponent.Cast(GetOwner().FindComponent(RplComponent));
 		if (replication && replication.IsOwner() && (m_iEPFDebounceTime != -1))
-		{
 			GetGame().GetCallqueue().Remove(EPF_SyncQuickSlots);
-		}
 
 		int slotsCount = DEFAULT_QUICK_SLOTS.Count();
 		if (m_aQuickSlotsHistory.Count() < slotsCount)
-		{
 			m_aQuickSlotsHistory.Resize(slotsCount);
-		}
 
 		foreach (int idx, RplId rplId : rplIds)
 		{
 			IEntity slotEntity = EPF_NetworkUtils.FindEntityByRplId(rplId);
 			m_aQuickSlots.Set(idx, slotEntity);
-			if (slotEntity) m_aQuickSlotsHistory.Set(idx, GetItemType(slotEntity));
+			if (slotEntity)
+				m_aQuickSlotsHistory.Set(idx, GetItemType(slotEntity));
 		}
 	}
 };

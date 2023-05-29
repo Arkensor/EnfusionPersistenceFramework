@@ -32,9 +32,26 @@ class EPF_NetworkUtils
 	//------------------------------------------------------------------------------------------------
 	static bool IsOwner(IEntity entity)
 	{
-		if (!entity) return false;
+		if (!entity)
+			return false;
+
 		RplComponent replication = RplComponent.Cast(entity.FindComponent(RplComponent));
-		if (!replication) return false;
+		if (!replication)
+			return false;
+
 		return replication.IsOwner();
 	}
-}
+	
+	//------------------------------------------------------------------------------------------------
+	static bool IsOwnerProxy(IEntity entity)
+	{
+		if (!entity)
+			return false;
+
+		RplComponent replication = RplComponent.Cast(entity.FindComponent(RplComponent));
+		if (!replication)
+			return false;
+
+		return replication.IsOwnerProxy();
+	}
+};

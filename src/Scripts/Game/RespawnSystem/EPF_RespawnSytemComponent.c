@@ -107,8 +107,7 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 					IEntity slotEntity = persistenceManager.FindEntityByPersistentId(quickSlot.m_sEntityId);
 					if (slotEntity && quickSlot.m_iIndex < quickBarRplIds.Count())
 					{
-						RplComponent replication = RplComponent.Cast(slotEntity.FindComponent(RplComponent));
-						if (replication) quickBarRplIds.Set(quickSlot.m_iIndex, replication.Id());
+						quickBarRplIds.Set(quickSlot.m_iIndex, EPF_NetworkUtils.GetRplId(slotEntity));
 					}
 				}
 
