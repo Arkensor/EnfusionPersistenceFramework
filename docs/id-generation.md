@@ -21,3 +21,14 @@ The format is still a GUID but depending on what it is generated for the exact f
 - `0000` The leading zero group lexicographically sorts baked objects as earliest created and gives a hint that the entity in question is in fact baked.
 - `HHHH` is the hive index with values between (inclusive) `1` and `4095`.
 - `SPL1`, `SPL2`, and `SPL3` are splits of the deterministic string hash, for the unique identifier, that represents the baked entity (s. [baked entities](baked-entities.md#identification) for details). 
+
+## Local UID replacement
+Uids are only available on backend connected dedicated servers. So for local workbench testing purposes a replacement is offered of the same GUID format and based on the order of connection of the main window and additional peer tools.
+
+| BBBBDDDD     | - | 0000      | - | 0000     | - | 0000          | - | 0000         | 00000001 |
+|--------------|---|-----------|---|----------|---|---------------|---|--------------|----------|
+| BOHEMUID     |   | ZERO      |   | ZERO     |   | ZERO          |   | UID1         | UID1UID1 |
+
+- `BOHEMUID` Leading indicator of a local replacement of the Bohemia player UID.
+- `ZERO` always zero groups.
+- `UID1` uid to a length of 12 based on the local connect [`playerId`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/generated/GameMode/BaseGameMode.c;26).

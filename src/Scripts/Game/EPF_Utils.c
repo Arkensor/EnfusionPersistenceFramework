@@ -21,7 +21,7 @@ class EPF_Utils
 				return string.Empty;
 			}
 
-			uid = string.Format("LOCAL_UID_%1", playerId);
+			uid = string.Format("BBBBDDDD-0000-0000-0000-%1", playerId.ToString(12));
 		}
 
 		return uid;
