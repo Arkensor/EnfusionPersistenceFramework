@@ -588,7 +588,14 @@ class EPF_PersistenceManager
 		if (!m_pDbContext)
 			return;
 
-		m_pRootEntityCollection = EDF_DbEntityHelper<EPF_PersistentRootEntityCollection>.GetRepository(m_pDbContext).FindSingleton().GetEntity();
+		string rootEntityCollectionId = string.Format("00EC%1-0000-0000-0000-000000000000", EPF_PersistenceIdGenerator.GetHiveId().ToString(4));
+		m_pRootEntityCollection = EDF_DbEntityHelper<EPF_PersistentRootEntityCollection>.GetRepository(m_pDbContext).Find(rootEntityCollectionId).GetEntity();
+		if (!m_pRootEntityCollection)
+		{
+			m_pRootEntityCollection = new EPF_PersistentRootEntityCollection();
+			m_pRootEntityCollection.SetId(rootEntityCollectionId);
+		}
+
 		SetState(EPF_EPersistenceManagerState.POST_INIT);
 	}
 

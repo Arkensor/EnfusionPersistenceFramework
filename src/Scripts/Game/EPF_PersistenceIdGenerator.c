@@ -14,6 +14,11 @@ class EPF_PersistenceIdGenerator : EDF_DbEntityIdGenerator
 
 		s_iHiveId = hiveId;
 	}
+	//------------------------------------------------------------------------------------------------
+	static int GetHiveId()
+	{
+		return s_iHiveId;
+	}
 
 	//------------------------------------------------------------------------------------------------
 	override static string Generate()
@@ -105,8 +110,8 @@ class EPF_PersistenceIdGenerator : EDF_DbEntityIdGenerator
 		int doubleSplit = splitLength * 2;
 		string split3 = EDF_HexHelper.Convert(Math.AbsInt(identifier.Substring(doubleSplit, identifier.Length() - doubleSplit).Hash()), false, 8);
 
-		// 0000 HHHH-SPL1-SPL1-SPL2-SPL2 SPL3 SPL3
-		return string.Format("0000%1-%2-%3-%4-%5%6",
+		// 00BB HHHH-SPL1-SPL1-SPL2-SPL2 SPL3 SPL3
+		return string.Format("00BB%1-%2-%3-%4-%5%6",
 			hiveHex,
 			split1.Substring(0, 4),
 			split1.Substring(4, 4),
