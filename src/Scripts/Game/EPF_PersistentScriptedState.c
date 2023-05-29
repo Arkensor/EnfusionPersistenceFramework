@@ -400,7 +400,7 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, DEFAULT if the data could be trimmed
 	EPF_EReadResult ReadFrom(notnull Managed scriptedState)
 	{
-		return EDF_DbEntityUtils.StructAutoCopy(scriptedState, this);
+		return EPF_SavaDataUtils.StructAutoCopy(scriptedState, this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -414,7 +414,7 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	//! Applies the save-data to the scripted state
 	EPF_EApplyResult ApplyTo(notnull Managed scriptedState)
 	{
-		return EDF_DbEntityUtils.StructAutoCopy(this, scriptedState);
+		return EPF_SavaDataUtils.StructAutoCopy(this, scriptedState);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -423,7 +423,7 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	//! \return true if save-data is considered to describe the same data. False on differences.
 	bool Equals(notnull EPF_ScriptedStateSaveData other)
 	{
-		return false;
+		return EPF_SavaDataUtils.StructAutoCompare(this, other);
 	}
 };
 

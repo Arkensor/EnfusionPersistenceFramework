@@ -25,7 +25,7 @@ class EPF_ComponentSaveData
 	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, DEFAULT if the data could be trimmed
 	EPF_EReadResult ReadFrom(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		return EDF_DbEntityUtils.StructAutoCopy(component, this);
+		return EPF_SavaDataUtils.StructAutoCopy(component, this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ class EPF_ComponentSaveData
 	//! \return true if save-data could be applied, false if something failed.
 	EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		return EDF_DbEntityUtils.StructAutoCopy(this, component);
+		return EPF_SavaDataUtils.StructAutoCopy(this, component);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ class EPF_ComponentSaveData
 	//! \return true if save-data is considered to describe the same data. False on differences.
 	bool Equals(notnull EPF_ComponentSaveData other)
 	{
-		return false;
+		return EPF_SavaDataUtils.StructAutoCompare(this, other);
 	}
 };
 
