@@ -467,14 +467,18 @@
 		InventoryStorageSlot newInvSlot = InventoryStorageSlot.Cast(newSlot);
 		if (newInvSlot)
 		{
-			if (EPF_Utils.IsInstanceAnyInherited(newInvSlot.GetStorage(), {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
-				EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.WAS_EQUIPPED);
-
-			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(parent);
-			if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
-				parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			BaseInventoryStorageComponent storage = newInvSlot.GetStorage();
+			if (storage)
 			{
-				EPF_BakedStorageChange.OnAdded(this, newInvSlot);
+				if (EPF_Utils.IsInstanceAnyInherited(storage, {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
+					EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.WAS_EQUIPPED);
+	
+				EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(parent);
+				if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
+					parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+				{
+					EPF_BakedStorageChange.OnAdded(this, newInvSlot);
+				}
 			}
 		}
 
@@ -504,14 +508,19 @@
 		InventoryStorageSlot oldInvSlot = InventoryStorageSlot.Cast(oldSlot);
 		if (oldInvSlot && persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE)
 		{
-			EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(oldInvSlot.GetOwner());
-			if (parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+			// Some inv slots have no storages sometimes e.g. clothing attachments, so ignore those.
+			BaseInventoryStorageComponent storage = oldInvSlot.GetStorage();
+			if (storage)
 			{
-				EPF_BakedStorageChange.OnRemoved(this, oldInvSlot);
-			}
-			else
-			{
-				EPF_StorageChangeDetection.SetDirty(oldInvSlot.GetStorage());
+				EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(oldInvSlot.GetOwner());
+				if (parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
+				{
+					EPF_BakedStorageChange.OnRemoved(this, oldInvSlot);
+				}
+				else
+				{
+					EPF_StorageChangeDetection.SetDirty(storage);
+				}
 			}
 		}
 
