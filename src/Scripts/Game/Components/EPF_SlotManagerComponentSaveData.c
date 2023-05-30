@@ -77,7 +77,9 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		{
 			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vOrigin) &&
 				vector.Distance(saveData.m_pTransformation.m_vOrigin, prefabInfo.m_vOffset) > 0.001)
+			{
 				readResult = EPF_EReadResult.OK;
+			}
 
 			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vAngles))
 			{
@@ -127,13 +129,10 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 	{
 		IEntity slotEntity = entitySlot.GetAttachedEntity();
 
-		// If there is an tramsform override saved we need to consume it before load operations
-		EPF_PersistentTransformation persistentTransform;
-		if (saveData)
-		{
-			persistentTransform = saveData.m_pTransformation;
-			saveData.m_pTransformation = null;
-		}
+		// If there is an tramsform override we need to flag it before load as we handle it on our own
+		EPF_PersistentTransformation persistentTransform = saveData.m_pTransformation;
+		if (persistentTransform)
+			persistentTransform.m_bApplied = true;
 
 		// Found matching entity, no need to spawn, just apply save-data
 		if (saveData &&
@@ -178,7 +177,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 				Math3D.MatrixIdentity3(transform);
 			}
 
-			if (persistentTransform.m_fScale != float.INFINITY)
+			if (EPF_Const.IsNan(persistentTransform.m_fScale))
 				SCR_Math3D.ScaleMatrix(transform, persistentTransform.m_fScale);
 
 			entitySlot.OverrideTransformLS(transform);

@@ -136,7 +136,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		EPF_EApplyResult result = EPF_EApplyResult.OK;
 
 		// Transform
-		if (m_pTransformation && !m_pTransformation.IsDefault())
+		if (m_pTransformation && !m_pTransformation.m_bApplied)
 			EPF_Utils.ForceTransform(entity, m_pTransformation.m_vOrigin, m_pTransformation.m_vAngles, m_pTransformation.m_fScale);
 
 		// Lifetime
@@ -179,10 +179,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			return false;
 
 		// Same transformation?
-		if ((vector.Distance(m_pTransformation.m_vOrigin, other.m_pTransformation.m_vOrigin) > 0.0001) ||
-			(vector.Distance(m_pTransformation.m_vAngles, other.m_pTransformation.m_vAngles) > 0.0001) ||
-			((m_pTransformation.m_fScale != float.INFINITY || other.m_pTransformation.m_fScale != float.INFINITY) &&
-				!float.AlmostEqual(m_pTransformation.m_fScale, other.m_pTransformation.m_fScale)))
+		if (!EPF_Const.IsNanEqual(m_pTransformation.m_vOrigin, other.m_pTransformation.m_vOrigin) ||
+			!EPF_Const.IsNanEqual(m_pTransformation.m_vAngles, other.m_pTransformation.m_vAngles) ||
+			!EPF_Const.IsNanEqual(m_pTransformation.m_fScale, other.m_pTransformation.m_fScale))
 		{
 			return false;
 		}
@@ -395,6 +394,9 @@ class EPF_PersistentTransformation
 	vector m_vOrigin;
 	vector m_vAngles;
 	float m_fScale;
+
+	// Mark as already applied to entity, e.g. already spawned at target coords via spawn params
+	bool m_bApplied;
 
 	//------------------------------------------------------------------------------------------------
 	void Reset()

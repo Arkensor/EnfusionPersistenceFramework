@@ -21,6 +21,7 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 			// Spawn character from data
 			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 
+			saveData.m_pTransformation.m_bApplied = true;
 			vector spawnAngles = Vector(saveData.m_pTransformation.m_vAngles[1], saveData.m_pTransformation.m_vAngles[0], saveData.m_pTransformation.m_vAngles[2]);
 			playerEntity = DoSpawn(m_rDefaultPrefab, saveData.m_pTransformation.m_vOrigin, spawnAngles);
 

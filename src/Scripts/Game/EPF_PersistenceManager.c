@@ -151,7 +151,42 @@ class EPF_PersistenceManager
 			return null;
 		}
 
-		IEntity entity = GetGame().SpawnEntityPrefab(resource);
+		EntitySpawnParams spawnParams;
+		if (saveData.m_pTransformation && !saveData.m_pTransformation.m_bApplied)
+		{
+			bool needed;
+			spawnParams = new EntitySpawnParams();
+			spawnParams.TransformMode = ETransformMode.WORLD;
+
+			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vOrigin))
+			{
+				spawnParams.Transform[3] = saveData.m_pTransformation.m_vOrigin;
+				needed = true;
+			}
+
+			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vAngles))
+			{
+				Math3D.AnglesToMatrix(saveData.m_pTransformation.m_vAngles, spawnParams.Transform);
+				needed = true;
+			}
+
+			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_fScale))
+			{
+				spawnParams.Scale = saveData.m_pTransformation.m_fScale;
+				needed = true;
+			}
+
+			if (needed)
+			{
+				saveData.m_pTransformation.m_bApplied = true;
+			}
+			else
+			{
+				spawnParams = null;
+			}
+		}
+
+		IEntity entity = GetGame().SpawnEntityPrefab(resource, params: spawnParams);
 		if (!entity)
 		{
 			Debug.Error(string.Format("Failed to spawn entity '%1:%2'. Ignored.", saveData.Type().ToString(), saveData.GetId()));
@@ -308,7 +343,7 @@ class EPF_PersistenceManager
 		//FlushDatabase();
 
 		Print("Persistence auto-save complete.", LogLevel.DEBUG);
-		
+
 		if (m_pOnAutoSaveCompleteEvent)
 			m_pOnAutoSaveCompleteEvent.Invoke(this);
 	}

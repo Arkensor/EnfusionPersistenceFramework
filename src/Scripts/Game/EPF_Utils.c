@@ -45,13 +45,12 @@ class EPF_Utils
 	static IEntity SpawnEntityPrefab(ResourceName prefab, vector origin, vector orientation = "0 0 0", bool global = true)
 	{
 		EntitySpawnParams spawnParams();
-
 		spawnParams.TransformMode = ETransformMode.WORLD;
-
 		Math3D.AnglesToMatrix(orientation, spawnParams.Transform);
 		spawnParams.Transform[3] = origin;
 
-		if (!global) return GetGame().SpawnEntityPrefabLocal(Resource.Load(prefab), GetGame().GetWorld(), spawnParams);
+		if (!global) 
+			return GetGame().SpawnEntityPrefabLocal(Resource.Load(prefab), GetGame().GetWorld(), spawnParams);
 
 		return GetGame().SpawnEntityPrefab(Resource.Load(prefab), GetGame().GetWorld(), spawnParams);
 	}
@@ -110,20 +109,31 @@ class EPF_Utils
 	//! \param scale
 	static void ForceTransform(notnull IEntity entity, vector origin = EPF_Const.VECTOR_NAN, vector angles = EPF_Const.VECTOR_NAN, float scale = "nan".ToFloat())
 	{
+		bool needsChange;
 		vector transform[4];
 		entity.GetWorldTransform(transform);
 
 		if (!EPF_Const.IsNan(origin))
+		{
 			transform[3] = origin;
+			needsChange = true;
+		}
 
 		if (!EPF_Const.IsNan(angles))
+		{
 			Math3D.AnglesToMatrix(angles, transform);
+			needsChange = true;
+		}
 
 		// TODO: Repace with EPF_Const.FLOAT_NAN after https://feedback.bistudio.com/T172797 is fixed. In EPF_Utils.Teleport() too.
 		if (!EPF_Const.IsNan(scale))
+		{
 			SCR_Math3D.ScaleMatrix(transform, scale);
+			needsChange = true;
+		}
 
-		ForceTransform(entity, transform);
+		if (needsChange)
+			ForceTransform(entity, transform);
 	}
 
 	//------------------------------------------------------------------------------------------------
