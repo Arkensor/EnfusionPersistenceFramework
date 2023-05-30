@@ -30,24 +30,41 @@ class EPF_RespawnHandlerComponent : SCR_RespawnHandlerComponent
 		if (!playerUid)
 			return;
 
-		// For this example just one character per player uid
 		Tuple2<int, string> characterContext(playerId, playerUid);
+
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		if (persistenceManager.GetState() < EPF_EPersistenceManagerState.ACTIVE)
+		{
+			// Wait with character load until the persistence system is fully loaded
+			EDF_ScriptInvokerCallback callback(this, "RequestCharacterLoad", characterContext);
+			persistenceManager.GetOnActiveEvent().Insert(callback.Invoke);
+			return;
+		}
+
+		RequestCharacterLoad(characterContext)
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void RequestCharacterLoad(Managed context)
+	{
+		// For this example just one character per player uid
+		Tuple2<int, string> characterContext = Tuple2<int, string>.Cast(context);
 		EDF_DbFindCallbackSingle<EPF_CharacterSaveData> characterDataCallback(this, "OnCharacterDataLoaded", characterContext);
-		EPF_PersistenceEntityHelper<EPF_CharacterSaveData>.GetRepository().FindAsync(playerUid, characterDataCallback);
+		EPF_PersistenceEntityHelper<EPF_CharacterSaveData>.GetRepository().FindAsync(characterContext.param2, characterDataCallback);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	//! Handles the character data found for the players account
 	protected void OnCharacterDataLoaded(EDF_EDbOperationStatusCode statusCode, EPF_CharacterSaveData characterData, Managed context)
 	{
-		Tuple2<int, string> characterInfo = Tuple2<int, string>.Cast(context);
+		Tuple2<int, string> characterContext = Tuple2<int, string>.Cast(context);
 
 		if (characterData)
-			PrintFormat("Loaded existing character '%1'.", characterInfo.param2);
+			PrintFormat("Loaded existing character '%1'.", characterContext.param2);
 
 		// Prepare spawn data buffer with last known player data (null for fresh accounts) and queue player for spawn
-		m_pRespawnSystem.PrepareCharacter(characterInfo.param1, characterInfo.param2, characterData);
-		m_sEnqueuedPlayers.Insert(characterInfo.param1);
+		m_pRespawnSystem.PrepareCharacter(characterContext.param1, characterContext.param2, characterData);
+		m_sEnqueuedPlayers.Insert(characterContext.param1);
 	}
 
 	//------------------------------------------------------------------------------------------------

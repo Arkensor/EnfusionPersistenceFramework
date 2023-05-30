@@ -15,7 +15,8 @@ class EPF_PersistenceManager
 
 	// Startup and shutdown sequence
 	protected EPF_EPersistenceManagerState m_eState;
-	protected ref ScriptInvoker m_pOnStateChange;
+	protected ref ScriptInvoker<EPF_PersistenceManager, EPF_EPersistenceManagerState> m_pOnStateChangeEvent;
+	protected ref ScriptInvoker<EPF_PersistenceManager> m_pOnStateActiveEvent;
 
 	// Underlying database connection
 	protected ref EDF_DbContext m_pDbContext;
@@ -39,6 +40,7 @@ class EPF_PersistenceManager
 	protected int m_iSaveOperation;
 	protected MapIterator m_iAutoSaveEntityIt;
 	protected MapIterator m_iAutoSaveScriptedStateIt;
+	protected ref ScriptInvoker<EPF_PersistenceManager> m_pOnAutoSaveCompleteEvent;
 
 	// Setup buffers, discarded after world init
 	protected ref map<string, EPF_PersistenceComponent> m_mBakedRoots;
@@ -80,7 +82,11 @@ class EPF_PersistenceManager
 	protected void SetState(EPF_EPersistenceManagerState state)
 	{
 		m_eState = state;
-		if (m_pOnStateChange) m_pOnStateChange.Invoke(this, state);
+		if (m_pOnStateChangeEvent)
+			m_pOnStateChangeEvent.Invoke(this, state);
+
+		if (state == EPF_EPersistenceManagerState.ACTIVE && m_pOnStateActiveEvent)
+			m_pOnStateActiveEvent.Invoke(this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -93,8 +99,31 @@ class EPF_PersistenceManager
 	//! Get the event invoker that can be subscribed to be notified about persistence manager state/phase changes.
 	ScriptInvoker GetOnStateChangeEvent()
 	{
-		if (!m_pOnStateChange) m_pOnStateChange = new ScriptInvoker();
-		return m_pOnStateChange;
+		if (!m_pOnStateChangeEvent)
+			m_pOnStateChangeEvent = new ScriptInvoker();
+
+		return m_pOnStateChangeEvent;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Get the event invoker that can be subscribed to be notified about the persistence system being fully active.
+	ScriptInvoker GetOnActiveEvent()
+	{
+		if (!m_pOnStateActiveEvent)
+			m_pOnStateActiveEvent = new ScriptInvoker();
+
+		return m_pOnStateActiveEvent;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Get the event invoker that can be subscribed to be notified about the auto-save to be completed each time.
+	//! Note: Could be rather useful to trigger a full db backup after an auto-save.
+	ScriptInvoker OnAutoSaveCompleteEvent()
+	{
+		if (!m_pOnAutoSaveCompleteEvent)
+			m_pOnAutoSaveCompleteEvent = new ScriptInvoker();
+
+		return m_pOnAutoSaveCompleteEvent;
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -279,6 +308,9 @@ class EPF_PersistenceManager
 		//FlushDatabase();
 
 		Print("Persistence auto-save complete.", LogLevel.DEBUG);
+		
+		if (m_pOnAutoSaveCompleteEvent)
+			m_pOnAutoSaveCompleteEvent.Invoke(this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -614,7 +646,7 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
-	event void OnWorldPostProcess(World world)
+	event void AfterWorldPostProcess()
 	{
 		Print("Persistence initial world load started...", LogLevel.DEBUG);
 
@@ -704,9 +736,9 @@ class EPF_PersistenceManager
 		// Free memory as it not needed after setup
 		m_mBakedRoots = null;
 
-		SetState(EPF_EPersistenceManagerState.ACTIVE);
-
 		Print("Persistence initial world load complete.", LogLevel.DEBUG);
+
+		SetState(EPF_EPersistenceManagerState.ACTIVE);
 	}
 
 	//------------------------------------------------------------------------------------------------

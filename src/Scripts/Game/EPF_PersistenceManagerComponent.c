@@ -33,8 +33,11 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 	override event void OnWorldPostProcess(World world)
 	{
 		super.OnWorldPostProcess(world);
+
+		// TODO: Switch to https://feedback.bistudio.com/T172903 event when added officialy
+		// Until then delay by one frame
 		if (m_pPersistenceManager)
-			m_pPersistenceManager.OnWorldPostProcess(world);
+			GetGame().GetCallqueue().Call(m_pPersistenceManager.AfterWorldPostProcess);
 	}
 
 	//------------------------------------------------------------------------------------------------
