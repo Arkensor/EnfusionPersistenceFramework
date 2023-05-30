@@ -40,7 +40,6 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 				m_mLoadingCharacters.Remove(playerEntity);
 			}
 
-			Debug.Error(string.Format("Failed to apply save-data '%1:%2' to character.", saveData.Type().ToString(), saveData.GetId()));
 			SCR_EntityHelper.DeleteEntityAndChildren(playerEntity);
 			playerEntity = null;
 		}
