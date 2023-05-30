@@ -4,6 +4,9 @@ The integration into the respawn system is the most planning-intensive. How the 
 ## Single character example respawn system
 See [`EPF_RespawnSytemComponent`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/RespawnSystem/EPF_RespawnSytemComponent.c;9) and [`EPF_RespawnHandlerComponent`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/RespawnSystem/EPF_RespawnHandlerComponent.c;6) for how the bohemia UID is handled and the character spawn process awaits finishing of loading before handing over controls to the player.
 
+## Awaiting persistence load
+It is important to wait for the persistence manager to have completed the setup or else characters spawned too early can count as baked which will cause problems. Subscribe to the [`EPF_PersistenceManager.GetOnActiveEvent()`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/EPF_PersistenceManager.c;110) event to await this.
+
 ## Dead body handling
 By default the `Self Spawn` option in [`Character_Base.et`](https://enfusionengine.com/api/redirect?to=enfusion://ResourceManager/~EnfusionPersistenceFramework:Prefabs/Characters/Core/Character_Base.et) is disabled. This is so that normal player characters do not automatically spawn even if their controlling person is not connected to the server. To still get dead bodies to spawn the example respawn system above uses the intended method for this which is to catch the [`BaseGameMode.OnPlayerKilled()`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/generated/GameMode/BaseGameMode.c;77) event and force spawn the dead body for the next restart. The garbage manager lifetime persistence info will take care of removing it again after the restart once the configured decay is reached.
 

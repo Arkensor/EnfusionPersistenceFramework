@@ -294,7 +294,8 @@
 	override protected event void OnPostInit(IEntity owner)
 	{
 		// Persistence logic only runs on the server
-		if (!EPF_PersistenceManager.IsPersistenceMaster()) return;
+		if (!EPF_PersistenceManager.IsPersistenceMaster())
+			return;
 
 		// Init and validate settings on shared class-class instance once
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(owner));
