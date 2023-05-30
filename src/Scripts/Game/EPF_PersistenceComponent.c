@@ -395,6 +395,20 @@
 			return;
 
 		// TODO: Replace with subscribe to all parent slots after https://feedback.bistudio.com/T171945 is added.
+
+		// Delay by a frame so we can know the actual slots they are in
+		if (parent.FindComponent(SlotManagerComponent) || parent.FindComponent(BaseSlotComponent))
+			GetGame().GetCallqueue().Call(StupidHackUntil099PleaseEndMySuffering, child, parent);
+
+		InventoryItemComponent invItem = EPF_Component<InventoryItemComponent>.Find(child);
+		if (invItem)
+			invItem.m_OnParentSlotChangedInvoker.Insert(OnParentSlotChanged);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! TODO: Refactor this stupid system of parent detection in 0.9.9
+	protected void StupidHackUntil099PleaseEndMySuffering(IEntity child, IEntity parent)
+	{
 		array<Managed> outComponents();
 		parent.FindComponents(SlotManagerComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
@@ -434,10 +448,6 @@
 			}
 		}
 		*/
-
-		InventoryItemComponent invItem = EPF_Component<InventoryItemComponent>.Find(child);
-		if (invItem)
-			invItem.m_OnParentSlotChangedInvoker.Insert(OnParentSlotChanged);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -472,7 +482,7 @@
 			{
 				if (EPF_Utils.IsInstanceAnyInherited(storage, {EquipedLoadoutStorageComponent, BaseEquipmentStorageComponent, BaseEquipedWeaponStorageComponent}))
 					EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.WAS_EQUIPPED);
-	
+
 				EPF_PersistenceComponent parentPersistence = EPF_Component<EPF_PersistenceComponent>.Find(parent);
 				if (persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE &&
 					parentPersistence && EPF_BitFlags.CheckFlags(parentPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED))
@@ -595,7 +605,7 @@
 		if (m_mLastSaveData)
 			m_mLastSaveData.Remove(this);
 
-		// Clean up storages 
+		// Clean up storages
 		EPF_StorageChangeDetection.Cleanup(owner);
 
 		// Check that we are not in session dtor phase

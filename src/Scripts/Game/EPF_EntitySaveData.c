@@ -62,7 +62,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
 			(!EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.BAKED) || EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.WAS_MOVED)))
 		{
-			if (m_pTransformation.ReadFrom(entity, attributes))
+			if (m_pTransformation.ReadFrom(entity, attributes, true))
 				statusCode = EPF_EReadResult.OK;
 		}
 
@@ -413,7 +413,7 @@ class EPF_PersistentTransformation
 	}
 
 	//------------------------------------------------------------------------------------------------
-	bool ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes)
+	bool ReadFrom(IEntity entity, EPF_EntitySaveDataClass attributes, bool isRoot)
 	{
 		bool anyData;
 
@@ -422,7 +422,7 @@ class EPF_PersistentTransformation
 
 		// For chars (in vehicles) we want to keep the world transform
 		// for if the parent vehicle is deleted they can still spawn
-		if (!ChimeraCharacter.Cast(entity) && entity.GetParent())
+		if (!ChimeraCharacter.Cast(entity) && !isRoot)
 		{
 			entity.GetLocalTransform(transform);
 			angles = entity.GetLocalYawPitchRoll();

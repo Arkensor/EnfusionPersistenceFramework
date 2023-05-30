@@ -1,6 +1,8 @@
 [EPF_ComponentSaveDataType(SlotManagerComponent), BaseContainerProps()]
 class EPF_SlotManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
+	[Attribute("1", desc: "Skip writing slot attached entities that are non banked if they have only default data and match the default slot prefab.\nDisable this option if you absoluetly need to track persistent ids of the slots. Can cause larger amounts of data for vehicles that have many nested slots.")]
+	bool m_bSkipDefaultNonBaked;
 };
 
 [EDF_DbName.Automatic()]
@@ -12,6 +14,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 	override EPF_EReadResult ReadFrom(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
 		SlotManagerComponent slotManager = SlotManagerComponent.Cast(component);
+		EPF_SlotManagerComponentSaveDataClass settings = EPF_SlotManagerComponentSaveDataClass.Cast(attributes);
 
 		m_aSlots = {};
 		array<ref EPF_EntitySlotPrefabInfo> slotinfos = EPF_EntitySlotPrefabInfo.GetSlotInfos(owner, slotManager);
@@ -51,8 +54,9 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 			// We can safely ignore baked objects with default info on them, but anything else needs to be saved.
 			if (attributes.m_bTrimDefaults &&
 				isPrefabMatch &&
-				EPF_BitFlags.CheckFlags(slotPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED) &&
-				readResult == EPF_EReadResult.DEFAULT)
+				readResult == EPF_EReadResult.DEFAULT &&
+				(settings.m_bSkipDefaultNonBaked ||
+				EPF_BitFlags.CheckFlags(slotPersistence.GetFlags(), EPF_EPersistenceFlags.BAKED)))
 			{
 				continue;
 			}
@@ -73,7 +77,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 	static void ReadTransform(IEntity slotEntity, EPF_EntitySaveData saveData, EPF_EntitySlotPrefabInfo prefabInfo, out EPF_EReadResult readResult)
 	{
 		EPF_PersistenceComponentClass slotAttributes = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(slotEntity);
-		if (saveData.m_pTransformation.ReadFrom(slotEntity, slotAttributes.m_pSaveData))
+		if (saveData.m_pTransformation.ReadFrom(slotEntity, slotAttributes.m_pSaveData, false))
 		{
 			if (!EPF_Const.IsNan(saveData.m_pTransformation.m_vOrigin) &&
 				vector.Distance(saveData.m_pTransformation.m_vOrigin, prefabInfo.m_vOffset) > 0.001)
