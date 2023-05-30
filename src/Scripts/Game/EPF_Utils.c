@@ -49,7 +49,7 @@ class EPF_Utils
 		Math3D.AnglesToMatrix(orientation, spawnParams.Transform);
 		spawnParams.Transform[3] = origin;
 
-		if (!global) 
+		if (!global)
 			return GetGame().SpawnEntityPrefabLocal(Resource.Load(prefab), GetGame().GetWorld(), spawnParams);
 
 		return GetGame().SpawnEntityPrefab(Resource.Load(prefab), GetGame().GetWorld(), spawnParams);
@@ -98,7 +98,7 @@ class EPF_Utils
 		transform[3] = position;
 		SCR_TerrainHelper.OrientToTerrain(transform);
 
-		ForceTransform(entity, transform);
+		ForceTransformEx(entity, transform);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -133,13 +133,15 @@ class EPF_Utils
 		}
 
 		if (needsChange)
-			ForceTransform(entity, transform);
+			ForceTransformEx(entity, transform);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	//! Set the transformation matrix and update the entity
-	static void ForceTransform(IEntity entity, vector transform[4])
+	static void ForceTransformEx(notnull IEntity entity, vector transform[4])
 	{
+		vector previousOrigin = entity.GetOrigin();
+
 		BaseGameEntity baseGameEntity = BaseGameEntity.Cast(entity);
 		if (baseGameEntity && !BaseVehicle.Cast(baseGameEntity))
 		{
@@ -157,10 +159,12 @@ class EPF_Utils
 			physics.SetAngularVelocity(vector.Zero);
 		}
 
+		RplComponent replication = EPF_Component<RplComponent>.Find(entity);
+		if (replication)
+			replication.ForceNodeMovement(previousOrigin);
+
 		if (!ChimeraCharacter.Cast(entity))
-		{
 			entity.Update();
-		}
 	}
 
 	//------------------------------------------------------------------------------------------------
