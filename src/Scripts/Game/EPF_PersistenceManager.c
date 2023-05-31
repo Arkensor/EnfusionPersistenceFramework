@@ -44,6 +44,7 @@ class EPF_PersistenceManager
 
 	// Setup buffers, discarded after world init
 	protected ref map<string, EPF_PersistenceComponent> m_mBakedRoots;
+	protected int m_iPendingLoadTypes;
 
 	//------------------------------------------------------------------------------------------------
 	//! Check if current game instance is intended to run the persistence system. Only the mission host should do so.
@@ -247,10 +248,17 @@ class EPF_PersistenceManager
 	//! \return entity instance or null if not found
 	EPF_PersistenceComponent FindPersistenceComponentById(string persistentId)
 	{
+		if (!CheckLoaded())
+			return null;
+
 		FlushRegistrations();
 		EPF_PersistenceComponent result;
-		if (m_mRootAutoSave.Find(persistentId, result)) return result;
-		if (m_mRootShutdown.Find(persistentId, result)) return result;
+		if (m_mRootAutoSave.Find(persistentId, result))
+			return result;
+
+		if (m_mRootShutdown.Find(persistentId, result))
+			return result;
+
 		return m_mUncategorizedEntities.Get(persistentId);
 	}
 
@@ -259,10 +267,17 @@ class EPF_PersistenceManager
 	//! \return scripted state instance or null if not found
 	EPF_PersistentScriptedState FindScriptedStateByPersistentId(string persistentId)
 	{
+		if (!CheckLoaded())
+			return null;
+
 		FlushRegistrations();
 		EPF_PersistentScriptedState result;
-		if (m_mScriptedStateAutoSave.Find(persistentId, result)) return result;
-		if (m_mScriptedStateShutdown.Find(persistentId, result)) return result;
+		if (m_mScriptedStateAutoSave.Find(persistentId, result))
+			return result;
+
+		if (m_mScriptedStateShutdown.Find(persistentId, result))
+			return result;
+
 		return m_mScriptedStateUncategorized.Get(persistentId);
 	}
 
@@ -270,7 +285,7 @@ class EPF_PersistenceManager
 	//! Manually trigger the global auto-save. Resets the timer until the next auto-save cycle. If an auto-save is already in progress it will do nothing.
 	void AutoSave()
 	{
-		if (m_bAutoSaveActive)
+		if (m_bAutoSaveActive || !CheckLoaded())
 			return;
 
 		m_bAutoSaveActive = true;
@@ -499,7 +514,7 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	void UpdateRootEntityCollection(notnull EPF_PersistenceComponent persistenceComponent, string id, bool isRootEntity)
 	{
-		if (m_eState < EPF_EPersistenceManagerState.ACTIVE)
+		if (m_eState < EPF_EPersistenceManagerState.SETUP)
 		{
 			if (m_mBakedRoots && EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.BAKED))
 			{
@@ -529,6 +544,9 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	void ForceSelfSpawn(notnull EPF_PersistenceComponent persistenceComponent)
 	{
+		if (!CheckLoaded())
+			return;
+
 		EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(persistenceComponent);
 		m_pRootEntityCollection.ForceSelfSpawn(persistenceComponent, persistenceComponent.GetPersistentId(), settings);
 	}
@@ -639,6 +657,18 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
+	protected bool CheckLoaded()
+	{
+		if (m_eState < EPF_EPersistenceManagerState.SETUP)
+		{
+			Debug.Error("Attempted to call persistence operation before setup phase. Await setup/completion using GetOnStateChangeEvent/GetOnActiveEvent.");
+			return false;
+		}
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
 	event void OnPostInit(IEntity gameMode, EPF_PersistenceManagerComponentClass settings)
 	{
 		m_pSettings = settings;
@@ -654,14 +684,6 @@ class EPF_PersistenceManager
 
 		if (!m_pDbContext)
 			return;
-
-		string rootEntityCollectionId = string.Format("00EC%1-0000-0000-0000-000000000000", EPF_PersistenceIdGenerator.GetHiveId().ToString(4));
-		m_pRootEntityCollection = EDF_DbEntityHelper<EPF_PersistentRootEntityCollection>.GetRepository(m_pDbContext).Find(rootEntityCollectionId).GetEntity();
-		if (!m_pRootEntityCollection)
-		{
-			m_pRootEntityCollection = new EPF_PersistentRootEntityCollection();
-			m_pRootEntityCollection.SetId(rootEntityCollectionId);
-		}
 
 		SetState(EPF_EPersistenceManagerState.POST_INIT);
 	}
@@ -685,7 +707,31 @@ class EPF_PersistenceManager
 	{
 		Print("Persistence initial world load started...", LogLevel.DEBUG);
 
+		// Flush all pending objects so they register as baked
 		FlushRegistrations();
+
+		EDF_DbFindCallbackSingle<EPF_PersistentRootEntityCollection> callback(this, "OnRootEntityCollectionLoaded");
+		EDF_DbEntityHelper<EPF_PersistentRootEntityCollection>.GetRepository(m_pDbContext)
+			.FindAsync(GetRootEntityCollectionId(), callback);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected string GetRootEntityCollectionId()
+	{
+		return string.Format("00EC%1-0000-0000-0000-000000000000", EPF_PersistenceIdGenerator.GetHiveId().ToString(4));
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void OnRootEntityCollectionLoaded(EDF_EDbOperationStatusCode statusCode, EPF_PersistentRootEntityCollection rootEntityCollection)
+	{
+		m_pRootEntityCollection = rootEntityCollection;
+		if (!m_pRootEntityCollection)
+		{
+			m_pRootEntityCollection = new EPF_PersistentRootEntityCollection();
+			m_pRootEntityCollection.SetId(GetRootEntityCollectionId());
+		}
+
+		// Anything spawned after this is considered dynamic
 		SetState(EPF_EPersistenceManagerState.SETUP);
 
 		// Remove baked entities that shall no longer be root entities in the world
@@ -737,42 +783,52 @@ class EPF_PersistenceManager
 			loadIds.Insert(id);
 		}
 
-		// Load all known initial entity types from db, both baked and dynamic in one bulk operation
-		foreach (typename saveDataType, array<string> persistentIds : bulkLoad)
-		{
-			array<ref EDF_DbEntity> findResults = m_pDbContext.FindAll(saveDataType, EDF_DbFind.Id().EqualsAnyOf(persistentIds)).GetEntities();
-			if (!findResults) continue;
-
-			foreach (EDF_DbEntity findResult : findResults)
-			{
-				EPF_EntitySaveData saveData = EPF_EntitySaveData.Cast(findResult);
-				if (!saveData)
-				{
-					Debug.Error(string.Format("Unexpected database find result type '%1' encountered during entity load. Ignored.", findResult.Type().ToString()));
-					continue;
-				}
-
-				// Load data for baked roots
-				EPF_PersistenceComponent persistenceComponent = m_mBakedRoots.Get(saveData.GetId());
-				if (persistenceComponent)
-				{
-					persistenceComponent.Load(saveData);
-					continue;
-				}
-
-				// Spawn additional dynamic entites
-				SpawnWorldEntity(saveData);
-			}
-		}
-
 		// Save any mapping or root entity changes detected during world init
 		m_pRootEntityCollection.Save(m_pDbContext);
 
+		// Load all known initial entity types from db, both baked and dynamic in one bulk operation
+		m_iPendingLoadTypes = bulkLoad.Count();
+		foreach (typename saveDataType, array<string> persistentIds : bulkLoad)
+		{
+			EDF_DbFindCallbackMultipleUntyped callback(this, "OnTypeCollectionLoaded");
+			m_pDbContext.FindAllAsync(saveDataType, EDF_DbFind.Id().EqualsAnyOf(persistentIds), callback: callback);
+		}
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void OnTypeCollectionLoaded(EDF_EDbOperationStatusCode code, array<ref EDF_DbEntity> findResults)
+	{
+		foreach (EDF_DbEntity findResult : findResults)
+		{
+			EPF_EntitySaveData saveData = EPF_EntitySaveData.Cast(findResult);
+			if (!saveData)
+			{
+				Debug.Error(string.Format("Unexpected database find result type '%1' encountered during entity load. Ignored.", findResult.Type().ToString()));
+				continue;
+			}
+
+			// Load data for baked roots
+			EPF_PersistenceComponent persistenceComponent = m_mBakedRoots.Get(saveData.GetId());
+			if (persistenceComponent)
+			{
+				persistenceComponent.Load(saveData);
+				continue;
+			}
+
+			// Spawn additional dynamic entites
+			SpawnWorldEntity(saveData);
+		}
+
+		if (--m_iPendingLoadTypes == 0)
+			OnPostSetup();
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void OnPostSetup()
+	{
 		// Free memory as it not needed after setup
 		m_mBakedRoots = null;
-
 		Print("Persistence initial world load complete.", LogLevel.DEBUG);
-
 		SetState(EPF_EPersistenceManagerState.ACTIVE);
 	}
 
@@ -780,10 +836,16 @@ class EPF_PersistenceManager
 	event void OnGameEnd()
 	{
 		Print("Persistence shutting down...", LogLevel.DEBUG);
+
+		bool wasActive = m_eState == EPF_EPersistenceManagerState.ACTIVE;
 		SetState(EPF_EPersistenceManagerState.SHUTDOWN);
-		AutoSave(); // Trigger auto-save
-		AutoSaveTick(); // Execute auto-save instantly till end
-		ShutDownSave(); // Save those who only save on shutdown
+		if (wasActive)
+		{
+			AutoSave(); // Trigger auto-save
+			AutoSaveTick(); // Execute auto-save instantly till end
+			ShutDownSave(); // Save those who only save on shutdown
+		}
+
 		Reset();
 		Print("Persistence shut down successfully.", LogLevel.DEBUG);
 	}
