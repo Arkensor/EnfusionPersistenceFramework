@@ -111,7 +111,7 @@ class EPF_WeaponSlotComponentSaveData : EPF_ComponentSaveData
 		if (m_pEntity)
 			entityType = EDF_DbName.Get(m_pEntity.Type());
 
-		saveContext.WriteValue("entityType", entityType);
+		saveContext.WriteValue("$type", entityType);
 
 		if (entityType)
 			saveContext.WriteValue("m_pEntity", m_pEntity);
@@ -128,7 +128,11 @@ class EPF_WeaponSlotComponentSaveData : EPF_ComponentSaveData
 		loadContext.ReadValue("m_iSlotIndex", m_iSlotIndex);
 
 		string entityTypeString;
-		loadContext.ReadValue("entityType", entityTypeString);
+		loadContext.ReadValue("$type", entityTypeString);
+
+		// TODO: Remove backwards compatiblity in 0.9.9
+		if (!entityTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
+			loadContext.ReadValue("entityType", entityTypeString);
 
 		if (entityTypeString == "EMPTY")
 			return true;

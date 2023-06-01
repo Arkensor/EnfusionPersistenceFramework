@@ -248,7 +248,7 @@ class EPF_PersistentEntitySlot
 		if (m_pEntity)
 			entityType = EDF_DbName.Get(m_pEntity.Type());
 
-		saveContext.WriteValue("entityType", entityType);
+		saveContext.WriteValue("$type", entityType);
 
 		if (entityType)
 			saveContext.WriteValue("m_pEntity", m_pEntity);
@@ -265,7 +265,11 @@ class EPF_PersistentEntitySlot
 		loadContext.ReadValue("m_sName", m_sName);
 
 		string entityTypeString;
-		loadContext.ReadValue("entityType", entityTypeString);
+		loadContext.ReadValue("$type", entityTypeString);
+
+		// TODO: Remove backwards compatiblity in 0.9.9
+		if (!entityTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
+			loadContext.ReadValue("entityType", entityTypeString);
 
 		if (entityTypeString == "EMPTY")
 			return true;

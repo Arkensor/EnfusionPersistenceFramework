@@ -14,7 +14,7 @@ class EPF_BaseSlotComponentSaveData : EPF_ComponentSaveData
 		BaseSlotComponent slot = BaseSlotComponent.Cast(component);
 		IEntity slotEntity = slot.GetAttachedEntity();
 		ResourceName prefab = EPF_Utils.GetPrefabName(slotEntity);
-		
+
 		EPF_EntitySlotPrefabInfo prefabInfo = EPF_EntitySlotPrefabInfo.GetSlotInfo(owner, slot);
 		bool isPrefabMatch = prefab == prefabInfo.GetEnabledSlotPrefab();
 
@@ -74,7 +74,7 @@ class EPF_BaseSlotComponentSaveData : EPF_ComponentSaveData
 		if (m_pEntity)
 			entityType = EDF_DbName.Get(m_pEntity.Type());
 
-		saveContext.WriteValue("entityType", entityType);
+		saveContext.WriteValue("$type", entityType);
 
 		if (entityType)
 			saveContext.WriteValue("m_pEntity", m_pEntity);
@@ -89,7 +89,11 @@ class EPF_BaseSlotComponentSaveData : EPF_ComponentSaveData
 			return false;
 
 		string entityTypeString;
-		loadContext.ReadValue("entityType", entityTypeString);
+		loadContext.ReadValue("$type", entityTypeString);
+
+		// TODO: Remove backwards compatiblity in 0.9.9
+		if (!entityTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
+			loadContext.ReadValue("entityType", entityTypeString);
 
 		if (entityTypeString == "EMPTY")
 			return true;

@@ -529,7 +529,7 @@ class EPF_PersistentComponentSaveData
 		if (!saveContext.IsValid())
 			return false;
 
-		saveContext.WriteValue("dataType", EDF_DbName.Get(m_pData.Type()));
+		saveContext.WriteValue("$type", EDF_DbName.Get(m_pData.Type()));
 		saveContext.WriteValue("m_pData", m_pData);
 
 		return true;
@@ -542,7 +542,12 @@ class EPF_PersistentComponentSaveData
 			return false;
 
 		string dataTypeString;
-		loadContext.ReadValue("dataType", dataTypeString);
+		loadContext.ReadValue("$type", dataTypeString);
+
+		// TODO: Remove backwards compatiblity in 0.9.9
+		if (!dataTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
+			loadContext.ReadValue("dataType", dataTypeString);
+
 		typename dataType = EDF_DbName.GetTypeByName(dataTypeString);
 		if (!dataType)
 			return false;
