@@ -14,32 +14,32 @@ The format is still a GUID but depending on what it is generated for the exact f
 - `RND1` and `RND2` aim to minimize predictability by malicious actors by introducing pseudo-random numbers. These are however **NOT** cryptographically safe!
 
 ## Baked map entities
-| 00BB0001     | - | 1a79      | - | 8da7     | - | 3f92          | - | 4c9a         | 1f3582d7 |
+| 00bbb0001     | - | 1a79      | - | 8da7     | - | 3f92          | - | 4c9a         | 1f3582d7 |
 |--------------|---|-----------|---|----------|---|---------------|---|--------------|----------|
 | 00CCHHHH     |   | SPL1      |   | SPL1     |   | SPL2          |   | SPL2         | SPL3SPL3 |
 
 - `00` The double leading zero lexicographically sorts baked objects as earliest created and gives a hint that the entity in question is in fact baked.
-- `CC` is the code of the special GUID format, `BB` is the code for baked map ojects
+- `CC` is the code of the special GUID format, `bb` is the code for baked map ojects
 - `HHHH` is the hive index with values between (inclusive) `1` and `4095`.
 - `SPL1`, `SPL2`, and `SPL3` are splits of the deterministic string hash, for the unique identifier, that represents the baked entity (s. [baked entities](baked-entities.md#identification) for details). 
 
 ## Root entity collection
-| 00EC0001     | - | 0000      | - | 0000     | - | 0000          | - | 0000         | 00000000 |
+| 00ec0001     | - | 0000      | - | 0000     | - | 0000          | - | 0000         | 00000000 |
 |--------------|---|-----------|---|----------|---|---------------|---|--------------|----------|
 | 00CCHHHH     |   | ZERO      |   | ZERO     |   | ZERO          |   | ZERO         | ZEROZERO |
 
 - `00` The double leading zero lexicographically sorts this special collection with the baked objects
-- `CC` is the code of the special GUID format, `EC` is the code for root entity collection
+- `CC` is the code of the special GUID format, `ec` is the code for root entity collection
 - `HHHH` is the hive index with values between (inclusive) `1` and `4095`.
 - `ZERO` always zero groups. There can be only one root entity collection per hive so the hive id is identifier enough.
 
 ## Local UID replacement
 Uids are only available on backend connected dedicated servers. So for local workbench testing purposes a replacement is offered of the same GUID format and based on the order of connection of the main window and additional peer tools.
 
-| BBBBDDDD     | - | 0000      | - | 0000     | - | 0000          | - | 0000         | 00000001 |
+| bbbbdddd     | - | 0000      | - | 0000     | - | 0000          | - | 0000         | 00000001 |
 |--------------|---|-----------|---|----------|---|---------------|---|--------------|----------|
 | BOHEMUID     |   | ZERO      |   | ZERO     |   | ZERO          |   | UID1         | UID1UID1 |
 
-- `BOHEMUID` Leading indicator of a local replacement of the Bohemia player UID.
+- `BOHEMUID` Leading indicator `bbbbdddd` of a local replacement of the Bohemia player UID.
 - `ZERO` always zero groups.
 - `UID1` uid to a length of 12 based on the local connect [`playerId`](https://enfusionengine.com/api/redirect?to=enfusion://ScriptEditor/Scripts/Game/generated/GameMode/BaseGameMode.c;26).

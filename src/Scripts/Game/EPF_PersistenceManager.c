@@ -718,7 +718,7 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	protected string GetRootEntityCollectionId()
 	{
-		return string.Format("00EC%1-0000-0000-0000-000000000000", EPF_PersistenceIdGenerator.GetHiveId().ToString(4));
+		return string.Format("00ec%1-0000-0000-0000-000000000000", EPF_PersistenceIdGenerator.GetHiveId().ToString(4));
 	}
 
 	//------------------------------------------------------------------------------------------------
