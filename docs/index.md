@@ -34,5 +34,8 @@ Details how ids are generated and what guarantees they provide.
 ### 11. [Respawn system integration](respawn-system-integration.md)
 Tips and considerations for the integration into a custom respawn system.
 
+### 12. [Query builder](query-builder.md)
+Persistence specific db query builder utlity.
+
 ### 12. [Debugging and metrics](debugging.md)
 Optional debug steps and peformance metrics.
