@@ -62,7 +62,8 @@ class EPF_ComponentSaveData
 
 class EPF_ComponentSaveDataType : BaseContainerCustomTitle
 {
-	static ref map<typename, typename> s_mMapping;
+	protected static ref map<typename, typename> s_mMapping;
+	protected static ref map<typename, typename> s_mReverseMapping;
 
 	#ifdef WORKBENCH
 	protected string m_sWorkbenchTitle;
@@ -71,9 +72,19 @@ class EPF_ComponentSaveDataType : BaseContainerCustomTitle
 	//------------------------------------------------------------------------------------------------
 	static typename Get(typename saveDataType)
 	{
-		if (!s_mMapping) return typename.Empty;
+		if (!s_mMapping)
+			return typename.Empty;
 
 		return s_mMapping.Get(saveDataType);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	static typename GetSaveDataType(typename componentType)
+	{
+		if (!s_mReverseMapping)
+			return typename.Empty;
+
+		return s_mReverseMapping.Get(componentType);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -82,19 +93,19 @@ class EPF_ComponentSaveDataType : BaseContainerCustomTitle
 		typename saveDataType = EDF_ReflectionUtils.GetAttributeParent();
 
 		if (!saveDataType.IsInherited(EPF_ComponentSaveDataClass))
-		{
 			Debug.Error(string.Format("Failed to register '%1' as persistence save-data type for '%2'. '%1' must inherit from '%3'.", saveDataType, componentType, EPF_ComponentSaveDataClass));
-		}
 
 		if (!saveDataType.ToString().EndsWith("Class"))
-		{
 			Debug.Error(string.Format("Failed to register '%1' as persistence save-data type for '%2'. '%1' must follow xyzClass naming convention.", saveDataType));
-		}
 
 		if (!s_mMapping)
+		{
 			s_mMapping = new map<typename, typename>();
+			s_mReverseMapping = new map<typename, typename>();
+		}
 
 		s_mMapping.Set(saveDataType, componentType);
+		s_mReverseMapping.Set(componentType, saveDataType);
 
 		#ifdef WORKBENCH
 		m_sWorkbenchTitle = componentType.ToString();

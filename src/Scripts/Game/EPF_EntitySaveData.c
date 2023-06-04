@@ -26,7 +26,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	ResourceName m_rPrefab;
 	ref EPF_PersistentTransformation m_pTransformation;
 	float m_fRemainingLifetime;
-	ref map<typename, ref array<ref EPF_ComponentSaveData>> m_mComponentsSaveData;
+	ref array<ref EPF_PersistentComponentSaveData> m_aComponents;
 
 	//------------------------------------------------------------------------------------------------
 	//! Spawn the world entity based on this save-data instance
@@ -85,41 +85,40 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		}
 
 		// Components
-		m_mComponentsSaveData = new map<typename, ref array<ref EPF_ComponentSaveData>>();
+		m_aComponents = {};
 
 		array<Managed> processedComponents();
 
 		// Go through hierarchy sorted component types
 		foreach (EPF_ComponentSaveDataClass componentSaveDataClass : attributes.m_aComponents)
 		{
-			array<ref EPF_ComponentSaveData> componentsSaveData();
-
 			typename saveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
-			if (!saveDataType) return false;
+			if (!saveDataType) 
+				return false;
 
 			array<Managed> outComponents();
 			entity.FindComponents(EPF_ComponentSaveDataType.Get(componentSaveDataClass.Type()), outComponents);
 			foreach (Managed componentRef : outComponents)
 			{
 				// Ingore base class find machtes if a parent class was already processed
-				if (processedComponents.Contains(componentRef)) continue;
+				if (processedComponents.Contains(componentRef)) 
+					continue;
+				
 				processedComponents.Insert(componentRef);
 
 				EPF_ComponentSaveData componentSaveData = EPF_ComponentSaveData.Cast(saveDataType.Spawn());
-				if (!componentSaveData) return EPF_EReadResult.ERROR;
+				if (!componentSaveData) 
+					return EPF_EReadResult.ERROR;
 
 				componentSaveDataClass.m_bTrimDefaults = attributes.m_bTrimDefaults;
 				EPF_EReadResult componentRead = componentSaveData.ReadFrom(entity, GenericComponent.Cast(componentRef), componentSaveDataClass);
 				if (componentRead == EPF_EReadResult.ERROR) return componentRead;
-				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults) continue;
+				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults) 
+					continue;
 
-				componentsSaveData.Insert(componentSaveData);
-			}
-
-			if (componentsSaveData.Count() > 0)
-			{
-				m_mComponentsSaveData.Set(saveDataType, componentsSaveData);
-				statusCode = EPF_EReadResult.OK;
+				EPF_PersistentComponentSaveData persistentComponent();
+				persistentComponent.m_pData = componentSaveData;
+				m_aComponents.Insert(persistentComponent);
 			}
 		}
 
@@ -191,34 +190,30 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			return false;
 
 		// See if we can match all component save-data instances
-		foreach (typename saveDataType, array<ref EPF_ComponentSaveData> components : m_mComponentsSaveData)
+		if (m_aComponents.Count() != other.m_aComponents.Count())
+			return false;
+
+		foreach (int idx, EPF_PersistentComponentSaveData componentSaveData : m_aComponents)
 		{
-			array<ref EPF_ComponentSaveData> otherComponents = other.m_mComponentsSaveData.Get(saveDataType);
-			if (!otherComponents || otherComponents.Count() != components.Count())
-				return false;
+			// Try same index first as they are likely to be the correct ones.
+			if (componentSaveData.m_pData.Equals(other.m_aComponents.Get(idx).m_pData))
+				continue;
 
-			foreach (int idx, EPF_ComponentSaveData componentSaveData : components)
+			bool found;
+			foreach (int compareIdx, EPF_PersistentComponentSaveData otherComponent : other.m_aComponents)
 			{
-				// Try same index first as they are likely to be the correct ones.
-				if (componentSaveData.Equals(otherComponents.Get(idx)))
-					continue;
+				if (compareIdx == idx)
+					continue; // Already tried in idx direct compare
 
-				bool found;
-				foreach (int compareIdx, EPF_ComponentSaveData otherComponent : otherComponents)
+				if (componentSaveData.m_pData.Equals(otherComponent.m_pData))
 				{
-					if (compareIdx == idx)
-						continue; // Already tried in idx direct compare
-
-					if (componentSaveData.Equals(otherComponent))
-					{
-						found = true;
-						break;
-					}
+					found = true;
+					break;
 				}
-
-				if (!found)
-					return false; //Unable to find any matching component save-data
 			}
+
+			if (!found)
+				return false; //Unable to find any matching component save-data
 		}
 
 		return true;
@@ -237,13 +232,12 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		typename componentSaveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
 
 		// Skip already processed save-data
-		if (processedSaveDataTypes.Contains(componentSaveDataType)) return result;
+		if (processedSaveDataTypes.Contains(componentSaveDataType)) 
+			return result;
+		
 		processedSaveDataTypes.Insert(componentSaveDataType);
 
 		// Make sure required save-data is already applied
-		array<ref EPF_ComponentSaveData> componentsSaveData = m_mComponentsSaveData.Get(componentSaveDataType);
-		if (!componentsSaveData || componentsSaveData.IsEmpty()) return result;
-
 		array<typename> requiredSaveDataClasses = componentSaveDataClass.Requires();
 		if (requiredSaveDataClasses)
 		{
@@ -274,8 +268,13 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Apply save-data to matching components
 		array<Managed> outComponents();
 		entity.FindComponents(EPF_ComponentSaveDataType.Get(componentSaveDataClass.Type()), outComponents);
-		foreach (EPF_ComponentSaveData componentSaveData : componentsSaveData)
+		foreach (EPF_PersistentComponentSaveData persistentComponentSaveData : m_aComponents)
 		{
+			EPF_ComponentSaveData componentSaveData = persistentComponentSaveData.m_pData;
+			
+			if (componentSaveData.Type() != componentSaveDataType)
+				continue;
+			
 			bool applied = false;
 			foreach (Managed componentRef : outComponents)
 			{
@@ -320,7 +319,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Prefab
 		string prefabString = m_rPrefab;
 		#ifndef PERSISTENCE_DEBUG
-		if (prefabString.StartsWith("{")) prefabString = m_rPrefab.Substring(1, 16);
+		if (prefabString.StartsWith("{")) 
+			prefabString = m_rPrefab.Substring(1, 16);
 		#endif
 		saveContext.WriteValue("m_rPrefab", prefabString);
 
@@ -332,19 +332,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			saveContext.WriteValue("m_fRemainingLifetime", m_fRemainingLifetime);
 
 		// Components
-		array<ref EPF_PersistentComponentSaveData> componentSaveDataWrapper();
-		foreach (typename type, array<ref EPF_ComponentSaveData> componentsSaveData : m_mComponentsSaveData)
-		{
-			foreach (EPF_ComponentSaveData component : componentsSaveData)
-			{
-				EPF_PersistentComponentSaveData container();
-				container.m_pData = component;
-				componentSaveDataWrapper.Insert(container);
-			}
-		}
-
-		if (!componentSaveDataWrapper.IsEmpty() || !isJson)
-			saveContext.WriteValue("m_aComponents", componentSaveDataWrapper);
+		if (!m_aComponents.IsEmpty() || !isJson)
+			saveContext.WriteValue("m_aComponents", m_aComponents);
 
 		return true;
 	}
@@ -368,22 +357,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		loadContext.ReadValue("m_fRemainingLifetime", m_fRemainingLifetime);
 
 		// Components
-		m_mComponentsSaveData = new map<typename, ref array<ref EPF_ComponentSaveData>>();
-
-		array<ref EPF_PersistentComponentSaveData> componentSaveDataWrapper();
-		loadContext.ReadValue("m_aComponents", componentSaveDataWrapper);
-		foreach (EPF_PersistentComponentSaveData container : componentSaveDataWrapper)
-		{
-			typename componentSaveDataType = container.m_pData.Type();
-
-			if (!m_mComponentsSaveData.Contains(componentSaveDataType))
-			{
-				m_mComponentsSaveData.Set(componentSaveDataType, {container.m_pData});
-				continue;
-			}
-
-			m_mComponentsSaveData.Get(componentSaveDataType).Insert(container.m_pData);
-		}
+		loadContext.ReadValue("m_aComponents", m_aComponents);
 
 		return true;
 	}
@@ -564,14 +538,15 @@ class EPF_ComponentSaveDataGetter<Class T>
 	//------------------------------------------------------------------------------------------------
 	static T GetFirst(EPF_EntitySaveData saveData)
 	{
-		if (!saveData)
-			return null;
+		if (saveData)
+		{
+			foreach (EPF_PersistentComponentSaveData persistentComponent : saveData.m_aComponents)
+			{
+				if (persistentComponent.m_pData.Type().IsInherited(T))		
+					return T.Cast(persistentComponent.m_pData);
+			}
+		}
 
-		array<ref EPF_ComponentSaveData> componentsSaveData = saveData.m_mComponentsSaveData.Get(T);
-		if (!componentsSaveData || componentsSaveData.IsEmpty())
-			return null;
-
-		return T.Cast(componentsSaveData[0]);
+		return null;
 	}
 };
-

@@ -242,6 +242,9 @@ class EPF_Utils
 	//! Returns a new string with the last "amount" of characters removed
 	static string TrimEnd(string data, int amount)
 	{
+		if (!data)
+			return string.Empty;
+
 		return data.Substring(0, data.Length() - amount);
 	}
 };
