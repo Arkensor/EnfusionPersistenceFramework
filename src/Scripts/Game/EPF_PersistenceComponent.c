@@ -410,6 +410,9 @@
 	//! TODO: Refactor this stupid system of parent detection in 0.9.9
 	protected void StupidHackUntil099PleaseEndMySuffering(IEntity child, IEntity parent)
 	{
+		if (!parent)
+			return; // Maybe parent got deleted by the time this invokes on next frame
+		
 		array<Managed> outComponents();
 		parent.FindComponents(SlotManagerComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
