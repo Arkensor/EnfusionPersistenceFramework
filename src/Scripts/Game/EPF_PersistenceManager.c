@@ -542,10 +542,16 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
-	void ForceSelfSpawn(notnull EPF_PersistenceComponent persistenceComponent)
+	void OverrideSelfSpawn(notnull EPF_PersistenceComponent persistenceComponent, bool selfSpawn)
 	{
 		if (!CheckLoaded())
 			return;
+
+		if (!selfSpawn)
+		{
+			m_pRootEntityCollection.Remove(persistenceComponent, persistenceComponent.GetPersistentId(), m_eState);
+			return;
+		}
 
 		EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(persistenceComponent);
 		m_pRootEntityCollection.ForceSelfSpawn(persistenceComponent, persistenceComponent.GetPersistentId(), settings);

@@ -90,7 +90,7 @@ class EPF_RespawnHandlerComponent : SCR_RespawnHandlerComponent
 		string newId = persistence.GetPersistentId();
 
 		persistence.SetPersistentId(string.Empty); // Force generation of new id for dead body
-		persistence.ForceSelfSpawn();
+		persistence.OverrideSelfSpawn(true);
 
 		// Prepare and execute fresh character spawn
 		m_pRespawnSystem.PrepareCharacter(playerId, newId, null);

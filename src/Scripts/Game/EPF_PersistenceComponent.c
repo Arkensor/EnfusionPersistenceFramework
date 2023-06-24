@@ -655,10 +655,11 @@
 	}
 
 	//------------------------------------------------------------------------------------------------
-	//! Manually force the entity to be self-respawned even if the setting is disabled in prefab
-	void ForceSelfSpawn()
+	//! Manually change the entity self-respawn behavior even if the setting is disabled in prefab
+	//! \param selfSpawn True for self spawn, false for do not self spawn.
+	void OverrideSelfSpawn(bool selfSpawn)
 	{
-		EPF_PersistenceManager.GetInstance().ForceSelfSpawn(this);
+		EPF_PersistenceManager.GetInstance().OverrideSelfSpawn(this, selfSpawn);
 	}
 
 	//------------------------------------------------------------------------------------------------
