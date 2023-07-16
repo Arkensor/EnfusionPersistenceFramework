@@ -130,6 +130,21 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
+	GenericEntity GetTransientCharacter(int playerId)
+	{
+		GenericEntity transientCharacter = m_mPerparedCharacters.Get(playerId);
+		if (!transientCharacter)
+		{
+			foreach (GenericEntity char, int id : m_mLoadingCharacters)
+			{
+				if (id == playerId)
+					return char;
+			}
+		}
+		return transientCharacter;
+	}
+
+	//------------------------------------------------------------------------------------------------
 	protected override GenericEntity RequestSpawn(int playerId)
 	{
 		GenericEntity playerEntity = m_mPerparedCharacters.Get(playerId);

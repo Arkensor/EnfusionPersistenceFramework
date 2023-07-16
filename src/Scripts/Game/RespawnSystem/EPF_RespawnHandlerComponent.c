@@ -111,6 +111,17 @@ class EPF_RespawnHandlerComponent : SCR_RespawnHandlerComponent
 			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(player);
 			persistence.PauseTracking();
 			persistence.Save();
+			// Game will cleanup the char for us because it was controlled by the player.
+		}
+		else
+		{
+			// Delete a still loading char that was not handed over to a player.
+			GenericEntity transientCharacter = m_pRespawnSystem.GetTransientCharacter(playerId);
+			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(transientCharacter);
+			if (persistence)
+				persistence.PauseTracking();
+
+			SCR_EntityHelper.DeleteEntityAndChildren(transientCharacter);
 		}
 	}
 
