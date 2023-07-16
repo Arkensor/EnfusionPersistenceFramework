@@ -655,7 +655,7 @@
 	}
 
 	//------------------------------------------------------------------------------------------------
-	//! Manually change the entity self-respawn behavior even if the setting is disabled in prefab
+	//! Manually change the entity self-respawn behavior, ignoring the prefab configuration.
 	//! \param selfSpawn True for self spawn, false for do not self spawn.
 	void OverrideSelfSpawn(bool selfSpawn)
 	{
