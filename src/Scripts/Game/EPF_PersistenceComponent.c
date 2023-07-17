@@ -13,6 +13,9 @@
 	[Attribute(defvalue: "1", desc: "If enabled the entity will deleted from persistence when deleted from the world automatically.")]
 	bool m_bSelfDelete;
 
+	[Attribute(defvalue: "0", desc: "Update the navmesh on being loaded back into the world. Only makes sense for prefabs that can affect the navmesh - e.g. houses.")]
+	bool m_bUpdateNavmesh;
+
 	[Attribute(defvalue: "1", desc: "Only storage root entities can be saved in the open world.\nIf disabled the entity will only be saved if inside another storage root (e.g. character, vehicle).")]
 	bool m_bStorageRoot;
 
@@ -266,6 +269,9 @@
 		}
 		else
 		{
+			if (settings.m_bUpdateNavmesh)
+				UpdateNavesh();
+
 			if (m_pOnAfterLoad)
 				m_pOnAfterLoad.Invoke(this, saveData);
 		}
@@ -412,7 +418,7 @@
 	{
 		if (!parent)
 			return; // Maybe parent got deleted by the time this invokes on next frame
-		
+
 		array<Managed> outComponents();
 		parent.FindComponents(SlotManagerComponent, outComponents);
 		foreach (Managed componentRef : outComponents)
@@ -694,8 +700,20 @@
 	//------------------------------------------------------------------------------------------------
 	protected void DeferredApplyCallback(EPF_EntitySaveData saveData)
 	{
+		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(GetOwner()));
+		if (settings.m_bUpdateNavmesh)
+			UpdateNavesh();
+
 		if (m_pOnAfterLoad)
 			m_pOnAfterLoad.Invoke(this, saveData);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void UpdateNavesh()
+	{
+		SCR_AIWorld aiworld = SCR_AIWorld.Cast(GetGame().GetAIWorld());
+		if (aiworld)
+			aiworld.RequestNavmeshRebuildEntity(GetOwner());
 	}
 
 	#ifdef WORKBENCH
