@@ -32,6 +32,10 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 				m_mLoadingCharacters.Set(playerEntity, playerId);
 
 				persistenceComponent.GetOnAfterLoadEvent().Insert(OnCharacterLoaded);
+
+				// TODO: Remove hard loading time limit when we know all spawn block bugs are fixed.
+				GetGame().GetCallqueue().CallLater(OnCharacterLoaded, 5000, false, persistenceComponent, saveData);
+
 				if (persistenceComponent.Load(saveData))
 					return;
 
@@ -79,12 +83,18 @@ class EPF_RespawnSytemComponent : SCR_RespawnSystemComponent
 	//------------------------------------------------------------------------------------------------
 	protected void OnCharacterLoaded(EPF_PersistenceComponent persistenceComponent, EPF_EntitySaveData saveData)
 	{
-		// We only want to know this once
-		persistenceComponent.GetOnAfterLoadEvent().Remove(OnCharacterLoaded);
+		if (!persistenceComponent || !saveData)
+			return;
 
 		GenericEntity playerEntity = GenericEntity.Cast(persistenceComponent.GetOwner());
-		int playerId = m_mLoadingCharacters.Get(playerEntity);
+		int playerId;
+		if (!m_mLoadingCharacters.Find(playerEntity, playerId))
+			return; // Already processed before the hard loading limit callqueue invoke
+
 		m_mLoadingCharacters.Remove(playerEntity);
+
+		// We only want to know this once
+		persistenceComponent.GetOnAfterLoadEvent().Remove(OnCharacterLoaded);
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 		SCR_CharacterInventoryStorageComponent inventoryStorage = EPF_Component<SCR_CharacterInventoryStorageComponent>.Find(playerEntity);

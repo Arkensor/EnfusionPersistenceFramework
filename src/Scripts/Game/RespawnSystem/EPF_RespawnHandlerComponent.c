@@ -135,8 +135,17 @@ class EPF_RespawnHandlerComponent : SCR_RespawnHandlerComponent
 		iterCopy.Copy(m_sEnqueuedPlayers);
 		foreach (int playerId : iterCopy)
 		{
-			if (m_pRespawnSystem.IsReadyForSpawn(playerId))
-				m_pPlayerManager.GetPlayerController(playerId).RequestRespawn();
+			if (!m_pRespawnSystem.IsReadyForSpawn(playerId))
+				continue;
+
+			PlayerController playerController = m_pPlayerManager.GetPlayerController(playerId);
+			if (!playerController)
+			{
+				Print("Failed to get player controller for playerId: " + playerId, LogLevel.VERBOSE);
+				continue;
+			}
+
+			playerController.RequestRespawn();
 		}
 	}
 

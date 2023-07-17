@@ -21,6 +21,8 @@ class EPF_DeferredApplyResult
 	//------------------------------------------------------------------------------------------------
 	static void AddPending(notnull EPF_EntitySaveData saveData, string awaitIdentifier)
 	{
+		Print(string.Format("EPF_DeferredApplyResult.AddPending(%1, %2)", saveData, awaitIdentifier), LogLevel.VERBOSE);
+
 		EPF_PendingIdentifierHolder data = s_mPendingIdentifiers.Get(saveData);
 		if (!data)
 		{
@@ -35,6 +37,8 @@ class EPF_DeferredApplyResult
 	//------------------------------------------------------------------------------------------------
 	static void AddPending(notnull EPF_ComponentSaveData componentSaveData, string awaitIdentifier)
 	{
+		Print(string.Format("EPF_DeferredApplyResult.AddPending(%1, %2)", componentSaveData, awaitIdentifier), LogLevel.VERBOSE);
+
 		EPF_PendingComponentIdentifierHolder data = s_mPendingComponentIdentifiers.Get(componentSaveData);
 		if (!data)
 		{
@@ -49,6 +53,8 @@ class EPF_DeferredApplyResult
 	//------------------------------------------------------------------------------------------------
 	static void SetFinished(notnull EPF_EntitySaveData saveData, string awaitIdentifier)
 	{
+		Print(string.Format("EPF_DeferredApplyResult.SetFinished(%1, %2)", saveData, awaitIdentifier), LogLevel.VERBOSE);
+
 		EPF_PendingIdentifierHolder data = s_mPendingIdentifiers.Get(saveData);
 		if (!data)
 			return;
@@ -62,6 +68,8 @@ class EPF_DeferredApplyResult
 	//------------------------------------------------------------------------------------------------
 	static void SetFinished(notnull EPF_ComponentSaveData componentSaveData, string awaitIdentifier)
 	{
+		Print(string.Format("EPF_DeferredApplyResult.SetFinished(%1, %2)", componentSaveData, awaitIdentifier), LogLevel.VERBOSE);
+
 		EPF_PendingComponentIdentifierHolder data = s_mPendingComponentIdentifiers.Get(componentSaveData);
 		if (!data)
 			return;
