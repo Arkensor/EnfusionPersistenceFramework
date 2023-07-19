@@ -112,7 +112,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 				componentSaveDataClass.m_bTrimDefaults = attributes.m_bTrimDefaults;
 				EPF_EReadResult componentRead = componentSaveData.ReadFrom(entity, GenericComponent.Cast(componentRef), componentSaveDataClass);
-				if (componentRead == EPF_EReadResult.ERROR) return componentRead;
+				if (componentRead == EPF_EReadResult.ERROR) 
+					return componentRead;
+				
 				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults) 
 					continue;
 
@@ -122,6 +124,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			}
 		}
 
+		if (!m_aComponents.IsEmpty())
+			statusCode = EPF_EReadResult.OK;
+		
 		return statusCode;
 	}
 
@@ -358,6 +363,8 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 		// Components
 		loadContext.ReadValue("m_aComponents", m_aComponents);
+		if (!m_aComponents)
+			m_aComponents = {}; // Info might be omitted in json but code expects an instance.
 
 		return true;
 	}
