@@ -1,4 +1,4 @@
-[EntityEditorProps(category: "EveronLife/Feature/Character/Spawning", description: "Character spawn point")]
+[EntityEditorProps(category: "Persistence/Respawn", description: "Character spawn point")]
 class EPF_SpawnPointClass : SCR_PositionClass
 {
 }
@@ -8,17 +8,27 @@ class EPF_SpawnPoint : SCR_Position
 	[Attribute("0", desc: "Find empty position for spawning within given radius. When none is found, entity position will be used.")]
 	protected float m_fSpawnRadius;
 
-	// TODO: Add bool for default spawn point when we have multiple?
-
 	protected static ref array<EPF_SpawnPoint> s_aSpawnPoints = new ref array<EPF_SpawnPoint>();
 
 	//------------------------------------------------------------------------------------------------
+	[Obsolete("Use GetRandomSpawnPoint instead.")]
 	static EPF_SpawnPoint GetDefaultSpawnPoint()
 	{
-		if (s_aSpawnPoints.IsEmpty()) return null;
+		if (s_aSpawnPoints.IsEmpty()) 
+			return null;
+		
 		return s_aSpawnPoints.Get(0);
 	}
 
+	//------------------------------------------------------------------------------------------------
+	static EPF_SpawnPoint GetRandomSpawnPoint()
+	{
+		if (s_aSpawnPoints.IsEmpty()) 
+			return null;
+		
+		return s_aSpawnPoints.GetRandomElement();
+	}
+	
 	//------------------------------------------------------------------------------------------------
 	static array<EPF_SpawnPoint> GetSpawnPoints()
 	{
@@ -29,16 +39,16 @@ class EPF_SpawnPoint : SCR_Position
 	#ifdef WORKBENCH
 	override void SetColorAndText()
 	{
-		m_sText = "Global Spawn";
+		m_sText = "Spawnpoint";
 		m_iColor = Color.CYAN;
 	}
 	#endif
 
 	//------------------------------------------------------------------------------------------------
-	void GetPosAngles(out vector position, out vector angles)
+	void GetPosYPR(out vector position, out vector ypr)
 	{
 		position = GetOrigin();
-		angles = GetAngles();
+		ypr = GetYawPitchRoll();
 		SCR_WorldTools.FindEmptyTerrainPosition(position, position, m_fSpawnRadius);
 	}
 
@@ -47,12 +57,14 @@ class EPF_SpawnPoint : SCR_Position
 	{
 		SetFlags(EntityFlags.STATIC, true);
 
-		if (GetGame().GetWorldEntity()) s_aSpawnPoints.Insert(this);
+		if (GetGame().GetWorldEntity()) 
+			s_aSpawnPoints.Insert(this);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	void ~EPF_SpawnPoint()
 	{
-		if (s_aSpawnPoints) s_aSpawnPoints.RemoveItem(this);
+		if (s_aSpawnPoints) 
+			s_aSpawnPoints.RemoveItem(this);
 	}
 }

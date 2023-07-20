@@ -30,7 +30,7 @@
 	{
 		return {EPF_PersistenceComponent}; //Prevent multiple persistence components from being added.
 	}
-};
+}
 
 /*sealed*/ class EPF_PersistenceComponent : ScriptComponent
 {
@@ -691,6 +691,9 @@
 	protected void StopMoveTracking()
 	{
 		IEntity owner = GetOwner();
+		if (!owner)
+			return;
+
 		ClearEventMask(owner, EntityEvent.CONTACT | EntityEvent.PHYSICSMOVE);
 		EventHandlerManagerComponent eventHandler = EPF_Component<EventHandlerManagerComponent>.Find(owner);
 		if (eventHandler)
@@ -816,4 +819,4 @@
 		return string.Format("%1_%2", prefabNameOnly, Workbench.GenerateGloballyUniqueID64());
 	}
 	#endif
-};
+}

@@ -76,4 +76,20 @@ modded class SCR_CharacterInventoryStorageComponent
 				m_aQuickSlotsHistory.Set(idx, GetItemType(slotEntity));
 		}
 	}
-};
+
+	//------------------------------------------------------------------------------------------------
+	void EPF_SetQuickBarItems(array<RplId> quickBarRplIds)
+	{
+		Rpc(Rpc_SetQuickBarItems, quickBarRplIds);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
+	protected void Rpc_SetQuickBarItems(array<RplId> quickBarRplIds)
+	{
+		Print("Rpc_SetQuickBarItems:");
+		Print(quickBarRplIds);
+
+		EPF_Rpc_UpdateQuickSlotItems(quickBarRplIds);
+	}
+}

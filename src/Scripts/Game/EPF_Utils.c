@@ -128,7 +128,7 @@ class EPF_Utils
 		// TODO: Repace with EPF_Const.FLOAT_NAN after https://feedback.bistudio.com/T172797 is fixed. In EPF_Utils.Teleport() too.
 		if (!EPF_Const.IsNan(scale))
 		{
-			SCR_Math3D.ScaleMatrix(transform, scale);
+			Math3D.MatrixScale(transform, scale);
 			needsChange = true;
 		}
 

@@ -44,7 +44,7 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
   GenericEntity Backpack_ALICE_Medium_5D6EE937732E33A5 : "{06B68C58B72EAAC6}Prefabs/Items/Equipment/Backpacks/Backpack_ALICE_Medium.et" {
    coords -0.397 0.899 -0.196
   }
-  GenericEntity Binoculars_M22_5D6EE9376A25640D : "{0CF54B9A85D8E0D4}Prefabs/Items/Equipment/Binoculars/Binoculars_M22.et" {
+  GenericEntity Binoculars_M22_5D6EE9376A25640D : "{0CF54B9A85D8E0D4}Prefabs/Items/Equipment/Binoculars/Binoculars_M22/Binoculars_M22.et" {
    coords -0.277 0.954 -0.522
   }
   GenericEntity PaperMap_01_folded_5D6EE9369B671256 : "{13772C903CB5E4F7}Prefabs/Items/Equipment/Maps/PaperMap_01_folded.et" {
@@ -53,7 +53,7 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
   GenericEntity ArmyCrackers_Soviet_01_5D6EE9374E310218 : "{50A68300B537EDFA}Prefabs/Items/Food/ArmyCrackers_Soviet_01.et" {
    coords -0.48 0.899 0.518
   }
-  GameEntity Flashlight_Soviet_01_5D6EE9369FB38793 : "{575EA58E67448C2A}Prefabs/Items/Equipment/Flashlights/Flashlight_Soviet_01.et" {
+  GameEntity Flashlight_Soviet_01_5D6EE9369FB38793 : "{575EA58E67448C2A}Prefabs/Items/Equipment/Flashlights/Flashlight_Soviet_01/Flashlight_Soviet_01.et" {
    coords -0.43 0.899 -0.541
   }
   GenericEntity Watch_Vostok_5D6EE9368CDD46BD : "{6FD6C96121905202}Prefabs/Items/Equipment/Watches/Watch_Vostok.et" {

@@ -9,6 +9,12 @@ class EPF_DeferredApplyResult
 	protected static ref set<ref EPF_EntitySaveData> s_aCheckQueue;
 
 	//------------------------------------------------------------------------------------------------
+	static bool IsPending(notnull EPF_EntitySaveData saveData)
+	{
+		return s_mPendingIdentifiers.Contains(saveData);
+	}
+
+	//------------------------------------------------------------------------------------------------
 	static ScriptInvoker GetOnApplied(notnull EPF_EntitySaveData saveData)
 	{
 		EPF_PendingIdentifierHolder data = s_mPendingIdentifiers.Get(saveData);
@@ -169,7 +175,7 @@ class EPF_DeferredApplyResult
 			s_aCheckQueue.RemoveItem(saveData);
 		}
 	}
-};
+}
 
 class EPF_PendingIdentifierHolder
 {
@@ -189,7 +195,7 @@ class EPF_PendingIdentifierHolder
 
 		m_pOnAppliedEvent = new ScriptInvoker();
 	}
-};
+}
 
 class EPF_PendingComponentIdentifierHolder
 {
@@ -202,4 +208,4 @@ class EPF_PendingComponentIdentifierHolder
 		if (!m_aIdentifiers)
 			m_aIdentifiers = {};
 	}
-};
+}

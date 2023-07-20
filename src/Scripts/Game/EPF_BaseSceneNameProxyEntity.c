@@ -1,7 +1,7 @@
 [EntityEditorProps(category: "Persistence", description: "Proxy to assign name to base scene entities.")]
 class EPF_BaseSceneNameProxyEntityClass : GenericEntityClass
 {
-};
+}
 
 class EPF_BaseSceneNameProxyEntity : GenericEntity
 {
@@ -43,6 +43,9 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 	//------------------------------------------------------------------------------------------------
 	protected void FindTarget(BaseContainer src = null, float radius = 1.0)
 	{
+		if (!EPF_PersistenceManager.IsPersistenceMaster())
+			return;
+
 		#ifdef WORKBENCH
 		m_pTarget = null;
 		#endif
@@ -51,12 +54,12 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 			#ifdef WORKBENCH
 			if (!_WB_GetEditorAPI().IsDoingEditAction())
 			#endif
-				Debug.Error(string.Format("Base scene name proxy '%1' without assigned target prefab. Fix or delete proxy entity!", GetName()));
+				Print(string.Format("Base scene name proxy '%1' without assigned target prefab. Fix or delete proxy entity!", GetName()), LogLevel.ERROR);
 		}
 		else
 		{
 			if (GetWorld().QueryEntitiesBySphere(GetOrigin(), radius, WorldSearchCallback))
-				Debug.Error(string.Format("Base scene name proxy '%1' failed to find target prefab '%2' in %3 meter radius. Fix or delete proxy entity!", GetName(), m_rTarget, radius));
+				Print(string.Format("Base scene name proxy '%1' failed to find target prefab '%2' in %3 meter radius. Fix or delete proxy entity!", GetName(), m_rTarget, radius), LogLevel.ERROR);
 		}
 	}
 
@@ -172,4 +175,4 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 			Color.PINK);
 	}
 	#endif
-};
+}
