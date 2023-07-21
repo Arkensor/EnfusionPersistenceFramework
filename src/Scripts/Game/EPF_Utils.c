@@ -15,13 +15,15 @@ class EPF_Utils
 		string uid = GetGame().GetBackendApi().GetPlayerUID(playerId);
 		if (!uid)
 		{
-			if (RplSession.Mode() == RplMode.Dedicated)
+			if (RplSession.Mode() != RplMode.Dedicated)
 			{
-				Debug.Error("Dedicated server is not correctly configuted to connect to the BI backend.\nSee https://community.bistudio.com/wiki/Arma_Reforger:Server_Hosting#gameHostRegisterBindAddress");
-				return string.Empty;
+				// Peer tool support
+				uid = string.Format("bbbbdddd-0000-0000-0000-%1", playerId.ToString(12));
 			}
-
-			uid = string.Format("bbbbdddd-0000-0000-0000-%1", playerId.ToString(12));
+			else
+			{
+				Debug.Error("Dedicated server is not correctly configuted to connect to the BI backend.\nSee https://community.bistudio.com/wiki/Arma_Reforger:Server_Hosting");
+			}
 		}
 
 		return uid;
@@ -88,7 +90,7 @@ class EPF_Utils
 
 		if (!EPF_Const.IsNan(yaw))
 		{
-			Math3D.AnglesToMatrix(Vector(yaw, 0 ,0), transform);
+			Math3D.AnglesToMatrix(Vector(yaw, 0, 0), transform);
 		}
 		else
 		{
@@ -247,4 +249,4 @@ class EPF_Utils
 
 		return data.Substring(0, data.Length() - amount);
 	}
-};
+}

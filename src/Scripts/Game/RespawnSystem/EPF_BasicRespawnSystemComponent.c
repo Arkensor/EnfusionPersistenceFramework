@@ -18,12 +18,12 @@ class EPF_BasicRespawnSystemComponent : SCR_RespawnSystemComponent
 
 		if (RplSession.Mode() != RplMode.Dedicated)
 		{
-			OnUidAvailable(playerId);
+			WaitForUid(playerId);
 		}
 		else
 		{
-			EDF_ScriptInvokerCallback1<int> callback(this, "OnUidAvailable");
-			m_pGameMode.GetOnPlayerAuditSuccess().Insert(callback.Invoke)
+			EDF_ScriptInvokerCallback1<int> callback(this, "WaitForUid");
+			m_pGameMode.GetOnPlayerAuditSuccess().Insert(callback.Invoke);
 		}
 	}
 
@@ -81,13 +81,17 @@ class EPF_BasicRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
+	protected void WaitForUid(int playerId)
+	{
+		// Wait one frame after audit/sp join, then it is available.
+		// TODO: Remove this method once https://feedback.bistudio.com/T165590 is fixed.
+		GetGame().GetCallqueue().Call(OnUidAvailable, playerId);
+	}
+
+	//------------------------------------------------------------------------------------------------
 	protected void OnUidAvailable(int playerId)
 	{
-		string playerUid = EPF_Utils.GetPlayerUID(playerId);
-		if (!playerUid)
-			return;
-
-		Tuple2<int, string> characterContext(playerId, playerUid);
+		Tuple2<int, string> characterContext(playerId, EPF_Utils.GetPlayerUID(playerId));
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 		if (persistenceManager.GetState() < EPF_EPersistenceManagerState.ACTIVE)
