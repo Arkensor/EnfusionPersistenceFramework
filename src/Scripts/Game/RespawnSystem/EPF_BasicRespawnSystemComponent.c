@@ -45,8 +45,8 @@ class EPF_BasicRespawnSystemComponent : SCR_RespawnSystemComponent
 		persistence.SetPersistentId(string.Empty); // Force generation of new id for dead body
 		persistence.OverrideSelfSpawn(true);
 
-		// Fresh character spawn
-		LoadCharacter(playerId, newId, null);
+		// Fresh character spawn (NOTE: We need to push this to next frame due to a bug where on the same death frame we can not hand over a new char).
+		GetGame().GetCallqueue().Call(LoadCharacter, playerId, newId, null);
 	}
 
 	//------------------------------------------------------------------------------------------------
