@@ -87,9 +87,6 @@ modded class SCR_CharacterInventoryStorageComponent
 	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
 	protected void Rpc_SetQuickBarItems(array<RplId> quickBarRplIds)
 	{
-		Print("Rpc_SetQuickBarItems:");
-		Print(quickBarRplIds);
-
 		EPF_Rpc_UpdateQuickSlotItems(quickBarRplIds);
 	}
 }
