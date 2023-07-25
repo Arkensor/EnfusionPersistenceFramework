@@ -250,8 +250,7 @@ class EPF_BasicRespawnSystemComponent : SCR_RespawnSystemComponent
 		EDF_ScriptInvokerCallback callback(this, "OnHandoverComplete", new Tuple1<int>(playerId));
 		playerController.m_OnControlledEntityChanged.Insert(callback.Invoke);
 
-		playerController.SetPossessedEntity(character);
-		playerController.SetControlledEntity(character);
+		playerController.SetInitialMainEntity(character);
 
 		m_pGameMode.OnPlayerEntityChanged_S(playerId, null, character);
 
