@@ -14,7 +14,7 @@ The format is still a GUID but depending on what it is generated for the exact f
 - `RND1` and `RND2` aim to minimize predictability by malicious actors by introducing pseudo-random numbers. These are however **NOT** cryptographically safe!
 
 ## Baked map entities
-| 00bbb0001     | - | 1a79      | - | 8da7     | - | 3f92          | - | 4c9a         | 1f3582d7 |
+| 00bb0001     | - | 1a79      | - | 8da7     | - | 3f92          | - | 4c9a         | 1f3582d7 |
 |--------------|---|-----------|---|----------|---|---------------|---|--------------|----------|
 | 00CCHHHH     |   | SPL1      |   | SPL1     |   | SPL2          |   | SPL2         | SPL3SPL3 |
 

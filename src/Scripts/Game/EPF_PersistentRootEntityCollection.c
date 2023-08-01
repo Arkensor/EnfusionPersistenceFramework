@@ -7,6 +7,9 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 	ref set<string> m_aRemovedBackedRootEntities = new set<string>();
 	ref map<typename, ref array<string>> m_mSelfSpawnDynamicEntities = new map<typename, ref array<string>>();
 
+	[NonSerialized()]
+	protected bool m_bHasData;
+
 	//------------------------------------------------------------------------------------------------
 	void Add(EPF_PersistenceComponent persistenceComponent, string persistentId, EPF_EPersistenceManagerState state)
 	{
@@ -67,15 +70,19 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 	{
 		m_iLastSaved = System.GetUnixTime();
 
-		// Remove collection if it only holds default values and it was previously saved (aka it has an id)
-		if (m_aRemovedBackedRootEntities.IsEmpty() && m_mSelfSpawnDynamicEntities.IsEmpty())
-		{
-			if (HasId()) dbContext.RemoveAsync(this); //Only actually remove if id indicates it was saved before.
-		}
-		else
+		bool hasData = !m_aRemovedBackedRootEntities.IsEmpty() || !m_mSelfSpawnDynamicEntities.IsEmpty();
+		if (hasData)
 		{
 			dbContext.AddOrUpdateAsync(this);
 		}
+		else
+		{
+			// Remove collection if we no longer have any data but there were some in the db previously
+			if (m_bHasData)
+				dbContext.RemoveAsync(this);
+		}
+
+		m_bHasData = hasData;
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -122,12 +129,14 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 			m_mSelfSpawnDynamicEntities.Set(EDF_DbName.GetTypeByName(entry.m_sSaveDataType), entry.m_aIds);
 		}
 
+		m_bHasData = !m_aRemovedBackedRootEntities.IsEmpty() || !m_mSelfSpawnDynamicEntities.IsEmpty();
+
 		return true;
 	}
-};
+}
 
 class EPF_SelfSpawnDynamicEntity
 {
 	string m_sSaveDataType;
 	ref array<string> m_aIds;
-};
+}
