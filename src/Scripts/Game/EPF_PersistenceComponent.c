@@ -680,6 +680,14 @@
 		EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.BAKED);
 	}
 
+	#ifdef WORKBENCH
+	//------------------------------------------------------------------------------------------------
+	void RevokeBakedFlag()
+	{
+		EPF_BitFlags.ClearFlags(m_eFlags, EPF_EPersistenceFlags.BAKED);
+	}
+	#endif
+
 	//------------------------------------------------------------------------------------------------
 	void FlagAsMoved()
 	{

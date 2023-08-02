@@ -311,6 +311,13 @@ class EPF_PersistenceManager
 		while (m_iAutoSaveEntityIt != mapEnd)
 		{
 			EPF_PersistenceComponent persistenceComponent = m_mRootAutoSave.GetIteratorElement(m_iAutoSaveEntityIt);
+			if (!persistenceComponent)
+			{
+				m_mRootAutoSave.RemoveElement(m_iAutoSaveEntityIt);
+				m_iAutoSaveEntityIt = m_mRootAutoSave.Next(m_iAutoSaveEntityIt);
+				continue;
+			}
+
 			m_iAutoSaveEntityIt = m_mRootAutoSave.Next(m_iAutoSaveEntityIt);
 
 			if (EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING))
@@ -372,13 +379,17 @@ class EPF_PersistenceManager
 
 		foreach (auto _, EPF_PersistenceComponent persistenceComponent : m_mRootShutdown)
 		{
-			if (EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING)) continue;
+			if (!persistenceComponent || EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING))
+				continue;
+
 			persistenceComponent.Save();
 		}
 
 		foreach (auto _, EPF_PersistentScriptedState scriptedState : m_mScriptedStateShutdown)
 		{
-			if (EPF_BitFlags.CheckFlags(scriptedState.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING)) continue;
+			if (!scriptedState || EPF_BitFlags.CheckFlags(scriptedState.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING))
+				continue;
+
 			scriptedState.Save();
 		}
 
@@ -834,8 +845,8 @@ class EPF_PersistenceManager
 	{
 		// Free memory as it not needed after setup
 		m_mBakedRoots = null;
-		Print("Persistence initial world load complete.", LogLevel.DEBUG);
 		SetState(EPF_EPersistenceManagerState.ACTIVE);
+		Print("Persistence initial world load complete.", LogLevel.DEBUG);
 	}
 
 	//------------------------------------------------------------------------------------------------
