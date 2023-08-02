@@ -180,9 +180,9 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void LoadCharacter(int playerId, string playerUid, EPF_CharacterSaveData saveData)
+	protected void LoadCharacter(int playerId, string characterPersistenceId, EPF_CharacterSaveData saveData)
 	{
-		//PrintFormat("Loading existing character '%1'...", playerUid);
+		//PrintFormat("Loading existing character '%1'...", characterPersistenceId);
 
 		#ifdef WORKBENCH
 		if (m_bUseFromCamera)
@@ -277,12 +277,12 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void CreateCharacter(int playerId, string playerUid)
+	protected void CreateCharacter(int playerId, string characterPersistenceId)
 	{
-		ResourceName prefab = GetCreationPrefab(playerId, playerUid);
+		ResourceName prefab = GetCreationPrefab(playerId, characterPersistenceId);
 
 		vector position, yawPitchRoll;
-		GetCreationPosition(playerId, playerUid, position, yawPitchRoll);
+		GetCreationPosition(playerId, characterPersistenceId, position, yawPitchRoll);
 
 		#ifdef WORKBENCH
 		if (m_bUseFromCamera)
@@ -298,8 +298,8 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		EPF_PersistenceComponent persistenceComponent = EPF_Component<EPF_PersistenceComponent>.Find(character);
 		if (persistenceComponent)
 		{
-			persistenceComponent.SetPersistentId(playerUid);
-			OnCharacterCreated(playerId, playerUid, character);
+			persistenceComponent.SetPersistentId(characterPersistenceId);
+			OnCharacterCreated(playerId, characterPersistenceId, character);
 			HandoverToPlayer(playerId, character);
 		}
 		else
@@ -312,15 +312,15 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 
 	//------------------------------------------------------------------------------------------------
 	//! Post process a newly created character before its handed over to the player.
-	protected void OnCharacterCreated(int playerId, string playerUid, IEntity character);
+	protected void OnCharacterCreated(int playerId, string characterPersistenceId, IEntity character);
 
 	//------------------------------------------------------------------------------------------------
 	//! Decide position and angles where a new character is spawned
-	protected void GetCreationPosition(int playerId, string playerUid, out vector position, out vector yawPitchRoll);
+	protected void GetCreationPosition(int playerId, string characterPersistenceId, out vector position, out vector yawPitchRoll);
 
 	//------------------------------------------------------------------------------------------------
 	//! Prefab for a newly created chracter
-	protected ResourceName GetCreationPrefab(int playerId, string playerUid)
+	protected ResourceName GetCreationPrefab(int playerId, string characterPersistenceId)
 	{
 		return "{37578B1666981FCE}Prefabs/Characters/Core/Character_Base.et";
 	}

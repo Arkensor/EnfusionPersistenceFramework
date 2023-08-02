@@ -8,7 +8,7 @@ class EPF_BasicRespawnSystemComponent : EPF_BaseRespawnSystemComponent
 	ResourceName m_rDefaultPrefab;
 
 	//------------------------------------------------------------------------------------------------
-	override protected void GetCreationPosition(int playerId, string playerUid, out vector position, out vector yawPitchRoll)
+	override protected void GetCreationPosition(int playerId, string characterPersistenceId, out vector position, out vector yawPitchRoll)
 	{
 		EPF_SpawnPoint spawnPoint = EPF_SpawnPoint.GetRandomSpawnPoint();
 		if (!spawnPoint)
@@ -21,7 +21,7 @@ class EPF_BasicRespawnSystemComponent : EPF_BaseRespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override protected ResourceName GetCreationPrefab(int playerId, string playerUid)
+	override protected ResourceName GetCreationPrefab(int playerId, string characterPersistenceId)
 	{
 		return m_rDefaultPrefab;
 	}
