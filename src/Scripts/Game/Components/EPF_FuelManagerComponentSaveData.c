@@ -1,7 +1,7 @@
 [EPF_ComponentSaveDataType(FuelManagerComponent), BaseContainerProps()]
 class EPF_FuelManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
-};
+}
 
 [EDF_DbName.Automatic()]
 class EPF_FuelManagerComponentSaveData : EPF_ComponentSaveData
@@ -34,10 +34,8 @@ class EPF_FuelManagerComponentSaveData : EPF_ComponentSaveData
 				if (persistentFuelNode.m_fFuel >= fuelNode.GetMaxFuel())
 					continue;
 
-				// Remove relfection getter when https://feedback.bistudio.com/T171947 is resolved in 0.9.9
-				float initialFuelState;
-				if (EDF_ReflectionUtilsT<float>.Get(fuelNode, "m_fInitialFuelTankState", initialFuelState) &&
-					float.AlmostEqual(persistentFuelNode.m_fFuel, initialFuelState)) continue;
+				if (float.AlmostEqual(persistentFuelNode.m_fFuel, fuelNode.EPF_GetInitialFuelTankState())) 
+					continue;
 			}
 
 			m_aFuelNodes.Insert(persistentFuelNode);
@@ -129,7 +127,7 @@ class EPF_FuelManagerComponentSaveData : EPF_ComponentSaveData
 
 		return true;
 	}
-};
+}
 
 class EPF_PersistentFuelNode
 {
@@ -141,4 +139,12 @@ class EPF_PersistentFuelNode
 	{
 		return m_iTankId == other.m_iTankId && float.AlmostEqual(m_fFuel, other.m_fFuel);
 	}
-};
+}
+
+modded class SCR_FuelNode
+{
+	float EPF_GetInitialFuelTankState()
+	{
+		return m_fInitialFuelTankState;
+	}
+}
