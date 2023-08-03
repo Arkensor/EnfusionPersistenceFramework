@@ -5,7 +5,7 @@ class EPF_CharacterControllerComponentSaveDataClass : EPF_ComponentSaveDataClass
 	{
 		return {EPF_BaseInventoryStorageComponentSaveDataClass};
 	}
-};
+}
 
 [EDF_DbName.Automatic()]
 class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
@@ -82,6 +82,10 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 					break;
 				}
 			}
+
+			result = EPF_EApplyResult.AWAIT_COMPLETION;
+			EPF_DeferredApplyResult.AddPending(this, "CharacterControllerComponentSaveData::StanceChanged");
+			GetGame().GetCallqueue().CallLater(ListenForStanceChangeComplete, m_pCharacterController.GetStanceChangeDelayTime() * 1000, true);
 		}
 
 		// Apply hand items
@@ -121,6 +125,16 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 		}
 
 		return result;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void ListenForStanceChangeComplete()
+	{
+		if (m_pCharacterController.IsChangingStance())
+			return;
+
+		GetGame().GetCallqueue().Remove(ListenForStanceChangeComplete);
+		EPF_DeferredApplyResult.SetFinished(this, "CharacterControllerComponentSaveData::StanceChanged");
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -211,4 +225,4 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 			m_eRightHandType == otherData.m_eRightHandType &&
 			m_bRightHandRaised == otherData.m_bRightHandRaised;
 	}
-};
+}
