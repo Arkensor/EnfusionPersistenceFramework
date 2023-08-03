@@ -3,6 +3,10 @@ SCR_BaseGameMode Gamemode {
   EPF_BasicRespawnSystemComponent "{5DE8852CF9A29905}" {
   }
   EPF_PersistenceManagerComponent "{5D6ED6C2AD953A40}" {
+   components {
+    EPF_PersistentDoorStateManagerComponent "{5E06D7A06C1F5D97}" {
+    }
+   }
    m_pConnectionInfo EDF_JsonFileDbConnectionInfo "{5D6ED6C2A3CA0970}" {
     m_sDatabaseName "EnfusionPersistenceFramework.Tests"
    }

@@ -23,7 +23,7 @@ class EPF_PersistentScriptedStateLoader<Class TScriptedState>
 
 		return TScriptedState.Cast(persistenceManager.SpawnScriptedState(EPF_ScriptedStateSaveData.Cast(findResults.Get(0))));
 	}
-
+ 
 	//------------------------------------------------------------------------------------------------
 	//! s. LoadSingleton()
 	static void LoadSingletonAsync(EDF_DataCallbackSingle<TScriptedState> callback = null)

@@ -12,6 +12,14 @@ class EPF_MetaDataDbEntity : EDF_DbEntity
 	}
 
 	//------------------------------------------------------------------------------------------------
+	//! Utility function to read meta-data
+	void ReadMetaData(notnull EPF_PersistentScriptedState scriptedState)
+	{
+		SetId(scriptedState.GetPersistentId());
+		m_iLastSaved = scriptedState.GetLastSaved();
+	}
+
+	//------------------------------------------------------------------------------------------------
 	//! Utility function to write meta-data to serializer
 	void SerializeMetaData(notnull BaseSerializationSaveContext saveContext)
 	{
@@ -31,4 +39,4 @@ class EPF_MetaDataDbEntity : EDF_DbEntity
 		loadContext.ReadValue("m_iDataLayoutVersion", m_iDataLayoutVersion);
 		loadContext.ReadValue("m_iLastSaved", m_iLastSaved);
 	}
-};
+}

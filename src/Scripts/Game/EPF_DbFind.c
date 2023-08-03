@@ -36,7 +36,7 @@ modded class EDF_DbFindFieldMainConditionBuilder
 	{
 		string prefabString = prefab;
 		if (prefabString.StartsWith("{"))
-			prefabString = prefabString.Substring(1, 16);
+			prefabString = EPF_Utils.GetPrefabGUID(prefab);
 
 		// Db might contain full paths so we need to do only contains check to cover both cases
 		#ifdef PERSISTENCE_DEBUG

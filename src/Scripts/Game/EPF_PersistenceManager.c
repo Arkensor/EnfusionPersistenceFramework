@@ -5,7 +5,7 @@ enum EPF_EPersistenceManagerState
 	SETUP,
 	ACTIVE,
 	SHUTDOWN
-};
+}
 
 class EPF_PersistenceManager
 {
@@ -41,6 +41,9 @@ class EPF_PersistenceManager
 	protected MapIterator m_iAutoSaveEntityIt;
 	protected MapIterator m_iAutoSaveScriptedStateIt;
 	protected ref ScriptInvoker<EPF_PersistenceManager> m_pOnAutoSaveCompleteEvent;
+
+	// Extensions
+	protected ref array<EPF_PersistenceManagerExtensionBaseComponent> m_aExtensions;
 
 	// Setup buffers, discarded after world init
 	protected ref map<string, EPF_PersistenceComponent> m_mBakedRoots;
@@ -686,7 +689,7 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
-	event void OnPostInit(IEntity gameMode, EPF_PersistenceManagerComponentClass settings)
+	event void OnPostInit(IEntity gameMode, EPF_PersistenceManagerComponent managerComponent, EPF_PersistenceManagerComponentClass settings)
 	{
 		m_pSettings = settings;
 
@@ -701,6 +704,15 @@ class EPF_PersistenceManager
 
 		if (!m_pDbContext)
 			return;
+
+		array<GenericComponent> extensions();
+		managerComponent.FindComponents(EPF_PersistenceManagerExtensionBaseComponent, extensions);
+		m_aExtensions = {};
+		m_aExtensions.Reserve(extensions.Count());
+		foreach (GenericComponent extension : extensions)
+		{
+			m_aExtensions.Insert(EPF_PersistenceManagerExtensionBaseComponent.Cast(extension));
+		}
 
 		SetState(EPF_EPersistenceManagerState.POST_INIT);
 	}
@@ -836,15 +848,52 @@ class EPF_PersistenceManager
 			SpawnWorldEntity(saveData);
 		}
 
-		if (--m_iPendingLoadTypes == 0)
-			OnPostSetup();
+		if (--m_iPendingLoadTypes > 0)
+			return;
+
+		// Free memory as it not needed after setup
+		m_mBakedRoots = null;
+		OnSetup();
+		GetGame().GetCallqueue().CallLater(TryCompleteSetup, 100, true); // Check for completion every 100ms
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Add EPF_PersistenceManagerExtensionBaseComponents or extend this via modded to
+	//	add custom logic that should be awaited for with IsSetupComplete()
+	protected void OnSetup()
+	{
+		foreach (EPF_PersistenceManagerExtensionBaseComponent extension : m_aExtensions)
+		{
+			extension.OnSetup(this);
+		}
+	}
+
+	//------------------------------------------------------------------------------------------------
+	//! Return true if additional custom setup logic is complete. Always consider super result too!
+	protected bool IsSetupComplete()
+	{
+		foreach (EPF_PersistenceManagerExtensionBaseComponent extension : m_aExtensions)
+		{
+			if (!extension.IsSetupComplete(this))
+				return false;
+		}
+
+		return true;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	protected void TryCompleteSetup()
+	{
+		if (!IsSetupComplete())
+			return;
+
+		GetGame().GetCallqueue().Remove(TryCompleteSetup);
+		OnPostSetup();
 	}
 
 	//------------------------------------------------------------------------------------------------
 	protected void OnPostSetup()
 	{
-		// Free memory as it not needed after setup
-		m_mBakedRoots = null;
 		SetState(EPF_EPersistenceManagerState.ACTIVE);
 		Print("Persistence initial world load complete.", LogLevel.DEBUG);
 	}
@@ -892,4 +941,4 @@ class EPF_PersistenceManager
 		EPF_PersistentScriptedStateProxy.s_mProxies = null;
 		s_pInstance = null;
 	}
-};
+}

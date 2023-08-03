@@ -90,11 +90,16 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
   }
  }
 }
+SCR_DestructibleBuildingEntity TestBuilding : "{CAF57CAE8680A78D}PrefabLibrary/Structures/Houses/House_Mountain_E_1I01.et" {
+ coords 912.024 0.001 2647.261
+ angleY -90
+}
 Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB_MERDC.et" {
  components {
   SCR_VehicleDamageManagerComponent "{141326E9FD94FE40}" {
    m_fVehicleDestroyDamage 12912.9
   }
  }
- coords 908.561 39.001 2650.991
+ coords 902.637 39.001 2655.522
+ angleY -90
 }

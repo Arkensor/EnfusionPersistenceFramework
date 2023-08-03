@@ -82,7 +82,7 @@ class EPF_CompartmentAccessComponentSaveData : EPF_ComponentSaveData
 
 		// No longer able to enter compartment so find free position on the ground to spawn instead
 		if (SCR_WorldTools.FindEmptyTerrainPosition(currentPos, currentPos, 50, cylinderHeight: 1000))
-			EPF_Utils.Teleport(owner, currentPos);
+			EPF_WorldUtils.Teleport(owner, currentPos);
 
 		return EPF_EApplyResult.OK;
 	}

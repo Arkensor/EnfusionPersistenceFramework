@@ -180,7 +180,7 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 
 			// Unable to add it to the storage parent, so put it on the ground at the parent origin
 			if (!storageManager.TryInsertItemInStorage(slotEntity, storageComponent, slot.m_iSlotIndex))
-				EPF_Utils.Teleport(slotEntity, storageComponent.GetOwner().GetOrigin(), storageComponent.GetOwner().GetYawPitchRoll()[0]);
+				EPF_WorldUtils.Teleport(slotEntity, storageComponent.GetOwner().GetOrigin(), storageComponent.GetOwner().GetYawPitchRoll()[0]);
 		}
 
 		// Delte any items not found in the storage data for non bakes that always save all slots

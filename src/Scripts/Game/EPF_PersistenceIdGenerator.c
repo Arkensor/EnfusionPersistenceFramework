@@ -72,7 +72,7 @@ class EPF_PersistenceIdGenerator : EDF_DbEntityIdGenerator
 			string type = EPF_Utils.GetPrefabName(entity);
 			if (type)
 			{
-				type = type.Substring(1, 16);
+				type = EPF_Utils.GetPrefabGUID(type);
 			}
 			else
 			{

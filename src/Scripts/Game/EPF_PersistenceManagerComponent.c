@@ -21,7 +21,9 @@ class EPF_PersistenceManagerComponentClass : SCR_BaseGameModeComponentClass
 
 	//[Attribute(defvalue: "50", desc: "Max DB operations batch size per frame. Only relevant when buffered DB context is enabled.", category: "Database")]
 	//int m_bBufferedDatabaseBatchsize;
-};
+
+	static EPF_PersistenceManagerComponentClass s_pInstance;
+}
 
 class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 {
@@ -70,6 +72,7 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 			return;
 
 		EPF_PersistenceManagerComponentClass settings = EPF_PersistenceManagerComponentClass.Cast(GetComponentData(owner));
+		EPF_PersistenceManagerComponentClass.s_pInstance = settings;
 		if (settings.m_fAutosaveInterval < settings.m_fUpdateRate)
 		{
 			Debug.Error(string.Format("Update rate '%1' must be smaller than auto-save interval '%2'.", settings.m_fUpdateRate, settings.m_fAutosaveInterval));
@@ -87,7 +90,7 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 		// Auto-save
 		m_fUpdateRateSetting = settings.m_fUpdateRate;
 		m_pPersistenceManager = EPF_PersistenceManager.GetInstance();
-		m_pPersistenceManager.OnPostInit(owner, settings);
+		m_pPersistenceManager.OnPostInit(owner, this, settings);
 		SetEventMask(owner, EntityEvent.POSTFRAME);
 	}
 
@@ -114,4 +117,4 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 
 		return EDF_DbConnectionInfoBase.Parse(connectionString);
 	}
-};
+}

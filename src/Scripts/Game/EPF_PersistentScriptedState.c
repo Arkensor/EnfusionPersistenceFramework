@@ -286,7 +286,7 @@ class EPF_PersistentScriptedState
 		if (EPF_BitFlags.CheckFlags(settings.m_eOptions, EPF_EPersistentScriptedStateOptions.SELF_DELETE))
 			Delete();
 	}
-};
+}
 
 class EPF_PersistentScriptedStateProxy : EPF_PersistentScriptedState
 {
@@ -391,7 +391,7 @@ class EPF_PersistentScriptedStateProxy : EPF_PersistentScriptedState
 	//------------------------------------------------------------------------------------------------
 	//! Use Create instead
 	protected void EPF_PersistentScriptedStateProxy();
-};
+}
 
 class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 {
@@ -425,13 +425,13 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	{
 		return EPF_SavaDataUtils.StructAutoCompare(this, other);
 	}
-};
+}
 
 enum EPF_EPersistentScriptedStateOptions
 {
 	USE_CHANGE_TRACKER	= 1,
 	SELF_DELETE			= 2
-};
+}
 
 class EPF_PersistentScriptedStateSettings
 {
@@ -497,7 +497,7 @@ class EPF_PersistentScriptedStateSettings
 		s_mSettings.Set(scriptedStateType, this);
 		s_mReverseMapping.Set(saveDataType, scriptedStateType);
 	}
-};
+}
 
 class EPF_PersistentScriptedStateProxyContext
 {
@@ -510,7 +510,7 @@ class EPF_PersistentScriptedStateProxyContext
 		m_pProxy = proxy;
 		m_pCallback = callback;
 	}
-};
+}
 
 class EPF_PersistentScriptedStateProxyCreateCallback : EDF_DbFindCallbackSingle<EPF_ScriptedStateSaveData>
 {
@@ -521,4 +521,4 @@ class EPF_PersistentScriptedStateProxyCreateCallback : EDF_DbFindCallbackSingle<
 		if (result && contextTyped.m_pProxy.Load(result))
 			contextTyped.m_pCallback.Invoke(result);
 	}
-};
+}

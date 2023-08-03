@@ -141,7 +141,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 		// Transform
 		if (m_pTransformation && !m_pTransformation.m_bApplied)
-			EPF_Utils.ForceTransform(entity, m_pTransformation.m_vOrigin, m_pTransformation.m_vAngles, m_pTransformation.m_fScale);
+			EPF_WorldUtils.ForceTransform(entity, m_pTransformation.m_vOrigin, m_pTransformation.m_vAngles, m_pTransformation.m_fScale);
 
 		// Lifetime
 		if (attributes.m_bSaveRemainingLifetime)
@@ -325,7 +325,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		string prefabString = m_rPrefab;
 		#ifndef PERSISTENCE_DEBUG
 		if (prefabString.StartsWith("{")) 
-			prefabString = m_rPrefab.Substring(1, 16);
+			prefabString = EPF_Utils.GetPrefabGUID(m_rPrefab);
 		#endif
 		saveContext.WriteValue("m_rPrefab", prefabString);
 
