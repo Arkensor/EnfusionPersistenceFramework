@@ -21,7 +21,7 @@ class EPF_PersistentScriptedStateLoaderTests : TestSuite
 		EPF_PersistenceManager.GetInstance().SetDbContext(m_pPreviousContext);
 		m_pPreviousContext = null;
 	}
-};
+}
 
 class EPF_Test_ScriptedStateLoaderDummy : EPF_PersistentScriptedState
 {
@@ -34,7 +34,7 @@ class EPF_Test_ScriptedStateLoaderDummy : EPF_PersistentScriptedState
 		instance.m_iIntValue = intValue;
 		return instance;
 	}
-};
+}
 
 [
 	EPF_PersistentScriptedStateSettings(EPF_Test_ScriptedStateLoaderDummy, options: EPF_EPersistentScriptedStateOptions.SELF_DELETE),
@@ -43,7 +43,7 @@ class EPF_Test_ScriptedStateLoaderDummy : EPF_PersistentScriptedState
 class EPF_Test_ScriptedStateLoaderDummySaveData : EPF_ScriptedStateSaveData
 {
 	int m_iIntValue;
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_NotExisting_Created : TestBase
@@ -58,7 +58,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_NotExisting_Created :
 		// Assert
 		SetResult(new EDF_TestResult(instance && instance.GetPersistentId()));
 	}
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_Existing_Returned : TestBase
@@ -93,7 +93,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_Existing_Returned : T
 	{
 		m_pExisting = null;
 	}
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_NotExisting_Created : TestBase
@@ -118,7 +118,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_NotExisting_Crea
 	{
 		return GetResult();
 	}
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_Existing_Returned : TestBase
@@ -163,7 +163,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_Existing_Returne
 	{
 		m_pExisting = null;
 	}
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadAsync_Existing_Returned : TestBase
@@ -208,7 +208,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadAsync_Existing_Returned : TestB
 	{
 		m_pExisting = null;
 	}
-};
+}
 
 [Test("EPF_PersistentScriptedStateLoaderTests", 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadAsync_MultipleExisting_AllReturned : TestBase
@@ -261,4 +261,4 @@ class EPF_Test_PersistentScriptedStateLoader_LoadAsync_MultipleExisting_AllRetur
 		m_pExisting1 = null;
 		m_pExisting2 = null;
 	}
-};
+}

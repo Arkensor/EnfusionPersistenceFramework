@@ -10,8 +10,14 @@ class EPF_PersistentWorldEntityLoader
 	static IEntity Load(typename saveDataType, string persistentId)
 	{
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		array<ref EDF_DbEntity> findResults = persistenceManager.GetDbContext().FindAll(saveDataType, EDF_DbFind.Id().Equals(persistentId), limit: 1).GetEntities();
-		if (!findResults || findResults.Count() != 1) return null;
+		array<ref EDF_DbEntity> findResults = persistenceManager
+			.GetDbContext()
+			.FindAll(saveDataType, EDF_DbFind.Id().Equals(persistentId), limit: 1)
+			.GetEntities();
+
+		if (!findResults || findResults.Count() != 1)
+			return null;
+
 		return persistenceManager.SpawnWorldEntity(EPF_EntitySaveData.Cast(findResults.Get(0)));
 	}
 
@@ -30,9 +36,10 @@ class EPF_PersistentWorldEntityLoader
 	//! see Load(typename, string)
 	static void LoadAsync(typename saveDataType, string persistentId, EDF_DataCallbackSingle<IEntity> callback = null)
 	{
-		EPF_WorldEntityLoaderProcessorCallbackSingle processorCallback();
-		processorCallback.Setup(callback);
-		EPF_PersistenceManager.GetInstance().GetDbContext().FindAllAsync(saveDataType, EDF_DbFind.Id().Equals(persistentId), limit: 1, callback: processorCallback);
+		auto processorCallback = new EPF_WorldEntityLoaderProcessorCallbackSingle(context: callback);
+		EPF_PersistenceManager.GetInstance()
+			.GetDbContext()
+			.FindAllAsync(saveDataType, EDF_DbFind.Id().Equals(persistentId), limit: 1, callback: processorCallback);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -54,18 +61,21 @@ class EPF_PersistentWorldEntityLoader
 
 		EDF_DbFindCondition condition;
 		if (persistentIds && !persistentIds.IsEmpty())
-		{
 			condition = EDF_DbFind.Id().EqualsAnyOf(persistentIds);
-		}
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		array<ref EDF_DbEntity> findResults = persistenceManager.GetDbContext().FindAll(saveDataType, condition).GetEntities();
+		array<ref EDF_DbEntity> findResults = persistenceManager
+			.GetDbContext()
+			.FindAll(saveDataType, condition)
+			.GetEntities();
+
 		if (findResults)
 		{
 			foreach (EDF_DbEntity findResult : findResults)
 			{
 				IEntity entity = persistenceManager.SpawnWorldEntity(EPF_EntitySaveData.Cast(findResult));
-				if (entity) resultEntities.Insert(entity);
+				if (entity)
+					resultEntities.Insert(entity);
 			}
 		}
 
@@ -87,16 +97,15 @@ class EPF_PersistentWorldEntityLoader
 	//! see Load(typename, array<string>)
 	static void LoadAsync(typename saveDataType, array<string> persistentIds = null, EDF_DataCallbackMultiple<IEntity> callback = null)
 	{
-		EPF_WorldEntityLoaderProcessorCallbackMultiple processorCallback();
-		processorCallback.Setup(callback);
+		auto processorCallback = new EPF_WorldEntityLoaderProcessorCallbackMultiple(context: callback);
 
 		EDF_DbFindCondition condition;
 		if (persistentIds && !persistentIds.IsEmpty())
-		{
 			condition = EDF_DbFind.Id().EqualsAnyOf(persistentIds);
-		}
 
-		EPF_PersistenceManager.GetInstance().GetDbContext().FindAllAsync(saveDataType, condition, callback: processorCallback);
+		EPF_PersistenceManager.GetInstance()
+			.GetDbContext()
+			.FindAllAsync(saveDataType, condition, callback: processorCallback);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -110,7 +119,8 @@ class EPF_PersistentWorldEntityLoader
 	//------------------------------------------------------------------------------------------------
 	protected static typename GetSaveDataType(string prefab)
 	{
-		if (!s_mSaveDataTypeCache) s_mSaveDataTypeCache = new map<string, typename>();
+		if (!s_mSaveDataTypeCache)
+			s_mSaveDataTypeCache = new map<string, typename>();
 
 		typename resultType = s_mSaveDataTypeCache.Get(prefab);
 
@@ -141,38 +151,30 @@ class EPF_PersistentWorldEntityLoader
 
 		return resultType;
 	}
-};
+}
 
 class EPF_WorldEntityLoaderProcessorCallbackSingle : EDF_DbFindCallbackSingle<EPF_EntitySaveData>
 {
-	ref EDF_DataCallbackSingle<IEntity> m_pOuterCallback;
-
 	//------------------------------------------------------------------------------------------------
 	override void OnSuccess(EPF_EntitySaveData result, Managed context)
 	{
 		IEntity resultWorldEntity = EPF_PersistenceManager.GetInstance().SpawnWorldEntity(result);
-		if (m_pOuterCallback) 
-			m_pOuterCallback.Invoke(resultWorldEntity);
+		auto callback = EDF_DataCallbackSingle<IEntity>.Cast(context);
+		if (callback)
+			callback.Invoke(resultWorldEntity);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
-		if (m_pOuterCallback) 
-			m_pOuterCallback.Invoke(null);
+		auto callback = EDF_DataCallbackSingle<IEntity>.Cast(context);
+		if (callback)
+			callback.Invoke(null);
 	}
-
-	//------------------------------------------------------------------------------------------------
-	void Setup(EDF_DataCallbackSingle<IEntity> outerCallback)
-	{
-		m_pOuterCallback = outerCallback;
-	}
-};
+}
 
 class EPF_WorldEntityLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMultiple<EPF_EntitySaveData>
 {
-	ref EDF_DataCallbackMultiple<IEntity> m_pOuterCallback;
-
 	//------------------------------------------------------------------------------------------------
 	override void OnSuccess(array<ref EPF_EntitySaveData> results, Managed context)
 	{
@@ -182,23 +184,20 @@ class EPF_WorldEntityLoaderProcessorCallbackMultiple : EDF_DbFindCallbackMultipl
 		foreach (EPF_EntitySaveData saveData : results)
 		{
 			IEntity entity = persistenceManager.SpawnWorldEntity(saveData);
-			if (entity) resultEntities.Insert(entity);
+			if (entity)
+				resultEntities.Insert(entity);
 		}
 
-		if (m_pOuterCallback) 
-			m_pOuterCallback.Invoke(resultEntities);
+		auto callback = EDF_DataCallbackMultiple<IEntity>.Cast(context);
+		if (callback)
+			callback.Invoke(resultEntities);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	override void OnFailure(EDF_EDbOperationStatusCode statusCode, Managed context)
 	{
-		if (m_pOuterCallback) 
-			m_pOuterCallback.Invoke(new array<IEntity>());
+		auto callback = EDF_DataCallbackMultiple<IEntity>.Cast(context);
+		if (callback)
+			callback.Invoke(new array<IEntity>());
 	}
-
-	//------------------------------------------------------------------------------------------------
-	void Setup(EDF_DataCallbackMultiple<IEntity> outerCallback)
-	{
-		m_pOuterCallback = outerCallback;
-	}
-};
+}
