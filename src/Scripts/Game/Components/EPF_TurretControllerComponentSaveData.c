@@ -1,7 +1,7 @@
 [EPF_ComponentSaveDataType(TurretControllerComponent), BaseContainerProps()]
 class EPF_TurretControllerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
-};
+}
 
 [EDF_DbName.Automatic()]
 class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
@@ -53,20 +53,14 @@ class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
 	//------------------------------------------------------------------------------------------------
 	override EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		// Need to push this 2 frames later because max angles are set on frame after turret spawned ...
-		EPF_DeferredApplyResult.AddPending(this, "TurretControllerComponentSaveData::SetAimingAngles");
 		TurretControllerComponent turretController = TurretControllerComponent.Cast(component);
-		GetGame().GetCallqueue().Call(SetAimingAngles, turretController, m_fYaw * Math.DEG2RAD, m_fPitch * Math.DEG2RAD, true);
-
-		/*
-		TODO: Wait for https://feedback.bistudio.com/T172197 to be added so we can select the weapon from the manager
 
 		BaseWeaponManagerComponent weaponManager = turretController.GetWeaponManager();
 		WeaponSlotComponent currentSlot = weaponManager.GetCurrentSlot();
 		if (!currentSlot || currentSlot.GetWeaponSlotIndex() != m_iSelectedWeaponSlotIdx)
 		{
 			array<WeaponSlotComponent> outSlots();
-			turretController.GetWeaponManager().GetWeaponsSlots(outSlots);
+			weaponManager.GetWeaponsSlots(outSlots);
 			foreach (WeaponSlotComponent weaponSlot : outSlots)
 			{
 				if (weaponSlot.GetWeaponSlotIndex() == m_iSelectedWeaponSlotIdx)
@@ -76,7 +70,10 @@ class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
 				}
 			}
 		}
-		*/
+
+		// Need to push this 2 frames later because max angles are set on frame after turret spawned ...
+		EPF_DeferredApplyResult.AddPending(this, "TurretControllerComponentSaveData::SetAimingAngles");
+		GetGame().GetCallqueue().Call(SetAimingAngles, turretController, m_fYaw * Math.DEG2RAD, m_fPitch * Math.DEG2RAD, true);
 
 		return EPF_EApplyResult.AWAIT_COMPLETION;
 	}
@@ -103,4 +100,4 @@ class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
 			float.AlmostEqual(m_fPitch, otherData.m_fPitch) &&
 			m_iSelectedWeaponSlotIdx == otherData.m_iSelectedWeaponSlotIdx;
 	}
-};
+}
