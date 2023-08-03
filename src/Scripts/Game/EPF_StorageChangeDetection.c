@@ -46,13 +46,6 @@ class EPF_BakedStorageChange
 		int slotId = parentSlot.GetID();
 		BaseInventoryStorageComponent storage = parentSlot.GetStorage();
 
-		// TODO: Remove workaround after https://feedback.bistudio.com/T172162 has been adressed
-		if (MuzzleComponent.Cast(parentSlot.GetParentContainer()))
-		{
-			slotId = 0;
-			storage = EPF_Component<WeaponAttachmentsStorageComponent>.Find(childPersistence.GetOwner().GetParent());
-		}
-
 		string storageKey = string.Format("%1:%2", storage, slotId);
 		EPF_BakedStorageChange change = s_mStorageChanges.Get(storageKey);
 		if (!change)
