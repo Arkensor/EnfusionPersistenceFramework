@@ -37,5 +37,8 @@ Tips and considerations for the integration into a custom respawn system.
 ### 12. [Query builder](query-builder.md)
 Persistence specific db query builder utlity.
 
-### 12. [Debugging and metrics](debugging.md)
+### 13. [Optional features](optional-features.md)
+Modular persistence extensions such as door or destruction management.
+
+### 14. [Debugging and metrics](debugging.md)
 Optional debug steps and peformance metrics.
