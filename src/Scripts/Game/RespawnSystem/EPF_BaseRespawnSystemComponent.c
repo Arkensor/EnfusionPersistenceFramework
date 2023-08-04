@@ -60,7 +60,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		persistence.OverrideSelfSpawn(true);
 
 		// Fresh character spawn (NOTE: We need to push this to next frame due to a bug where on the same death frame we can not hand over a new char).
-		GetGame().GetCallqueue().Call(LoadCharacter, playerId, newId, null);
+		GetGame().GetCallqueue().Call(CreateCharacter, playerId, newId);
 	}
 
 	//------------------------------------------------------------------------------------------------
