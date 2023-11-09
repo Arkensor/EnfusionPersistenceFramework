@@ -3,7 +3,7 @@ enum EPF_ETransformSaveFlags
 	COORDS = 0x01,
 	ANGLES = 0x02,
 	SCALE = 0x04
-};
+}
 
 [BaseContainerProps()]
 class EPF_EntitySaveDataClass
@@ -19,7 +19,7 @@ class EPF_EntitySaveDataClass
 
 	[Attribute(desc: "Components to persist.")]
 	ref array<ref EPF_ComponentSaveDataClass> m_aComponents;
-};
+}
 
 class EPF_EntitySaveData : EPF_MetaDataDbEntity
 {
@@ -70,9 +70,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
 			attributes.m_bSaveRemainingLifetime)
 		{
-			GarbageManager garbageManager = GetGame().GetGarbageManager();
-			if (garbageManager)
-				m_fRemainingLifetime = garbageManager.GetRemainingLifetime(entity);
+			ChimeraWorld garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
+			if (garbageWorld)
+				m_fRemainingLifetime = garbageWorld.GetGarbageSystem().GetRemainingLifetime(entity);
 
 			if (m_fRemainingLifetime == -1)
 			{
@@ -93,7 +93,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		foreach (EPF_ComponentSaveDataClass componentSaveDataClass : attributes.m_aComponents)
 		{
 			typename saveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
-			if (!saveDataType) 
+			if (!saveDataType)
 				return false;
 
 			array<Managed> outComponents();
@@ -101,21 +101,21 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			foreach (Managed componentRef : outComponents)
 			{
 				// Ingore base class find machtes if a parent class was already processed
-				if (processedComponents.Contains(componentRef)) 
+				if (processedComponents.Contains(componentRef))
 					continue;
-				
+
 				processedComponents.Insert(componentRef);
 
 				EPF_ComponentSaveData componentSaveData = EPF_ComponentSaveData.Cast(saveDataType.Spawn());
-				if (!componentSaveData) 
+				if (!componentSaveData)
 					return EPF_EReadResult.ERROR;
 
 				componentSaveDataClass.m_bTrimDefaults = attributes.m_bTrimDefaults;
 				EPF_EReadResult componentRead = componentSaveData.ReadFrom(entity, GenericComponent.Cast(componentRef), componentSaveDataClass);
-				if (componentRead == EPF_EReadResult.ERROR) 
+				if (componentRead == EPF_EReadResult.ERROR)
 					return componentRead;
-				
-				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults) 
+
+				if (componentRead == EPF_EReadResult.DEFAULT && attributes.m_bTrimDefaults)
 					continue;
 
 				EPF_PersistentComponentSaveData persistentComponent();
@@ -126,7 +126,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 		if (!m_aComponents.IsEmpty())
 			statusCode = EPF_EReadResult.OK;
-		
+
 		return statusCode;
 	}
 
@@ -146,9 +146,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Lifetime
 		if (attributes.m_bSaveRemainingLifetime)
 		{
-			GarbageManager garbageManager = GetGame().GetGarbageManager();
-			if (garbageManager && m_fRemainingLifetime > 0)
-				garbageManager.Insert(entity, m_fRemainingLifetime);
+			ChimeraWorld garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
+			if (garbageWorld && m_fRemainingLifetime > 0)
+				garbageWorld.GetGarbageSystem().Insert(entity, m_fRemainingLifetime);
 		}
 
 		// Components
@@ -237,9 +237,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		typename componentSaveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
 
 		// Skip already processed save-data
-		if (processedSaveDataTypes.Contains(componentSaveDataType)) 
+		if (processedSaveDataTypes.Contains(componentSaveDataType))
 			return result;
-		
+
 		processedSaveDataTypes.Insert(componentSaveDataType);
 
 		// Make sure required save-data is already applied
@@ -276,10 +276,10 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		foreach (EPF_PersistentComponentSaveData persistentComponentSaveData : m_aComponents)
 		{
 			EPF_ComponentSaveData componentSaveData = persistentComponentSaveData.m_pData;
-			
+
 			if (componentSaveData.Type() != componentSaveDataType)
 				continue;
-			
+
 			bool applied = false;
 			foreach (Managed componentRef : outComponents)
 			{
@@ -324,7 +324,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Prefab
 		string prefabString = m_rPrefab;
 		#ifndef PERSISTENCE_DEBUG
-		if (prefabString.StartsWith("{")) 
+		if (prefabString.StartsWith("{"))
 			prefabString = EPF_Utils.GetPrefabGUID(m_rPrefab);
 		#endif
 		saveContext.WriteValue("m_rPrefab", prefabString);
@@ -368,7 +368,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 		return true;
 	}
-};
+}
 
 class EPF_PersistentTransformation
 {
@@ -498,7 +498,7 @@ class EPF_PersistentTransformation
 	{
 		Reset();
 	}
-};
+}
 
 class EPF_PersistentComponentSaveData
 {
@@ -538,7 +538,7 @@ class EPF_PersistentComponentSaveData
 
 		return true;
 	}
-};
+}
 
 class EPF_ComponentSaveDataGetter<Class T>
 {
@@ -549,11 +549,11 @@ class EPF_ComponentSaveDataGetter<Class T>
 		{
 			foreach (EPF_PersistentComponentSaveData persistentComponent : saveData.m_aComponents)
 			{
-				if (persistentComponent.m_pData.Type().IsInherited(T))		
+				if (persistentComponent.m_pData.Type().IsInherited(T))
 					return T.Cast(persistentComponent.m_pData);
 			}
 		}
 
 		return null;
 	}
-};
+}

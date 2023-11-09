@@ -3,7 +3,7 @@ class EPF_SlotManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 	[Attribute("1", desc: "Skip writing slot attached entities that are non banked if they have only default data and match the default slot prefab.\nDisable this option if you absoluetly need to track persistent ids of the slots. Can cause larger amounts of data for vehicles that have many nested slots.")]
 	bool m_bSkipDefaultNonBaked;
-};
+}
 
 [EDF_DbName.Automatic()]
 class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
@@ -182,7 +182,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 			}
 
 			if (EPF_Const.IsNan(persistentTransform.m_fScale))
-				SCR_Math3D.ScaleMatrix(transform, persistentTransform.m_fScale);
+				Math3D.MatrixScale(transform, persistentTransform.m_fScale);
 
 			entitySlot.OverrideTransformLS(transform);
 		}
@@ -223,7 +223,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 
 		return true;
 	}
-};
+}
 
 class EPF_PersistentEntitySlot
 {
@@ -283,4 +283,4 @@ class EPF_PersistentEntitySlot
 
 		return true;
 	}
-};
+}

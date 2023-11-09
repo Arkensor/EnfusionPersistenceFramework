@@ -3,31 +3,31 @@ modded class SCR_CharacterInventoryStorageComponent
 	protected int m_iEPFDebounceTime = -1;
 
 	//------------------------------------------------------------------------------------------------
-	override void StoreItemToQuickSlot(notnull IEntity pItem, int iSlotIndex = -1, bool isForced = false)
+	override int StoreItemToQuickSlot(notnull IEntity pItem, int iSlotIndex = -1, bool isForced = false)
 	{
-		super.StoreItemToQuickSlot(pItem, iSlotIndex, isForced);
-
-		if (!EPF_NetworkUtils.IsOwnerProxy(GetOwner()))
-			return;
-
-		// Debounce sync to configured interval after the last change.
-		if (m_iEPFDebounceTime == -1)
+		if (EPF_NetworkUtils.IsOwnerProxy(GetOwner()))
 		{
-			EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(GetOwner());
-			if (persistence)
+			// Debounce sync to configured interval after the last change.
+			if (m_iEPFDebounceTime == -1)
 			{
-				auto charInvSaveDataClass = EPF_CharacterInventoryStorageComponentSaveDataClass.Cast(persistence.GetAttributeClass(EPF_CharacterInventoryStorageComponentSaveDataClass));
-				if (charInvSaveDataClass)
-					m_iEPFDebounceTime = charInvSaveDataClass.m_iMaxQuickbarSaveTime * 1000; // Convert to ms from seconds
+				EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(GetOwner());
+				if (persistence)
+				{
+					auto charInvSaveDataClass = EPF_CharacterInventoryStorageComponentSaveDataClass.Cast(persistence.GetAttributeClass(EPF_CharacterInventoryStorageComponentSaveDataClass));
+					if (charInvSaveDataClass)
+						m_iEPFDebounceTime = charInvSaveDataClass.m_iMaxQuickbarSaveTime * 1000; // Convert to ms from seconds
+				}
+			}
+	
+			if (m_iEPFDebounceTime != -1)
+			{
+				ScriptCallQueue callQueue = GetGame().GetCallqueue();
+				if (callQueue.GetRemainingTime(EPF_SyncQuickSlots) == -1)
+					callQueue.CallLater(EPF_SyncQuickSlots, m_iEPFDebounceTime);
 			}
 		}
 
-		if (m_iEPFDebounceTime != -1)
-		{
-			ScriptCallQueue callQueue = GetGame().GetCallqueue();
-			if (callQueue.GetRemainingTime(EPF_SyncQuickSlots) == -1)
-				callQueue.CallLater(EPF_SyncQuickSlots, m_iEPFDebounceTime);
-		}
+		return super.StoreItemToQuickSlot(pItem, iSlotIndex, isForced);
 	}
 
 	//------------------------------------------------------------------------------------------------

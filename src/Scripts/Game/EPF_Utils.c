@@ -12,7 +12,7 @@ class EPF_Utils
 			return string.Empty;
 		}
 
-		string uid = GetGame().GetBackendApi().GetPlayerUID(playerId);
+		string uid = GetGame().GetBackendApi().GetPlayerIdentityId(playerId);
 		if (!uid)
 		{
 			if (RplSession.Mode() != RplMode.Dedicated)
@@ -78,7 +78,7 @@ class EPF_Utils
 		if (!name) name = entity.GetName();
 		return name;
 	}
-	
+
 	//------------------------------------------------------------------------------------------------
 	//! Gets the GUID of a prefab
 	static string GetPrefabGUID(ResourceName prefab)
@@ -166,7 +166,7 @@ class EPF_Utils
 
 		return data.Substring(0, data.Length() - amount);
 	}
-	
+
 	//------------------------------------------------------------------------------------------------
 	[Obsolete("Use EPF_WorldUtils.Teleport instead.")]
 	static void Teleport(notnull IEntity entity, vector position, float yaw = "nan".ToFloat())

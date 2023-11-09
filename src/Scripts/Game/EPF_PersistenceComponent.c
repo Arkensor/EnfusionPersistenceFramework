@@ -638,7 +638,7 @@
 	//! Get the instance of the save-data or component save-data class-class that was configured in the prefab/world editor.
 	//! \param saveDataClassType typename of the entity or component save-data which should be returned
 	//! \return instance of the save-data or null if not found
-	Class GetAttributeClass(typename saveDataClassType)
+	Managed GetAttributeClass(typename saveDataClassType)
 	{
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(GetOwner()));
 		if (!settings.m_pSaveData)

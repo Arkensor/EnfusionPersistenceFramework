@@ -42,15 +42,15 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnPlayerKilled_S(int playerId, IEntity player, IEntity killer)
+	override void OnPlayerKilled_S(int playerId, IEntity playerEntity, IEntity killerEntity, notnull Instigator killer)
 	{
-		//PrintFormat("EPF_BaseRespawnSystemComponent.OnPlayerKilled_S(%1, %2, %3)", playerId, player, killer);
+		//PrintFormat("EPF_BaseRespawnSystemComponent.OnPlayerKilled_S(%1, %2, %3)", playerId, playerEntity, killerEntity);
 
 		// Add the dead body root entity collection so it spawns back after restart for looting
-		EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(player);
+		EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(playerEntity);
 		if (!persistence)
 		{
-			Print(string.Format("OnPlayerKilled(%1, %2, %3) -> Player killed that does not have persistence component?!? Something went terribly wrong!", playerId, player, killer), LogLevel.ERROR);
+			Debug.Error(string.Format("OnPlayerKilled(%1, %2, %3) -> Player killed that does not have persistence component?!? Something went terribly wrong!", playerId, playerEntity, killerEntity));
 			return;
 		}
 
@@ -331,7 +331,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	{
 		//PrintFormat("HandoverToPlayer(%1, %2)", playerId, character);
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(m_pPlayerManager.GetPlayerController(playerId));
-		EDF_ScriptInvokerCallback callback(this, "OnHandoverComplete", new Tuple1<int>(playerId));
+		EDF_ScriptInvokerCallback2<IEntity, IEntity> callback(this, "OnHandoverComplete", new Tuple1<int>(playerId));
 		playerController.m_OnControlledEntityChanged.Insert(callback.Invoke);
 
 		playerController.SetInitialMainEntity(character);
@@ -339,15 +339,14 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		m_pGameMode.OnPlayerEntityChanged_S(playerId, null, character);
 
 		SCR_RespawnComponent respawn = SCR_RespawnComponent.Cast(playerController.GetRespawnComponent());
-		respawn.SGetOnSpawn().Invoke(); // TODO: Check if this is needed, the base game added it as a hack?!?
 		respawn.NotifySpawn(character);
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnHandoverComplete(Managed context)
+	protected void OnHandoverComplete(IEntity from, IEntity to, Managed context)
 	{
 		Tuple1<int> typedContext = Tuple1<int>.Cast(context);
-		//PrintFormat("OnHandoverComplete(%1)", typedContext.param1);
+		//PrintFormat("OnHandoverComplete(%1)", from, to, typedContext.param1);
 		m_mLoadingCharacters.Remove(typedContext.param1);
 	}
 
