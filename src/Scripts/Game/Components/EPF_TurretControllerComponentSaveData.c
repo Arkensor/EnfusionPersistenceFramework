@@ -81,14 +81,18 @@ class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
 	//------------------------------------------------------------------------------------------------
 	protected void SetAimingAngles(TurretControllerComponent turretController, float yaw, float pitch, bool wait)
 	{
-		if (wait)
+		if (turretController)
 		{
-			// Waiting for second frame ...
-			GetGame().GetCallqueue().Call(SetAimingAngles, turretController, yaw, pitch, false);
-			return;
+			if (wait)
+			{
+				// Waiting for second frame ...
+				GetGame().GetCallqueue().Call(SetAimingAngles, turretController, yaw, pitch, false);
+				return;
+			}
+
+			turretController.SetAimingAngles(yaw, pitch);
 		}
 
-		turretController.SetAimingAngles(yaw, pitch);
 		EPF_DeferredApplyResult.SetFinished(this, "TurretControllerComponentSaveData::SetAimingAngles");
 	}
 
