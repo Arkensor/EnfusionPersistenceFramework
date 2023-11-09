@@ -317,6 +317,7 @@ class EPF_PersistenceManager
 			if (!persistenceComponent)
 			{
 				m_mRootAutoSave.RemoveElement(m_iAutoSaveEntityIt);
+				mapEnd = m_mRootAutoSave.End();
 				m_iAutoSaveEntityIt = m_mRootAutoSave.Next(m_iAutoSaveEntityIt);
 				continue;
 			}
