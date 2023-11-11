@@ -32,7 +32,8 @@ class EPF_PersistentDoorStateManagerComponent : EPF_PersistenceManagerExtensionB
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnDoorStateManagerLoaded(EPF_PersistentDoorStateManager doorStateManager)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void OnDoorStateManagerLoaded(EPF_PersistentDoorStateManager doorStateManager)
 	{
 		m_pDoorStateManager = doorStateManager;
 		if (!m_pDoorStateManager)

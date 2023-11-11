@@ -93,7 +93,8 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void WaitForUid(int playerId)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void WaitForUid(int playerId)
 	{
 		// Wait one frame after audit/sp join, then it is available.
 		// TODO: Remove this method once https://feedback.bistudio.com/T165590 is fixed.
@@ -118,7 +119,8 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void HandlePlayerLoad(Managed context)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void HandlePlayerLoad(Managed context)
 	{
 		// For this example just one character per player uid
 		Tuple2<int, string> characterContext = Tuple2<int, string>.Cast(context);
@@ -166,7 +168,8 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 
 	//------------------------------------------------------------------------------------------------
 	//! Handles the character data found for the players account
-	protected void OnCharacterDataLoaded(EDF_EDbOperationStatusCode statusCode, EPF_CharacterSaveData characterData, Managed context)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void OnCharacterDataLoaded(EDF_EDbOperationStatusCode statusCode, EPF_CharacterSaveData characterData, Managed context)
 	{
 		Tuple2<int, string> characterContext = Tuple2<int, string>.Cast(context);
 		if (characterData)
@@ -221,7 +224,8 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnCharacterLoadCompleteCallback(Managed context)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void OnCharacterLoadCompleteCallback(Managed context)
 	{
 		auto typedContext = Tuple3<int, EPF_CharacterSaveData, EPF_PersistenceComponent>.Cast(context);
 		OnCharacterLoadComplete(typedContext.param1, typedContext.param2, typedContext.param3);
@@ -343,10 +347,11 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnHandoverComplete(IEntity from, IEntity to, Managed context)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void OnHandoverComplete(IEntity from, IEntity to, Managed context)
 	{
 		Tuple1<int> typedContext = Tuple1<int>.Cast(context);
-		//PrintFormat("OnHandoverComplete(%1)", from, to, typedContext.param1);
+		//PrintFormat("OnHandoverComplete(%1, %2, %3)", from, to, typedContext.param1);
 		m_mLoadingCharacters.Remove(typedContext.param1);
 	}
 

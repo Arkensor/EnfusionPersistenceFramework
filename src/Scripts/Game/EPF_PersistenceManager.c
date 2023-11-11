@@ -752,7 +752,8 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnRootEntityCollectionLoaded(EDF_EDbOperationStatusCode statusCode, EPF_PersistentRootEntityCollection rootEntityCollection)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/ 
+	void OnRootEntityCollectionLoaded(EDF_EDbOperationStatusCode statusCode, EPF_PersistentRootEntityCollection rootEntityCollection)
 	{
 		m_pRootEntityCollection = rootEntityCollection;
 		if (!m_pRootEntityCollection)
@@ -826,7 +827,8 @@ class EPF_PersistenceManager
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected void OnTypeCollectionLoaded(EDF_EDbOperationStatusCode code, array<ref EDF_DbEntity> findResults)
+	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
+	void OnTypeCollectionLoaded(EDF_EDbOperationStatusCode code, array<ref EDF_DbEntity> findResults)
 	{
 		foreach (EDF_DbEntity findResult : findResults)
 		{
