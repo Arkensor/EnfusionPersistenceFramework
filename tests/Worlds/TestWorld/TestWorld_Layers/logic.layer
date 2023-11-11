@@ -15,8 +15,9 @@ SCR_BaseGameMode Gamemode {
    Streamable Disabled
   }
  }
+ coords -791.934 -38.001 -2502.995
 }
 EPF_SpawnPoint Spawnpoint {
- coords 904.683 39.001 2645.768
+ coords 112.749 1 142.773
  angleY 90
 }

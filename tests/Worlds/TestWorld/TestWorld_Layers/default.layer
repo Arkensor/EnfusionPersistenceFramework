@@ -1,5 +1,5 @@
 EPF_BaseSceneNameProxyEntity Rifle_AK74_GP25_5D6F01990DDEB458 {
- coords 906.757 39.91 2646.345
+ coords 114.823 1.908 143.45
  angleZ 90
  m_rTarget "{63E8322E2ADD4AA7}Prefabs/Weapons/Rifles/AK74/Rifle_AK74_GP25.et"
 }
@@ -35,11 +35,11 @@ SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/
    }
   }
  }
- coords 906.619 39.001 2644.922
+ coords 114.685 1 141.927
  angleY 90
 }
 SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civilian/Recreation/TableRecreation_01/TableRecreation_01.et" {
- coords 906.775 39.001 2647.763
+ coords 114.841 1 144.768
  {
   GenericEntity Backpack_ALICE_Medium_5D6EE937732E33A5 : "{06B68C58B72EAAC6}Prefabs/Items/Equipment/Backpacks/Backpack_ALICE_Medium.et" {
    coords -0.397 0.899 -0.196
@@ -91,7 +91,7 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
  }
 }
 SCR_DestructibleBuildingEntity TestBuilding : "{CAF57CAE8680A78D}PrefabLibrary/Structures/Houses/House_Mountain_E_1I01.et" {
- coords 912.024 0.001 2647.261
+ coords 120.09 0.396 144.266
  angleY -90
 }
 Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB_MERDC.et" {
@@ -100,6 +100,6 @@ Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_arm
    m_fVehicleDestroyDamage 12912.9
   }
  }
- coords 902.637 39.001 2655.522
+ coords 110.703 1 152.527
  angleY -90
 }
