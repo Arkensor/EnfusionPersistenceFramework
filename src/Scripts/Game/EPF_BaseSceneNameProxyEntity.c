@@ -19,7 +19,14 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 	//------------------------------------------------------------------------------------------------
 	protected void EPF_BaseSceneNameProxyEntity(IEntitySource src, IEntity parent)
 	{
-		FindTarget(src);
+		SetEventMask(EntityEvent.INIT);
+	}
+
+	//------------------------------------------------------------------------------------------------
+	override void EOnInit(IEntity owner)
+	{
+		if (GetWorld().IsEditMode() || EPF_PersistenceManager.IsPersistenceMaster())
+			FindTarget(owner.GetPrefabData().GetPrefab().ToEntitySource());
 
 		if (!GetWorld().IsEditMode())
 		{
@@ -43,9 +50,6 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 	//------------------------------------------------------------------------------------------------
 	protected void FindTarget(BaseContainer src = null, float radius = 1.0)
 	{
-		if (!EPF_PersistenceManager.IsPersistenceMaster())
-			return;
-
 		#ifdef WORKBENCH
 		m_pTarget = null;
 		#endif
@@ -120,7 +124,7 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 		else if (m_rTarget)
 		{
 			items.Insert(new WB_UIMenuItem("Try autofix proxy target", 1));
-			items.Insert(new WB_UIMenuItem("Remember proxy target", 2));
+			items.Insert(new WB_UIMenuItem("Remember proxy", 2));
 		}
 
 		return items;
