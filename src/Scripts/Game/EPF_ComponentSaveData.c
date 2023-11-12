@@ -25,7 +25,8 @@ class EPF_ComponentSaveData
 	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, DEFAULT if the data could be trimmed
 	EPF_EReadResult ReadFrom(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		return EPF_SavaDataUtils.StructAutoCopy(component, this);
+		return EPF_EReadResult.ERROR; // Re-Enable after C++ side issues are fixed for serializer variable count check
+		//return EPF_SavaDataUtils.StructAutoCopy(component, this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -47,7 +48,8 @@ class EPF_ComponentSaveData
 	//! \return true if save-data could be applied, false if something failed.
 	EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		return EPF_SavaDataUtils.StructAutoCopy(this, component);
+		return EPF_EReadResult.ERROR; // Re-Enable after C++ side issues are fixed for serializer variable count check
+		//return EPF_SavaDataUtils.StructAutoCopy(this, component);
 	}
 
 	//------------------------------------------------------------------------------------------------

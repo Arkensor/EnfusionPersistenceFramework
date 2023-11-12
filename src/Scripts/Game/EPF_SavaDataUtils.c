@@ -1,4 +1,4 @@
-class EPF_SavaDataUtils : EDF_DbEntityUtils
+class EPF_SavaDataUtils
 {
 	//------------------------------------------------------------------------------------------------
 	static bool StructAutoCompare(notnull Managed a, notnull Managed b, bool floatingPrecision = 5)
