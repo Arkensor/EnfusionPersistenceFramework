@@ -36,7 +36,7 @@ class EPF_VehicleControllerSaveData : EPF_ComponentSaveData
 		if (vehicleController_SA)
 		{
 			if (m_bEngineOn)
-				vehicleController_SA.StartEngine();
+				vehicleController_SA.ForceStartEngine();
 		}
 		else
 		{
