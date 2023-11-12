@@ -173,6 +173,8 @@ class EPF_PersistentScriptedState
 			Debug.Error(string.Format("Failed to persist scripted state '%1'. Save-data could not be read.", target));
 			return null;
 		}
+		
+		// TODO: Missing support for scripted state default skip?
 
 		if (proxy)
 		{

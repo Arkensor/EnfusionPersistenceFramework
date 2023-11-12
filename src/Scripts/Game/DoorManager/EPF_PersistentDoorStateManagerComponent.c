@@ -44,7 +44,7 @@ class EPF_PersistentDoorStateManagerComponent : EPF_PersistenceManagerExtensionB
 		}
 
 		auto settings = EPF_PersistentDoorStateManagerComponentClass.Cast(GetComponentData(GetOwner()));
-		m_pDoorStateManager.SetFilterLogic(settings.m_pFilter);
+		m_pDoorStateManager.m_pFilter = settings.m_pFilter;
 	}
 
 	//------------------------------------------------------------------------------------------------
