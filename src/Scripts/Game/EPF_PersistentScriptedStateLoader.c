@@ -23,7 +23,7 @@ class EPF_PersistentScriptedStateLoader<Class TScriptedState>
 
 		return TScriptedState.Cast(persistenceManager.SpawnScriptedState(EPF_ScriptedStateSaveData.Cast(findResults.Get(0))));
 	}
- 
+
 	//------------------------------------------------------------------------------------------------
 	//! s. LoadSingleton()
 	static void LoadSingletonAsync(EDF_DataCallbackSingle<TScriptedState> callback = null)
@@ -202,11 +202,18 @@ class EPF_ScriptedStateLoaderProcessorCallbackMultiple<Class TScriptedState> : E
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 
 		array<TScriptedState> resultStates();
+		array<ref TScriptedState> resultRefs();
+		resultStates.Reserve(results.Count());
+		resultRefs.Reserve(results.Count());
+
 		foreach (EPF_ScriptedStateSaveData saveData : results)
 		{
 			TScriptedState resultScriptedState = TScriptedState.Cast(persistenceManager.SpawnScriptedState(saveData));
 			if (resultScriptedState)
+			{
 				resultStates.Insert(resultScriptedState);
+				resultRefs.Insert(resultScriptedState);
+			}
 		}
 
 		m_pCallback.Invoke(resultStates);
