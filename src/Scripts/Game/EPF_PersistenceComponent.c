@@ -381,7 +381,7 @@
 		}
 
 		// For vehicles we want to get notified when they encounter their first contact or start to be driven
-		if (settings.m_pSaveData.m_bTrimDefaults && EPF_Component<VehicleControllerComponent>.Find(owner))
+		if (settings.m_pSaveData.m_bTrimDefaults && (owner.FindComponent(VehicleControllerComponent) || owner.FindComponent(VehicleControllerComponent_SA)))
 		{
 			SetEventMask(owner, EntityEvent.CONTACT);
 			EventHandlerManagerComponent ev = EPF_Component<EventHandlerManagerComponent>.Find(owner);
@@ -604,9 +604,18 @@
 	override event protected void EOnPhysicsMove(IEntity owner)
 	{
 		// Check for if engine is one as there is tiny jitter movement during engine startup we want to ignore.
-		VehicleControllerComponent vehicleController = EPF_Component<VehicleControllerComponent>.Find(owner);
-		if (vehicleController && vehicleController.IsEngineOn())
-			FlagAsMoved();
+		VehicleControllerComponent_SA vehicleController_SA = EPF_Component<VehicleControllerComponent_SA>.Find(owner);
+		if (vehicleController_SA)
+		{
+			if (vehicleController_SA.IsEngineOn())
+				FlagAsMoved();
+		}
+		else
+		{
+			VehicleControllerComponent vehicleController = EPF_Component<VehicleControllerComponent>.Find(owner);
+			if (vehicleController && vehicleController.IsEngineOn())
+				FlagAsMoved();
+		}
 	}
 
 	//------------------------------------------------------------------------------------------------
