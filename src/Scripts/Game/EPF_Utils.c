@@ -148,7 +148,7 @@ class EPF_Utils
 	}
 
 	//------------------------------------------------------------------------------------------------
-	static bool IsInstanceAnyInherited(Class instance, notnull array<typename> from)
+	static bool IsInstanceAnyInherited(Managed instance, notnull array<typename> from)
 	{
 		if (!instance)
 			return false;
