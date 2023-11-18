@@ -57,7 +57,7 @@ class EPF_SpawnPoint : SCR_Position
 	{
 		SetFlags(EntityFlags.STATIC, true);
 
-		if (GetGame().GetWorldEntity()) 
+		if (GetGame().InPlayMode()) 
 			s_aSpawnPoints.Insert(this);
 	}
 
