@@ -310,15 +310,12 @@ class EPF_PersistenceManager
 		if (!m_bAutoSaveActive)
 			return;
 
-		MapIterator mapEnd = m_mRootAutoSave.End();
-		while (m_iAutoSaveEntityIt != mapEnd)
+		while (m_iAutoSaveEntityIt < m_mRootAutoSave.End())
 		{
 			EPF_PersistenceComponent persistenceComponent = m_mRootAutoSave.GetIteratorElement(m_iAutoSaveEntityIt);
 			if (!persistenceComponent)
 			{
 				m_mRootAutoSave.RemoveElement(m_iAutoSaveEntityIt);
-				mapEnd = m_mRootAutoSave.End();
-				m_iAutoSaveEntityIt = m_mRootAutoSave.Next(m_iAutoSaveEntityIt);
 				continue;
 			}
 
@@ -337,7 +334,7 @@ class EPF_PersistenceManager
 			}
 		}
 
-		while (m_iAutoSaveScriptedStateIt != m_mScriptedStateAutoSave.End())
+		while (m_iAutoSaveScriptedStateIt < m_mScriptedStateAutoSave.End())
 		{
 			EPF_PersistentScriptedState scriptedState = m_mScriptedStateAutoSave.GetIteratorElement(m_iAutoSaveScriptedStateIt);
 			m_iAutoSaveScriptedStateIt = m_mScriptedStateAutoSave.Next(m_iAutoSaveScriptedStateIt);
