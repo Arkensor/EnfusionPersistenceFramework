@@ -321,10 +321,10 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 
 		SerializeMetaData(saveContext);
 
-		// Prefab
+		// Prefab - go through string for debugging
 		string prefabString = m_rPrefab;
 		#ifndef PERSISTENCE_DEBUG
-		if (prefabString.StartsWith("{"))
+		if (prefabString.StartsWith("{")) //keep this solution even though as of 1.0.0.95 it would be saved as just GUID anyway
 			prefabString = EPF_Utils.GetPrefabGUID(m_rPrefab);
 		#endif
 		saveContext.WriteValue("m_rPrefab", prefabString);
@@ -352,8 +352,12 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		DeserializeMetaData(loadContext);
 
 		// Prefab
-		loadContext.ReadValue("m_rPrefab", m_rPrefab);
-		if (m_rPrefab && m_rPrefab[0] != "{") m_rPrefab = string.Format("{%1}", m_rPrefab);
+		string prefabString;
+		loadContext.ReadValue("m_rPrefab", prefabString);
+		if (prefabString && prefabString.Get(0) != "{")
+			prefabString = string.Format("{%1}", prefabString);
+
+		m_rPrefab = prefabString;
 
 		// Transform
 		loadContext.ReadValue("m_pTransformation", m_pTransformation);
