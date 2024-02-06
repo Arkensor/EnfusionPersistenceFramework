@@ -94,7 +94,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		{
 			typename saveDataType = EPF_Utils.TrimEnd(componentSaveDataClass.ClassName(), 5).ToType();
 			if (!saveDataType)
-				return false;
+				return EPF_EReadResult.ERROR;
 
 			array<Managed> outComponents();
 			entity.FindComponents(EPF_ComponentSaveDataType.Get(componentSaveDataClass.Type()), outComponents);

@@ -166,6 +166,7 @@
 		IEntity owner = GetOwner();
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(owner));
 		EPF_EntitySaveData saveData = EPF_EntitySaveData.Cast(settings.m_tSaveDataType.Spawn());
+		
 		if (saveData)
 			readResult = saveData.ReadFrom(owner, settings.m_pSaveData);
 
