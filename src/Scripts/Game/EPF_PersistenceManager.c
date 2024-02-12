@@ -38,8 +38,12 @@ class EPF_PersistenceManager
 	protected float m_fAutoSaveAccumultor;
 	protected bool m_bAutoSaveActive;
 	protected int m_iSaveOperation;
-	protected MapIterator m_iAutoSaveEntityIt;
-	protected MapIterator m_iAutoSaveScriptedStateIt;
+	protected ref array<EPF_PersistenceComponent> m_aRootAutoSaveCollection;
+	protected ref array<EPF_PersistentScriptedState> m_aScriptedStateAutoSaveCollection;
+	protected int m_iAutoSaveEntityIdx;
+	protected int m_iAutoSaveEntityCount;
+	protected int m_iAutoSaveScriptedStateIdx;
+	protected int m_iAutoSaveScriptedStateCount;
 	protected ref ScriptInvoker<EPF_PersistenceManager> m_pOnAutoSaveCompleteEvent;
 
 	// Extensions
@@ -297,9 +301,24 @@ class EPF_PersistenceManager
 
 		FlushRegistrations();
 
-		// Need to get iterators afterwards as they might change
-		m_iAutoSaveEntityIt = m_mRootAutoSave.Begin();
-		m_iAutoSaveScriptedStateIt = m_mScriptedStateAutoSave.Begin();
+		m_iAutoSaveEntityCount = m_mRootAutoSave.Count();
+		m_aRootAutoSaveCollection = {};
+		m_aRootAutoSaveCollection.Reserve(m_iAutoSaveEntityCount);
+		for (int nComponment = 0; nComponment < m_iAutoSaveEntityCount; ++nComponment)
+		{
+			m_aRootAutoSaveCollection.Insert(m_mRootAutoSave.GetElement(nComponment));
+		}
+
+		m_iAutoSaveScriptedStateCount = m_mScriptedStateAutoSave.Count();
+		m_aScriptedStateAutoSaveCollection = {};
+		m_aScriptedStateAutoSaveCollection.Reserve(m_iAutoSaveScriptedStateCount);
+		for (int nState = 0; nState < m_iAutoSaveScriptedStateCount; ++nState)
+		{
+			m_aScriptedStateAutoSaveCollection.Insert(m_mScriptedStateAutoSave.GetElement(nState));
+		}
+
+		m_iAutoSaveEntityIdx = 0;
+		m_iAutoSaveScriptedStateIdx = 0;
 
 		Print("Persistence auto-save started ...", LogLevel.DEBUG);
 	}
@@ -310,16 +329,11 @@ class EPF_PersistenceManager
 		if (!m_bAutoSaveActive)
 			return;
 
-		while (m_iAutoSaveEntityIt < m_mRootAutoSave.End())
+		while (m_iAutoSaveEntityIdx < m_iAutoSaveEntityCount)
 		{
-			EPF_PersistenceComponent persistenceComponent = m_mRootAutoSave.GetIteratorElement(m_iAutoSaveEntityIt);
+			auto persistenceComponent = m_aRootAutoSaveCollection.Get(m_iAutoSaveEntityIdx++);
 			if (!persistenceComponent)
-			{
-				m_mRootAutoSave.RemoveElement(m_iAutoSaveEntityIt);
 				continue;
-			}
-
-			m_iAutoSaveEntityIt = m_mRootAutoSave.Next(m_iAutoSaveEntityIt);
 
 			if (EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING))
 				continue;
@@ -334,10 +348,11 @@ class EPF_PersistenceManager
 			}
 		}
 
-		while (m_iAutoSaveScriptedStateIt < m_mScriptedStateAutoSave.End())
+		while (m_iAutoSaveScriptedStateIdx < m_iAutoSaveScriptedStateCount)
 		{
-			EPF_PersistentScriptedState scriptedState = m_mScriptedStateAutoSave.GetIteratorElement(m_iAutoSaveScriptedStateIt);
-			m_iAutoSaveScriptedStateIt = m_mScriptedStateAutoSave.Next(m_iAutoSaveScriptedStateIt);
+			auto scriptedState = m_aScriptedStateAutoSaveCollection.Get(m_iAutoSaveScriptedStateIdx++);
+			if (!scriptedState)
+				continue;
 
 			if (EPF_BitFlags.CheckFlags(scriptedState.GetFlags(), EPF_EPersistenceFlags.PAUSE_TRACKING))
 				continue;
@@ -362,6 +377,8 @@ class EPF_PersistenceManager
 		m_mRootAutoSaveCleanup.Clear();
 
 		m_bAutoSaveActive = false;
+		m_aRootAutoSaveCollection = null;
+		m_aScriptedStateAutoSaveCollection = null;
 
 		//FlushDatabase();
 
