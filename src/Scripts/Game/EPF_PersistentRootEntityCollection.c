@@ -15,13 +15,8 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 	{
 		if (EPF_BitFlags.CheckFlags(persistenceComponent.GetFlags(), EPF_EPersistenceFlags.BAKED))
 		{
-			// TODO refactor to use https://feedback.bistudio.com/T172042 when patched
-			int idx = m_aRemovedBackedRootEntities.Find(persistentId);
-			if (idx != -1)
-			{
-				m_aRemovedBackedRootEntities.Remove(idx);
+			if (m_aRemovedBackedRootEntities.RemoveItem(persistentId))
 				return;
-			}
 		}
 
 		EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(persistenceComponent);
@@ -37,11 +32,13 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 		array<string> ids = m_mSelfSpawnDynamicEntities.Get(settings.m_tSaveDataType);
 		if (!ids)
 		{
-			ids = {};
+			ids = {persistentId};
 			m_mSelfSpawnDynamicEntities.Set(settings.m_tSaveDataType, ids);
+			return;
 		}
-
-		ids.Insert(persistentId);
+		
+		if (!ids.Contains(persistentId))
+			ids.Insert(persistentId);
 	}
 
 	//------------------------------------------------------------------------------------------------
