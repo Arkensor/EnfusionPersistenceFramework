@@ -70,9 +70,13 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
 			attributes.m_bSaveRemainingLifetime)
 		{
-			auto garbage = ChimeraWorld.CastFrom(entity.GetWorld()).GetGarbageManager();
-			if (garbage)
-				m_fRemainingLifetime = garbage.GetRemainingLifetime(entity);
+			auto garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
+			if (garbageWorld)
+			{
+				auto garbage = garbageWorld.GetGarbageManager();
+				if (garbage)
+					m_fRemainingLifetime = garbage.GetRemainingLifetime(entity);
+			}
 
 			if (m_fRemainingLifetime == -1)
 			{
@@ -146,9 +150,13 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Lifetime
 		if (attributes.m_bSaveRemainingLifetime)
 		{
-			auto garbage = ChimeraWorld.CastFrom(entity.GetWorld()).GetGarbageManager();
-			if (garbage && m_fRemainingLifetime > 0)
-				garbage.Insert(entity, m_fRemainingLifetime);
+			auto garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
+			if (garbageWorld)
+			{
+				auto garbage = garbageWorld.GetGarbageManager();
+				if (garbage && m_fRemainingLifetime > 0)
+					garbage.Insert(entity, m_fRemainingLifetime);
+			}
 		}
 
 		// Components

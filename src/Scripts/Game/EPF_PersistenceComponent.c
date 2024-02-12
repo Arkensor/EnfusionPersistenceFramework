@@ -303,6 +303,10 @@
 		// Persistence logic only runs on the server
 		if (!EPF_PersistenceManager.IsPersistenceMaster())
 			return;
+		
+		// Avoid tracking anything in preload/preview world
+		if (!ChimeraWorld.CastFrom(owner.GetWorld()) || (GetGame().GetWorld() != owner.GetWorld()))
+			return;
 
 		// Init and validate settings on shared class-class instance once
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(owner));
