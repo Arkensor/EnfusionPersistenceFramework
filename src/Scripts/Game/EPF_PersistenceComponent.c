@@ -764,7 +764,7 @@
 		if (!worldEditorApi)
 				return;
 
-		worldEditorApi.RenameEntity(owner, GenerateName(owner));
+		worldEditorApi.RenameEntity(worldEditorApi.EntityToSource(owner), GenerateName(owner));
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -798,36 +798,37 @@
 		if (!worldEditorApi)
 				return;
 
-		EPF_BaseSceneNameProxyEntity nameProxy;
+		IEntitySource nameProxySource;
 
 		if (id == 0)
 		{
-			nameProxy = EPF_BaseSceneNameProxyEntity.GetProxyForBaseSceneEntity(owner);
+			auto nameProxy = EPF_BaseSceneNameProxyEntity.GetProxyForBaseSceneEntity(owner);
+			nameProxySource = worldEditorApi.EntityToSource(nameProxy);
 		}
 		else if (id == 2)
 		{
 			worldEditorApi.BeginEntityAction("BaseSceneNameProxyEntity__Assign");
-			nameProxy = EPF_BaseSceneNameProxyEntity.s_pSelectedProxy;
+			nameProxySource = worldEditorApi.EntityToSource(EPF_BaseSceneNameProxyEntity.s_pSelectedProxy);
 			EPF_BaseSceneNameProxyEntity.s_pSelectedProxy = null;
-			worldEditorApi.ModifyEntityKey(nameProxy, "coords", owner.GetOrigin().ToString(false));
+			worldEditorApi.SetVariableValue(nameProxySource, null, "coords", owner.GetOrigin().ToString(false));
 			worldEditorApi.EndEntityAction();
 		}
 		else
 		{
 			worldEditorApi.BeginEntityAction("BaseSceneNameProxyEntity__Create");
-			nameProxy = EPF_BaseSceneNameProxyEntity.Cast(worldEditorApi.CreateEntity(
+			nameProxySource = worldEditorApi.CreateEntity(
 				"EPF_BaseSceneNameProxyEntity",
 				GenerateName(owner),
 				worldEditorApi.GetCurrentEntityLayerId(),
 				null,
 				owner.GetOrigin(),
-				owner.GetAngles()));
+				owner.GetAngles());
 
-			worldEditorApi.ModifyEntityKey(nameProxy, "m_rTarget", EPF_Utils.GetPrefabName(owner));
+			worldEditorApi.SetVariableValue(nameProxySource, null, "m_rTarget", EPF_Utils.GetPrefabName(owner));
 			worldEditorApi.EndEntityAction();
 		}
 
-		worldEditorApi.SetEntitySelection(nameProxy);
+		worldEditorApi.SetEntitySelection(nameProxySource);
 		worldEditorApi.UpdateSelectionGui();
 	}
 

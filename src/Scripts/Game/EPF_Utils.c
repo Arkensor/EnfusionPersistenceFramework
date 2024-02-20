@@ -169,14 +169,14 @@ class EPF_Utils
 
 	//------------------------------------------------------------------------------------------------
 	[Obsolete("Use EPF_WorldUtils.Teleport instead.")]
-	static void Teleport(notnull IEntity entity, vector position, float yaw = "nan".ToFloat())
+	static void Teleport(notnull IEntity entity, vector position, float yaw = float.INFINITY)
 	{
 		EPF_WorldUtils.Teleport(entity, position, yaw);
 	}
 
 	//------------------------------------------------------------------------------------------------
 	[Obsolete("Use EPF_WorldUtils.ForceTransform instead.")]
-	static void ForceTransform(notnull IEntity entity, vector origin = EPF_Const.VECTOR_NAN, vector angles = EPF_Const.VECTOR_NAN, float scale = "nan".ToFloat())
+	static void ForceTransform(notnull IEntity entity, vector origin = EPF_Const.VECTOR_INFINITY, vector angles = EPF_Const.VECTOR_INFINITY, float scale = float.INFINITY)
 	{
 		EPF_WorldUtils.ForceTransform(entity, origin, angles, scale);
 	}

@@ -70,13 +70,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		if (EPF_BitFlags.CheckFlags(flags, EPF_EPersistenceFlags.ROOT) &&
 			attributes.m_bSaveRemainingLifetime)
 		{
-			auto garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
-			if (garbageWorld)
-			{
-				auto garbage = garbageWorld.GetGarbageManager();
-				if (garbage)
-					m_fRemainingLifetime = garbage.GetRemainingLifetime(entity);
-			}
+			auto garbage = SCR_GarbageSystem.GetByEntityWorld(entity);
+			if (garbage)
+				m_fRemainingLifetime = garbage.GetRemainingLifetime(entity);
 
 			if (m_fRemainingLifetime == -1)
 			{
@@ -150,13 +146,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		// Lifetime
 		if (attributes.m_bSaveRemainingLifetime)
 		{
-			auto garbageWorld = ChimeraWorld.CastFrom(entity.GetWorld());
-			if (garbageWorld)
-			{
-				auto garbage = garbageWorld.GetGarbageManager();
-				if (garbage && m_fRemainingLifetime > 0)
-					garbage.Insert(entity, m_fRemainingLifetime);
-			}
+			auto garbage = SCR_GarbageSystem.GetByEntityWorld(entity);
+			if (garbage && m_fRemainingLifetime > 0)
+				garbage.Insert(entity, m_fRemainingLifetime);
 		}
 
 		// Components
@@ -191,9 +183,9 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			return false;
 
 		// Same transformation?
-		if (!EPF_Const.IsNanEqual(m_pTransformation.m_vOrigin, other.m_pTransformation.m_vOrigin) ||
-			!EPF_Const.IsNanEqual(m_pTransformation.m_vAngles, other.m_pTransformation.m_vAngles) ||
-			!EPF_Const.IsNanEqual(m_pTransformation.m_fScale, other.m_pTransformation.m_fScale))
+		if (m_pTransformation.m_vOrigin != other.m_pTransformation.m_vOrigin ||
+			m_pTransformation.m_vAngles != other.m_pTransformation.m_vAngles ||
+			m_pTransformation.m_fScale != other.m_pTransformation.m_fScale)
 		{
 			return false;
 		}
@@ -394,15 +386,15 @@ class EPF_PersistentTransformation
 	//------------------------------------------------------------------------------------------------
 	void Reset()
 	{
-		m_vOrigin = EPF_Const.VECTOR_NAN;
-		m_vAngles = EPF_Const.VECTOR_NAN;
-		m_fScale = EPF_Const.FLOAT_NAN;
+		m_vOrigin = EPF_Const.VECTOR_INFINITY;
+		m_vAngles = EPF_Const.VECTOR_INFINITY;
+		m_fScale = float.INFINITY;
 	}
 
 	//------------------------------------------------------------------------------------------------
 	bool IsDefault()
 	{
-		return EPF_Const.IsNan(m_vOrigin) && EPF_Const.IsNan(m_vAngles) && EPF_Const.IsNan(m_fScale);
+		return EPF_Const.IsInf(m_vOrigin) && EPF_Const.IsInf(m_vAngles) && EPF_Const.IsInf(m_fScale);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -460,16 +452,16 @@ class EPF_PersistentTransformation
 		// For binary stream the info which of the 3 possible props will be written after needs to be known.
 		// JSON just has the keys or not, so there it is not a problem.
 		EPF_ETransformSaveFlags flags;
-		if (!EPF_Const.IsNan(m_vOrigin))
+		if (!EPF_Const.IsInf(m_vOrigin))
 			flags |= EPF_ETransformSaveFlags.COORDS;
 
-		if (!EPF_Const.IsNan(m_vAngles))
+		if (!EPF_Const.IsInf(m_vAngles))
 			flags |= EPF_ETransformSaveFlags.ANGLES;
 
-		if (!EPF_Const.IsNan(m_fScale))
+		if (!EPF_Const.IsInf(m_fScale))
 			flags |= EPF_ETransformSaveFlags.SCALE;
 
-		if (ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BinSaveContainer))
+		if (ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BinSerializationSaveContainer))
 			saveContext.WriteValue("transformSaveFlags", flags);
 
 		if (flags & EPF_ETransformSaveFlags.COORDS)
@@ -490,7 +482,7 @@ class EPF_PersistentTransformation
 		if (!loadContext.IsValid()) return false;
 
 		EPF_ETransformSaveFlags flags = EPF_ETransformSaveFlags.COORDS | EPF_ETransformSaveFlags.ANGLES | EPF_ETransformSaveFlags.SCALE;
-		if (ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(BinLoadContainer))
+		if (ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(BinSerializationLoadContainer))
 			loadContext.ReadValue("transformSaveFlags", flags);
 
 		if (flags & EPF_ETransformSaveFlags.COORDS)

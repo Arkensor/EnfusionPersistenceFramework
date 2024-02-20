@@ -32,11 +32,11 @@ class EPF_WorldUtils
 	//! \param entity Entity instance to be teleported
 	//! \param position Position where to teleport to
 	//! \param angles (yaw, pitch, rolle in degrees) to apply after teleportation
-	static void Teleport(notnull IEntity entity, vector position, float yaw = "nan".ToFloat())
+	static void Teleport(notnull IEntity entity, vector position, float yaw = float.INFINITY)
 	{
 		vector transform[4];
 
-		if (!EPF_Const.IsNan(yaw))
+		if (!EPF_Const.IsInf(yaw))
 		{
 			Math3D.AnglesToMatrix(Vector(yaw, 0, 0), transform);
 		}
@@ -57,26 +57,26 @@ class EPF_WorldUtils
 	//! \param origin
 	//! \param angles (yaw, pitch, roll in degrees)
 	//! \param scale
-	static void ForceTransform(notnull IEntity entity, vector origin = EPF_Const.VECTOR_NAN, vector angles = EPF_Const.VECTOR_NAN, float scale = "nan".ToFloat())
+	static void ForceTransform(notnull IEntity entity, vector origin = EPF_Const.VECTOR_INFINITY, vector angles = EPF_Const.VECTOR_INFINITY, float scale = float.INFINITY)
 	{
 		bool needsChange;
 		vector transform[4];
 		entity.GetWorldTransform(transform);
 
-		if (!EPF_Const.IsNan(origin))
+		if (!EPF_Const.IsInf(origin))
 		{
 			transform[3] = origin;
 			needsChange = true;
 		}
 
-		if (!EPF_Const.IsNan(angles))
+		if (!EPF_Const.IsInf(angles))
 		{
 			Math3D.AnglesToMatrix(angles, transform);
 			needsChange = true;
 		}
 
 		// TODO: Repace with EPF_Const.FLOAT_NAN after https://feedback.bistudio.com/T172797 is fixed. In EPF_Utils.Teleport() too.
-		if (!EPF_Const.IsNan(scale))
+		if (!EPF_Const.IsInf(scale))
 		{
 			Math3D.MatrixScale(transform, scale);
 			needsChange = true;

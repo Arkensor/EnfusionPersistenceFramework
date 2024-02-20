@@ -8,7 +8,7 @@ class EPF_SpawnPoint : SCR_Position
 	[Attribute("0", desc: "Find empty position for spawning within given radius. When none is found, entity position will be used.")]
 	protected float m_fSpawnRadius;
 
-	protected static ref array<EPF_SpawnPoint> s_aSpawnPoints = new ref array<EPF_SpawnPoint>();
+	protected static ref array<EPF_SpawnPoint> s_aSpawnPoints = {};
 
 	//------------------------------------------------------------------------------------------------
 	[Obsolete("Use GetRandomSpawnPoint instead.")]

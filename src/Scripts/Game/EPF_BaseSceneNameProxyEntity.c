@@ -148,18 +148,19 @@ class EPF_BaseSceneNameProxyEntity : GenericEntity
 				return;
 
 			worldEditorApi.BeginEntityAction("BaseSceneNameProxyEntity__AutoFix");
-			_WB_GetEditorAPI().ModifyEntityKey(this, "coords", m_pTarget.GetOrigin().ToString(false));
+			worldEditorApi.SetVariableValue(worldEditorApi.EntityToSource(this), null, "coords", m_pTarget.GetOrigin().ToString(false));
 			worldEditorApi.EndEntityAction();
 		}
 
-		worldEditorApi.SetEntitySelection(m_pTarget);
+		worldEditorApi.SetEntitySelection(worldEditorApi.EntityToSource(m_pTarget));
 		worldEditorApi.UpdateSelectionGui();
 	}
 
 	//------------------------------------------------------------------------------------------------
 	override void _WB_AfterWorldUpdate(float timeSlice)
 	{
-		IEntity selected = _WB_GetEditorAPI().GetSelectedEntity();
+		WorldEditorAPI worldEditorApi = _WB_GetEditorAPI();
+		IEntity selected = worldEditorApi.SourceToEntity(worldEditorApi.GetSelectedEntity());
 		if (!m_pTarget || (selected != this && selected != m_pTarget))
 			return;
 
