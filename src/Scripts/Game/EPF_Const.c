@@ -1,17 +1,17 @@
 class EPF_Const
 {
-	static const vector VECTOR_INFINITY = "inf inf inf";
+	static const vector VECTOR_UNSET = "-1337.42042 -1337.42042 -1337.42042";
+	static const float FLOAT_UNSET = -1337.42042;
 
 	//------------------------------------------------------------------------------------------------
-	sealed static bool IsInf(vector value)
+	sealed static bool IsUnset(vector value)
 	{
-		return value == VECTOR_INFINITY;
+		return value == VECTOR_UNSET;
 	}
 
 	//------------------------------------------------------------------------------------------------
-	sealed static bool IsInf(float value)
+	sealed static bool IsUnset(float value)
 	{
-		return value == float.INFINITY;
+		return value == FLOAT_UNSET;
 	}
-
-};
+}

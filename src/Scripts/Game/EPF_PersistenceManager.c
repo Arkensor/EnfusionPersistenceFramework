@@ -159,6 +159,7 @@ class EPF_PersistenceManager
 			return null;
 		}
 
+		// Already read transformation data ahead of time to spawn the result entity directly into the right TM (will skil re-applying it in ApplyTo of savedata)
 		EntitySpawnParams spawnParams;
 		if (saveData.m_pTransformation && !saveData.m_pTransformation.m_bApplied)
 		{
@@ -166,19 +167,19 @@ class EPF_PersistenceManager
 			spawnParams = new EntitySpawnParams();
 			spawnParams.TransformMode = ETransformMode.WORLD;
 
-			if (!EPF_Const.IsInf(saveData.m_pTransformation.m_vOrigin))
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_vOrigin))
 			{
 				spawnParams.Transform[3] = saveData.m_pTransformation.m_vOrigin;
 				needed = true;
 			}
 
-			if (!EPF_Const.IsInf(saveData.m_pTransformation.m_vAngles))
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_vAngles))
 			{
 				Math3D.AnglesToMatrix(saveData.m_pTransformation.m_vAngles, spawnParams.Transform);
 				needed = true;
 			}
 
-			if (!EPF_Const.IsInf(saveData.m_pTransformation.m_fScale))
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_fScale))
 			{
 				spawnParams.Scale = saveData.m_pTransformation.m_fScale;
 				needed = true;

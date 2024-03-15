@@ -79,13 +79,13 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		EPF_PersistenceComponentClass slotAttributes = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(slotEntity);
 		if (saveData.m_pTransformation.ReadFrom(slotEntity, slotAttributes.m_pSaveData, false))
 		{
-			if (!EPF_Const.IsInf(saveData.m_pTransformation.m_vOrigin) &&
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_vOrigin) &&
 				vector.Distance(saveData.m_pTransformation.m_vOrigin, prefabInfo.m_vOffset) > 0.001)
 			{
 				readResult = EPF_EReadResult.OK;
 			}
 
-			if (!EPF_Const.IsInf(saveData.m_pTransformation.m_vAngles))
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_vAngles))
 			{
 				vector localFixedAngles = slotEntity.GetLocalAngles();
 				if (float.AlmostEqual(localFixedAngles[0], -180))
