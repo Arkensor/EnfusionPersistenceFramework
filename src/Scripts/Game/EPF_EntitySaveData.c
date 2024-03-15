@@ -529,10 +529,6 @@ class EPF_PersistentComponentSaveData
 		string dataTypeString;
 		loadContext.ReadValue("_type", dataTypeString);
 
-		// TODO: Remove backwards compatiblity in 0.9.9
-		if (!dataTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
-			loadContext.ReadValue("dataType", dataTypeString);
-
 		typename dataType = EDF_DbName.GetTypeByName(dataTypeString);
 		if (!dataType)
 			return false;
