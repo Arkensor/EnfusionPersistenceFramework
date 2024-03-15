@@ -169,10 +169,10 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		{
 			vector transform[4];
 
-			if (!EPF_Const.IsInf(persistentTransform.m_vOrigin))
+			if (!EPF_Const.IsUnset(persistentTransform.m_vOrigin))
 				transform[3] = persistentTransform.m_vOrigin;
 
-			if (!EPF_Const.IsInf(persistentTransform.m_vAngles))
+			if (!EPF_Const.IsUnset(persistentTransform.m_vAngles))
 			{
 				Math3D.AnglesToMatrix(persistentTransform.m_vAngles, transform);
 			}
@@ -181,7 +181,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 				Math3D.MatrixIdentity3(transform);
 			}
 
-			if (EPF_Const.IsInf(persistentTransform.m_fScale))
+			if (EPF_Const.IsUnset(persistentTransform.m_fScale))
 				Math3D.MatrixScale(transform, persistentTransform.m_fScale);
 
 			entitySlot.OverrideTransformLS(transform);
