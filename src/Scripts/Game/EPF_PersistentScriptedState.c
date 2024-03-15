@@ -402,7 +402,7 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	//! \return EPF_EReadResult.OK if save-data could be read, ERROR if something failed, DEFAULT if the data could be trimmed
 	EPF_EReadResult ReadFrom(notnull Managed scriptedState)
 	{
-		return EDF_DbEntityUtils<EPF_ScriptedStateSaveData>.StructAutoCopy(scriptedState, this);
+		return EDF_DbEntityUtils.StructAutoCopy(scriptedState, this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -416,11 +416,7 @@ class EPF_ScriptedStateSaveData : EPF_MetaDataDbEntity
 	//! Applies the save-data to the scripted state
 	EPF_EApplyResult ApplyTo(notnull Managed scriptedState)
 	{
-		auto target = EPF_PersistentScriptedState.Cast(scriptedState);
-		if (!target)
-			return EPF_EApplyResult.ERROR; // Re-Enable after C++ side issues are fixed for serializer variable count check
-
-		return EDF_DbEntityUtils<EPF_PersistentScriptedState>.StructAutoCopy(this, target);
+		return EDF_DbEntityUtils.StructAutoCopy(this, scriptedState);
 	}
 
 	//------------------------------------------------------------------------------------------------
