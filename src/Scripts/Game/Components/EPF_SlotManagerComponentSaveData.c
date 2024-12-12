@@ -100,6 +100,11 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 				if (vector.Distance(localFixedAngles, prefabInfo.m_vAngles) > 0.001)
 					readResult = EPF_EReadResult.OK;
 			}
+
+			if (!EPF_Const.IsUnset(saveData.m_pTransformation.m_fScale))
+			{
+				readResult = EPF_EReadResult.OK;
+			}
 		}
 	}
 
@@ -181,7 +186,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 				Math3D.MatrixIdentity3(transform);
 			}
 
-			if (EPF_Const.IsUnset(persistentTransform.m_fScale))
+			if (!EPF_Const.IsUnset(persistentTransform.m_fScale))
 				Math3D.MatrixScale(transform, persistentTransform.m_fScale);
 
 			entitySlot.OverrideTransformLS(transform);
