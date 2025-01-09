@@ -364,7 +364,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		string prefabString;
 		loadContext.ReadValue("m_rPrefab", prefabString);
 		if (prefabString && prefabString.Get(0) != "{")
-			prefabString = string.Format("{%1}", prefabString);
+			prefabString = string.Format("{%1}.et", prefabString);
 
 		m_rPrefab = prefabString;
 

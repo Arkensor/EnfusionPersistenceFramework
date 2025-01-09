@@ -3,7 +3,7 @@ class EPF_HitZoneContainerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 	[Attribute(desc: "If set, only the explictly selected hitzones are persisted.")]
 	ref array<string> m_aHitzoneFilter;
-};
+}
 
 [EDF_DbName.Automatic()]
 class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
@@ -19,12 +19,12 @@ class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 		m_aHitzones = {};
 
 		array<HitZone> outHitZones();
-		hitZoneContainer.GetAllHitZones(outHitZones);
+		hitZoneContainer.GetAllHitZonesInHierarchy(outHitZones);
 
-		foreach (HitZone hitZone : outHitZones)
+		foreach (int idx, HitZone hitZone : outHitZones)
 		{
 			EPF_PersistentHitZone persistentHitZone();
-			persistentHitZone.m_sName = hitZone.GetName();
+			persistentHitZone.m_sName = string.Format("z%1_%2", idx, hitZone.GetName());
 			persistentHitZone.m_fHealth = hitZone.GetHealthScaled();
 
 			if (settings.m_bTrimDefaults && float.AlmostEqual(persistentHitZone.m_fHealth, 1.0)) continue;
@@ -44,7 +44,7 @@ class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 
 		array<HitZone> outHitZones();
 		HitZoneContainerComponent hitZoneContainer = HitZoneContainerComponent.Cast(component);
-		hitZoneContainer.GetAllHitZones(outHitZones);
+		hitZoneContainer.GetAllHitZonesInHierarchy(outHitZones);
 
 		bool tryIdxAcces = outHitZones.Count() >= m_aHitzones.Count();
 
@@ -56,16 +56,16 @@ class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 			if (tryIdxAcces)
 			{
 				HitZone idxHitZone = outHitZones.Get(idx);
-
-				if (idxHitZone.GetName() == persistentHitZone.m_sName) hitZone = idxHitZone;
+				if (string.Format("z%1_%2", idx, idxHitZone.GetName()) == persistentHitZone.m_sName)
+					hitZone = idxHitZone;
 			}
 
 			// Iterate all hitzones to hopefully find the right one
 			if (!hitZone)
 			{
-				foreach (HitZone findHitZone : outHitZones)
+				foreach (int hitIdx, HitZone findHitZone : outHitZones)
 				{
-					if (findHitZone.GetName() == persistentHitZone.m_sName)
+					if (string.Format("z%1_%2", hitIdx, findHitZone.GetName()) == persistentHitZone.m_sName)
 					{
 						hitZone = findHitZone;
 						break;
@@ -75,7 +75,7 @@ class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 
 			if (!hitZone)
 			{
-				Debug.Error(string.Format("'%1' unable to find hitZone with name '%2'. Ignored.", component, persistentHitZone.m_sName));
+				Debug.Error(string.Format("'%1' unable to find hitZone '%2'. Ignored.", component, persistentHitZone.m_sName));
 				continue;
 			}
 
@@ -118,7 +118,7 @@ class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 
 		return true;
 	}
-};
+}
 
 class EPF_PersistentHitZone
 {
@@ -130,4 +130,4 @@ class EPF_PersistentHitZone
 	{
 		return m_sName == other.m_sName && float.AlmostEqual(m_fHealth, other.m_fHealth);
 	}
-};
+}
