@@ -259,7 +259,7 @@ class EPF_PersistentScriptedState
 		if (EPF_BitFlags.CheckFlags(settings.m_eOptions, EPF_EPersistentScriptedStateOptions.USE_CHANGE_TRACKER) && !m_mLastSaveData)
 			m_mLastSaveData = new map<EPF_PersistentScriptedState, ref EPF_ScriptedStateSaveData>();
 
-		EPF_PersistenceManager.GetInstance().EnqueueRegistration(this);
+		EPF_PersistenceManager.GetInstance(true).EnqueueRegistration(this);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ class EPF_PersistentScriptedState
 			m_mLastSaveData.Remove(this);
 
 		// Check that we are not in session dtor phase.
-		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 		if (!persistenceManager || (persistenceManager.GetState() == EPF_EPersistenceManagerState.SHUTDOWN)) return;
 
 		persistenceManager.Unregister(this);

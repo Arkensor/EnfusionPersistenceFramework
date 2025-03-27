@@ -294,7 +294,10 @@
 		if (m_sId && EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PERSISTENT_RECORD))
 		{
 			EPF_BitFlags.ClearFlags(m_eFlags, EPF_EPersistenceFlags.PERSISTENT_RECORD);
-			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);
+			if (!persistenceManager)
+				return;
+
 			EPF_PersistenceComponentClass settings = EPF_ComponentData<EPF_PersistenceComponentClass>.Get(GetOwner());
 			persistenceManager.RemoveAsync(settings.m_tSaveDataType, m_sId);
 		}
@@ -369,7 +372,7 @@
 		if (settings.m_bStorageRoot)
 			EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.ROOT);
 
-		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(true);
 		if (persistenceManager.GetState() < EPF_EPersistenceManagerState.SETUP)
 			EPF_BitFlags.SetFlags(m_eFlags, EPF_EPersistenceFlags.BAKED);
 

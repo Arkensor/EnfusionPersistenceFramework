@@ -89,7 +89,7 @@ class EPF_PersistenceManagerComponent : SCR_BaseGameModeComponent
 
 		// Auto-save
 		m_fUpdateRateSetting = settings.m_fUpdateRate;
-		m_pPersistenceManager = EPF_PersistenceManager.GetInstance();
+		m_pPersistenceManager = EPF_PersistenceManager.GetInstance(true);
 		m_pPersistenceManager.OnPostInit(owner, this, settings);
 		SetEventMask(owner, EntityEvent.POSTFRAME);
 	}

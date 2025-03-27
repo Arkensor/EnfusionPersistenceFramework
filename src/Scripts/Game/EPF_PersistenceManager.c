@@ -69,7 +69,7 @@ class EPF_PersistenceManager
 	//! Get the singleton instance of the persistence manager
 	//! \param create Create the singleton if not yet existing
 	//! \return persistence manager instance or null if game instance role does not allow persistence handling or the instance did not exist and create was disabled
-	static EPF_PersistenceManager GetInstance(bool create = true)
+	static EPF_PersistenceManager GetInstance(bool create = false)
 	{
 		// Persistence logic only runs on the server machine
 		if (!IsPersistenceMaster())
@@ -293,7 +293,13 @@ class EPF_PersistenceManager
 	//! Manually trigger the global auto-save. Resets the timer until the next auto-save cycle. If an auto-save is already in progress it will do nothing.
 	void AutoSave()
 	{
-		if (m_bAutoSaveActive || !CheckLoaded())
+		if (m_eState < EPF_EPersistenceManagerState.ACTIVE)
+		{
+			Debug.Error("AutoSave shall not be called while the world setup is still in progress!");
+			return;
+		}
+		
+		if (m_bAutoSaveActive)
 			return;
 
 		m_bAutoSaveActive = true;
@@ -736,6 +742,9 @@ class EPF_PersistenceManager
 	//------------------------------------------------------------------------------------------------
 	event void OnPostFrame(float timeSlice)
 	{
+		if (m_eState < EPF_EPersistenceManagerState.ACTIVE)
+			return; // Do not start counting and running autosave before its fully loaded.
+		
 		if (!m_pSettings.m_bEnableAutosave)
 			return;
 
