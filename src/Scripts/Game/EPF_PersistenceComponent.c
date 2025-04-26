@@ -632,13 +632,15 @@
 		// Clean up storages
 		EPF_StorageChangeDetection.Cleanup(owner);
 
-		// Check that we are not in session dtor phase
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);
-		if (!persistenceManager || persistenceManager.GetState() == EPF_EPersistenceManagerState.SHUTDOWN)
+		if (!persistenceManager)
 			return;
 
 		persistenceManager.Unregister(this);
 
+		if (persistenceManager.GetState() == EPF_EPersistenceManagerState.SHUTDOWN)
+			return; // No root entity collection updates or self delete during shutdown where they will all be destroyed.
+		
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(owner));
 		if (m_sId && !EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PAUSE_TRACKING))
 		{
