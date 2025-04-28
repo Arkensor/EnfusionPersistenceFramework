@@ -188,6 +188,8 @@
 			m_pOnAfterSave.Invoke(this, saveData);
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		if (!persistenceManager)
+			return null;
 
 		bool isPersistent = EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PERSISTENT_RECORD);
 
@@ -294,7 +296,7 @@
 		if (m_sId && EPF_BitFlags.CheckFlags(m_eFlags, EPF_EPersistenceFlags.PERSISTENT_RECORD))
 		{
 			EPF_BitFlags.ClearFlags(m_eFlags, EPF_EPersistenceFlags.PERSISTENT_RECORD);
-			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);
+			EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 			if (!persistenceManager)
 				return;
 
@@ -498,6 +500,9 @@
 		FlagAsMoved();
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		if (!persistenceManager)
+			return;
+
 		InventoryStorageSlot newInvSlot = InventoryStorageSlot.Cast(newSlot);
 		if (newInvSlot)
 		{
@@ -538,6 +543,8 @@
 		FlagAsMoved();
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
+		if (!persistenceManager)
+			return;
 
 		InventoryStorageSlot oldInvSlot = InventoryStorageSlot.Cast(oldSlot);
 		if (oldInvSlot && persistenceManager.GetState() == EPF_EPersistenceManagerState.ACTIVE)
@@ -632,7 +639,7 @@
 		// Clean up storages
 		EPF_StorageChangeDetection.Cleanup(owner);
 
-		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance(false);
+		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 		if (!persistenceManager)
 			return;
 

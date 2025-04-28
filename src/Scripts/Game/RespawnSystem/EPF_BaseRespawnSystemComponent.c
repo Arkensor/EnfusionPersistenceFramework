@@ -107,7 +107,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		Tuple2<int, string> uidContext(playerId, EPF_Utils.GetPlayerUID(playerId));
 
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		if (persistenceManager.GetState() < EPF_EPersistenceManagerState.ACTIVE)
+		if (persistenceManager && persistenceManager.GetState() < EPF_EPersistenceManagerState.ACTIVE)
 		{
 			// Wait with character load until the persistence system is fully loaded
 			EDF_ScriptInvokerCallback callback(this, "HandlePlayerLoad", uidContext);
@@ -244,7 +244,6 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		if (m_pPlayerManager.GetPlayerControlledEntity(playerId) == playerEntity)
 			return; // Player was force taken over after the time limit
 
-		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 		SCR_CharacterInventoryStorageComponent inventoryStorage = EPF_Component<SCR_CharacterInventoryStorageComponent>.Find(playerEntity);
 		if (inventoryStorage)
 		{
@@ -260,6 +259,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 					quickBarRplIds.Insert(RplId.Invalid());
 				}
 
+				EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
 				foreach (EPF_PersistentQuickSlotItem quickSlot : charInventorySaveData.m_aQuickSlotEntities)
 				{
 					IEntity slotEntity = persistenceManager.FindEntityByPersistentId(quickSlot.m_sEntityId);

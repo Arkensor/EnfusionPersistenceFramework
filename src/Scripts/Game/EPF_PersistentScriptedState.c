@@ -270,7 +270,8 @@ class EPF_PersistentScriptedState
 
 		// Check that we are not in session dtor phase.
 		EPF_PersistenceManager persistenceManager = EPF_PersistenceManager.GetInstance();
-		if (!persistenceManager || (persistenceManager.GetState() == EPF_EPersistenceManagerState.SHUTDOWN)) return;
+		if (!persistenceManager || (persistenceManager.GetState() == EPF_EPersistenceManagerState.SHUTDOWN))
+			return;
 
 		persistenceManager.Unregister(this);
 
