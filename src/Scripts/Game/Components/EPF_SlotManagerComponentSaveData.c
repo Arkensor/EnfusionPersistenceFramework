@@ -146,7 +146,7 @@ class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 		// Found matching entity, no need to spawn, just apply save-data
 		if (saveData &&
 			slotEntity &&
-			EPF_Utils.GetPrefabName(slotEntity).StartsWith(saveData.m_rPrefab))
+			EPF_Utils.GetPrefabGUID(EPF_Utils.GetPrefabName(slotEntity)) == EPF_Utils.GetPrefabGUID(saveData.m_rPrefab))
 		{
 			EPF_PersistenceComponent slotPersistence = EPF_Component<EPF_PersistenceComponent>.Find(slotEntity);
 			if (slotPersistence && !slotPersistence.Load(saveData, false))
