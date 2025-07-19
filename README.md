@@ -11,6 +11,9 @@
 
 # Enfusion Persistence Framework
 
+> **Info**
+> This mod is permitted to be used for Make Arma Not War 2025 submissions and commercial use on monetized servers
+
 > **Warning**
 > This framework is still in **BETA**. Until version 1.0.0 there is no backward compatibility guarantee! Expect some bugs/performance issues and function signature updates until then. Feedback via [issue](https://github.com/Arkensor/EnfusionPersistenceFramework/issues) or [discussion](https://github.com/Arkensor/EnfusionPersistenceFramework/discussions) is welcome.
 
