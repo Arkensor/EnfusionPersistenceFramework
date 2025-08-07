@@ -175,6 +175,16 @@ class EPF_DeferredApplyResult
 			s_aCheckQueue.RemoveItem(saveData);
 		}
 	}
+	
+	//------------------------------------------------------------------------------------------------
+	static void Reset()
+	{
+		s_mPendingIdentifiers.Clear();
+		s_mPendingComponentIdentifiers.Clear();
+		
+		if (s_aCheckQueue)
+			s_aCheckQueue.Clear();
+	}
 }
 
 class EPF_PendingIdentifierHolder

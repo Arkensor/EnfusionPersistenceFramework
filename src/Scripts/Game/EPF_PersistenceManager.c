@@ -965,6 +965,7 @@ class EPF_PersistenceManager
 		EPF_EntitySlotPrefabInfo.Reset();
 		EPF_StorageChangeDetection.Reset();
 		EPF_PersistenceIdGenerator.Reset();
+		EPF_DeferredApplyResult.Reset();
 		EPF_PersistentScriptedStateProxy.s_mProxies = null;
 		s_pInstance = null;
 	}
