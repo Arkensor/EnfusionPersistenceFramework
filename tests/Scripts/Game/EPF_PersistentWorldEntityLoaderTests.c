@@ -1,6 +1,13 @@
-class EPF_PersistentWorldEntityLoaderTests : TestSuite
+[BaseContainerProps(category: "Autotest")]
+class EPF_PersistentWorldEntityLoaderTests : SCR_AutotestSuiteBase
 {
 	ref EDF_DbContext m_pPreviousContext;
+
+	//------------------------------------------------------------------------------------------------
+	override ResourceName GetWorldFile()
+	{
+		return "{0DBFB1494C79B3E8}Worlds/TestWorld/TestWorld.ent";
+	}
 
 	//------------------------------------------------------------------------------------------------
 	[Step(EStage.Setup)]
@@ -18,12 +25,15 @@ class EPF_PersistentWorldEntityLoaderTests : TestSuite
 	[Step(EStage.TearDown)]
 	void TearDown()
 	{
+		if (!m_pPreviousContext)
+			return;
+
 		EPF_PersistenceManager.GetInstance().SetDbContext(m_pPreviousContext);
 		m_pPreviousContext = null;
 	}
-};
+}
 
-class PersistentWorldEntityLoaderBase : TestBase
+class PersistentWorldEntityLoaderBase : SCR_AutotestCaseBase
 {
 	EPF_PersistenceComponent m_pExisting;
 
@@ -51,7 +61,7 @@ class PersistentWorldEntityLoaderBase : TestBase
 		SCR_EntityHelper.DeleteEntityAndChildren(m_pExisting.GetOwner());
 		m_pExisting = null;
 	}
-};
+}
 
 [Test("EPF_PersistentWorldEntityLoaderTests", 3)]
 class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWorldEntityLoaderBase
@@ -63,7 +73,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWor
 		IEntity worldEntity = EPF_PersistentWorldEntityLoader.Load(EPF_Utils.GetPrefabName(m_pExisting.GetOwner()), m_pExisting.GetPersistentId());
 
 		// Assert
-		SetResult(new EDF_TestResult(
+		SetResult(new SCR_AutotestResult(
 			worldEntity &&
 			m_pExisting.GetPersistentId() &&
 			EPF_PersistenceComponent.GetPersistentId(worldEntity) == m_pExisting.GetPersistentId()));
@@ -71,7 +81,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWor
 		// Cleanup
 		SCR_EntityHelper.DeleteEntityAndChildren(worldEntity);
 	}
-};
+}
 
 [Test("EPF_PersistentWorldEntityLoaderTests", 3)]
 class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : PersistentWorldEntityLoaderBase
@@ -85,7 +95,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : Persiste
 
 	void Assert(IEntity worldEntity, Managed context)
 	{
-		SetResult(new EDF_TestResult(
+		SetResult(new SCR_AutotestResult(
 			worldEntity &&
 			m_pExisting.GetPersistentId() &&
 			EPF_PersistenceComponent.GetPersistentId(worldEntity) == m_pExisting.GetPersistentId()));
@@ -99,7 +109,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : Persiste
 	{
 		return GetResult();
 	}
-};
+}
 
 [Test("EPF_PersistentWorldEntityLoaderTests", 3)]
 class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : PersistentWorldEntityLoaderBase
@@ -121,7 +131,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : Persi
 		array<IEntity> worldEntities = EPF_PersistentWorldEntityLoader.Load(EPF_ItemSaveData, m_aIds);
 
 		// Assert
-		SetResult(new EDF_TestResult(
+		SetResult(new SCR_AutotestResult(
 			worldEntities &&
 			worldEntities.Count() == 2 &&
 			m_aIds.Contains(EPF_PersistenceComponent.GetPersistentId(worldEntities.Get(0))) &&
@@ -147,7 +157,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : Persi
 		SCR_EntityHelper.DeleteEntityAndChildren(m_pExisting2.GetOwner());
 		m_pExisting2 = null;
 	}
-};
+}
 
 [Test("EPF_PersistentWorldEntityLoaderTests", 3)]
 class EPF_Test_PersistentWorldEntityLoader_LoadAsync_MultiExisting_AllSpawned : EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned
@@ -161,7 +171,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_MultiExisting_AllSpawned : 
 
 	void Assert(array<IEntity> worldEntities, Managed context)
 	{
-		SetResult(new EDF_TestResult(
+		SetResult(new SCR_AutotestResult(
 			worldEntities &&
 			worldEntities.Count() == 2 &&
 			m_aIds.Contains(EPF_PersistenceComponent.GetPersistentId(worldEntities.Get(0))) &&
@@ -176,4 +186,4 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_MultiExisting_AllSpawned : 
 	{
 		return GetResult();
 	}
-};
+}

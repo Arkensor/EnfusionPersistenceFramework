@@ -1,9 +1,9 @@
 EPF_BaseSceneNameProxyEntity Rifle_AK74_GP25_5D6F01990DDEB458 {
  coords 114.823 1.908 143.45
- angleZ 90
+ angles 0 0 90
  m_rTarget "{63E8322E2ADD4AA7}Prefabs/Weapons/Rifles/AK74/Rifle_AK74_GP25.et"
 }
-SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/Civilian/SignPub_01.et" {
+SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/DefaultLibrary/Props/Civilian/SignPub_01.et" {
  components {
   ActionsManagerComponent "{5D6ED6C21D96CB70}" {
    ActionContexts {
@@ -16,14 +16,6 @@ SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/
     }
    }
    additionalActions {
-    EPF_RunTestsAction "{5D6EDE39D7678964}" {
-     ParentContextList {
-      "main"
-     }
-     UIInfo UIInfo "{5D6EDE39FB20AB4C}" {
-      Name "Run Unit Tests"
-     }
-    }
     EPF_TriggerSaveAction "{5D6EDE39D0F20D8D}" {
      ParentContextList {
       "main"
@@ -36,9 +28,9 @@ SCR_DestructibleEntity TestActionBoard : "{467951CEFC8F345B}PrefabLibrary/Props/
   }
  }
  coords 114.685 1 141.927
- angleY 90
+ angles 0 90 0
 }
-SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civilian/Recreation/TableRecreation_01/TableRecreation_01.et" {
+GenericEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/DefaultLibrary/Props/Civilian/Recreation/TableRecreation_01/TableRecreation_01.et" {
  coords 114.841 1 144.768
  {
   GenericEntity Backpack_ALICE_Medium_5D6EE937732E33A5 : "{06B68C58B72EAAC6}Prefabs/Items/Equipment/Backpacks/Backpack_ALICE_Medium.et" {
@@ -74,7 +66,7 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
   GenericEntity AspirinBottle_5D6EE93743969E14 : "{C98FCC6CA6C56069}Prefabs/Items/Medicine/AspirinBottle.et" {
    coords -0.537 0.899 0.247
   }
-  GenericEntity Gauze_01_5D6EE937403B4596 : "{CDCC313B2FB76FE7}Prefabs/Items/Medicine/Gauze_01.et" {
+  GenericEntity Gauze_01_5D6EE937403B4596 : "{CDCC313B2FB76FE7}Prefabs/Items/Medicine/FieldDressing_01/Gauze_01.et" {
    coords -0.417 0.899 0.242
   }
   GenericEntity CombatBoots_US_01_5D6EE9399EE49647 : "{DAAFD15478BDE1C3}Prefabs/Characters/Footwear/CombatBoots_US_01.et" {
@@ -82,17 +74,17 @@ SCR_DestructibleEntity TestItems : "{622F9989DDC4865B}PrefabLibrary/Props/Civili
   }
   GameEntity Pants_M88_5D6EE936B5836B5D : "{DCF980831E880F6A}Prefabs/Characters/Uniforms/Pants_M88.et" {
    coords 0.386 0.969 0.385
-   angleY 90
+   angles 0 90 0
   }
   GenericEntity MRE_5D6EE9374A250742 : "{EB21D26B8D5A3232}Prefabs/Items/Food/MRE.et" {
    coords -0.463 0.899 0.374
-   angleY 90
+   angles 0 90 0
   }
  }
 }
-SCR_DestructibleBuildingEntity TestBuilding : "{CAF57CAE8680A78D}PrefabLibrary/Structures/Houses/House_Mountain_E_1I01.et" {
+SCR_DestructibleBuildingEntity TestBuilding : "{CAF57CAE8680A78D}PrefabLibrary/DefaultLibrary/Structures/Houses/House_Mountain_E_1I01.et" {
  coords 120.09 0.396 144.266
- angleY -90
+ angles 0 -90 0
 }
 Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB_MERDC.et" {
  components {
@@ -101,5 +93,5 @@ Vehicle TestVehicle : "{DD774A8FD0989A78}Prefabs/Vehicles/Wheeled/M998/M1025_arm
   }
  }
  coords 110.703 1 152.527
- angleY -90
+ angles 0 -90 0
 }
