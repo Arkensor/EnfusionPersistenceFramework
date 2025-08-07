@@ -26,20 +26,12 @@ class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 
 		m_eStance = characterController.GetStance();
 		m_sLeftHandItemId = EPF_PersistenceComponent.GetPersistentId(characterController.GetAttachedGadgetAtLeftHandSlot());
-		m_sRightHandItemId = EPF_PersistenceComponent.GetPersistentId(characterController.GetRightHandItem());
-		if (m_sRightHandItemId)
+		const BaseWeaponManagerComponent weaponManager = characterController.GetWeaponManagerComponent();
+		if (weaponManager && weaponManager.GetCurrentSlot())
 		{
-			m_eRightHandType = EEquipItemType.EEquipTypeGeneric;
-		}
-		else
-		{
-			BaseWeaponManagerComponent weaponManager = characterController.GetWeaponManagerComponent();
-			if (weaponManager && weaponManager.GetCurrentSlot())
-			{
-				m_sRightHandItemId = EPF_PersistenceComponent.GetPersistentId(weaponManager.GetCurrentSlot().GetWeaponEntity());
-				m_eRightHandType = EEquipItemType.EEquipTypeWeapon;
-				m_bRightHandRaised = characterController.IsWeaponRaised();
-			}
+			m_sRightHandItemId = EPF_PersistenceComponent.GetPersistentId(weaponManager.GetCurrentSlot().GetWeaponEntity());
+			m_eRightHandType = EEquipItemType.EEquipTypeWeapon;
+			m_bRightHandRaised = characterController.IsWeaponRaised();
 		}
 
 		if (attributes.m_bTrimDefaults &&

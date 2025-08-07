@@ -118,7 +118,7 @@ class EPF_PersistentDoorStateStruct
 	//------------------------------------------------------------------------------------------------
 	EPF_EApplyResult ApplyTo(notnull IEntity doorOwner, notnull DoorComponent door)
 	{
-		door.SetControlValue(m_fControlValue);
+		door.SetControlValue(m_fControlValue, RplId.Invalid());
 		return EPF_EApplyResult.AWAIT_COMPLETION;
 	}
 }
