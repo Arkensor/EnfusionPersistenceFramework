@@ -1,8 +1,5 @@
-class EPF_BasicRespawnSystemComponentClass : EPF_BaseRespawnSystemComponentClass
-{
-}
-
-class EPF_BasicRespawnSystemComponent : EPF_BaseRespawnSystemComponent
+[BaseContainerProps(category: "Respawn")]
+class EPF_BasicSpawnLogic: EPF_BaseSpawnLogic
 {
 	[Attribute(defvalue: "{37578B1666981FCE}Prefabs/Characters/Core/Character_Base.et")]
 	ResourceName m_rDefaultPrefab;

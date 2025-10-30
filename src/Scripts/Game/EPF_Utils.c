@@ -6,27 +6,7 @@ class EPF_Utils
 	//! \return the uid as string
 	static string GetPlayerUID(int playerId)
 	{
-		if (!Replication.IsServer())
-		{
-			Debug.Error("GetPlayerUID can only be used on the server and after OnPlayerAuditSuccess.");
-			return string.Empty;
-		}
-
-		string uid = GetGame().GetBackendApi().GetPlayerIdentityId(playerId);
-		if (!uid)
-		{
-			if (RplSession.Mode() != RplMode.Dedicated)
-			{
-				// Peer tool support
-				uid = string.Format("bbbbdddd-0000-0000-0000-%1", playerId.ToString(12));
-			}
-			else
-			{
-				Debug.Error("Dedicated server is not correctly configured to connect to the BI backend.\nSee https://community.bistudio.com/wiki/Arma_Reforger:Server_Hosting");
-			}
-		}
-
-		return uid;
+		return SCR_PlayerIdentityUtils.GetPlayerIdentityId(playerId);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -35,7 +15,7 @@ class EPF_Utils
 	//! \return the uid as string
 	static string GetPlayerUID(IEntity player)
 	{
-		return GetPlayerUID(GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(player));
+		return SCR_PlayerIdentityUtils.GetPlayerIdentityId(player);
 	}
 
 	//------------------------------------------------------------------------------------------------

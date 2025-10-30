@@ -1,7 +1,3 @@
-class EPF_BaseRespawnSystemComponentClass : SCR_RespawnSystemComponentClass
-{
-}
-
 #ifdef WORKBENCH
 enum EPF_EPlayFromCameraHandling
 {
@@ -11,7 +7,8 @@ enum EPF_EPlayFromCameraHandling
 }
 #endif
 
-class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
+[BaseContainerProps(category: "Respawn")]
+class EPF_BaseSpawnLogic : SCR_SpawnLogic
 {
 	#ifdef WORKBENCH
 	[Attribute(defvalue: EPF_EPlayFromCameraHandling.IGNORE.ToString(), uiwidget: UIWidgets.ComboBox, desc: "What should happen in the Workbench when play from camera is chosen?", enums: ParamEnumArray.FromEnum(EPF_EPlayFromCameraHandling))]
@@ -23,28 +20,18 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	#endif
 
 	protected ref map<int, IEntity> m_mLoadingCharacters = new map<int, IEntity>();
-	protected PlayerManager m_pPlayerManager;
 
 	//------------------------------------------------------------------------------------------------
-	override void OnPlayerRegistered_S(int playerId)
+	override void OnPlayerAuditSuccess_S(int playerId)
 	{
-		//PrintFormat("EPF_BaseRespawnSystemComponent.OnPlayerRegistered_S(%1)", playerId);
-
-		if (RplSession.Mode() != RplMode.Dedicated)
-		{
-			WaitForUid(playerId);
-		}
-		else
-		{
-			EDF_ScriptInvokerCallback1<int> callback(this, "WaitForUid");
-			m_pGameMode.GetOnPlayerAuditSuccess().Insert(callback.Invoke);
-		}
+		super.OnPlayerAuditSuccess_S(playerId);
+		ExcuteInitialLoadOrSpawn_S(playerId);
 	}
-
+	
 	//------------------------------------------------------------------------------------------------
 	override void OnPlayerKilled_S(int playerId, IEntity playerEntity, IEntity killerEntity, notnull Instigator killer)
 	{
-		//PrintFormat("EPF_BaseRespawnSystemComponent.OnPlayerKilled_S(%1, %2, %3)", playerId, playerEntity, killerEntity);
+		super.OnPlayerKilled_S(playerId, playerEntity, killerEntity, killer);
 
 		// Add the dead body root entity collection so it spawns back after restart for looting
 		EPF_PersistenceComponent persistence = EPF_Component<EPF_PersistenceComponent>.Find(playerEntity);
@@ -66,9 +53,9 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	//------------------------------------------------------------------------------------------------
 	override void OnPlayerDisconnected_S(int playerId, KickCauseCode cause, int timeout)
 	{
-		//PrintFormat("EPF_BaseRespawnSystemComponent.OnPlayerDisconnected_S(%1, %2, %3)", playerId, typename.EnumToString(KickCauseCode, cause), timeout);
-
-		IEntity character = m_pPlayerManager.GetPlayerController(playerId).GetControlledEntity();
+		super.OnPlayerDisconnected_S(playerId, cause, timeout);
+		
+		IEntity character = GetGame().GetPlayerManager().GetPlayerController(playerId).GetControlledEntity();
 		if (character)
 		{
 			SaveCharacter(playerId, character, false);
@@ -87,22 +74,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override void OnPlayerDeleted_S(int playerId)
-	{
-		// Skip base impementation because of hard wired respawn system aspects we do not make us of.
-	}
-
-	//------------------------------------------------------------------------------------------------
-	/*protected --Hotfix for 1.0 DO NOT CALL THIS MANUALLY*/
-	void WaitForUid(int playerId)
-	{
-		// Wait one frame after audit/sp join, then it is available.
-		// TODO: Remove this method once https://feedback.bistudio.com/T165590 is fixed.
-		GetGame().GetCallqueue().Call(OnUidAvailable, playerId);
-	}
-
-	//------------------------------------------------------------------------------------------------
-	protected void OnUidAvailable(int playerId)
+	override protected void DoSpawn_S(int playerId)
 	{
 		Tuple2<int, string> uidContext(playerId, EPF_Utils.GetPlayerUID(playerId));
 
@@ -185,8 +157,6 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	//------------------------------------------------------------------------------------------------
 	protected void LoadCharacter(int playerId, string characterPersistenceId, EPF_CharacterSaveData saveData)
 	{
-		//PrintFormat("Loading existing character '%1'...", characterPersistenceId);
-
 		#ifdef WORKBENCH
 		if (m_bUseFromCamera)
 		{
@@ -241,7 +211,7 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 		persistenceComponent.GetOnAfterLoadEvent().Remove(OnCharacterLoadComplete);
 
 		IEntity playerEntity = persistenceComponent.GetOwner();
-		if (m_pPlayerManager.GetPlayerControlledEntity(playerId) == playerEntity)
+		if (GetGame().GetPlayerManager().GetPlayerControlledEntity(playerId) == playerEntity)
 			return; // Player was force taken over after the time limit
 
 		SCR_CharacterInventoryStorageComponent inventoryStorage = EPF_Component<SCR_CharacterInventoryStorageComponent>.Find(playerEntity);
@@ -334,13 +304,14 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 	protected void HandoverToPlayer(int playerId, IEntity character)
 	{
 		//PrintFormat("HandoverToPlayer(%1, %2)", playerId, character);
-		SCR_PlayerController playerController = SCR_PlayerController.Cast(m_pPlayerManager.GetPlayerController(playerId));
+		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId));
 		EDF_ScriptInvokerCallback2<IEntity, IEntity> callback(this, "OnHandoverComplete", new Tuple1<int>(playerId));
 		playerController.m_OnControlledEntityChanged.Insert(callback.Invoke);
 
 		playerController.SetInitialMainEntity(character);
 
-		m_pGameMode.OnPlayerEntityChanged_S(playerId, null, character);
+		const SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		gamemode.OnPlayerEntityChanged_S(playerId, null, character);
 
 		SCR_RespawnComponent respawn = SCR_RespawnComponent.Cast(playerController.GetRespawnComponent());
 		respawn.NotifySpawn(character);
@@ -367,18 +338,5 @@ class EPF_BaseRespawnSystemComponent : SCR_RespawnSystemComponent
 
 		if (!isTransient)
 			persistence.Save(); // Transient chars should not have changes, since no handover
-	}
-
-	//------------------------------------------------------------------------------------------------
-	override void OnInit(IEntity owner)
-	{
-		m_pGameMode = SCR_BaseGameMode.Cast(owner);
-		m_pRplComponent = RplComponent.Cast(owner.FindComponent(RplComponent));
-		m_pPlayerManager = GetGame().GetPlayerManager();
-
-		if (!m_pGameMode || !m_pRplComponent || !m_pPlayerManager)
-			Debug.Error("SCR_RespawnSystemComponent setup is invalid!");
-
-		// Skip base impementation because of hard wired respawn system aspects we do not make us of.
 	}
 }

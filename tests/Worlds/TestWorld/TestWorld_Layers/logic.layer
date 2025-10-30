@@ -1,7 +1,5 @@
 SCR_BaseGameMode Gamemode {
  components {
-  EPF_BasicRespawnSystemComponent "{5DE8852CF9A29905}" {
-  }
   EPF_PersistenceManagerComponent "{5D6ED6C2AD953A40}" {
    components {
     EPF_PersistentDoorStateManagerComponent "{5E06D7A06C1F5D97}" {
@@ -9,6 +7,10 @@ SCR_BaseGameMode Gamemode {
    }
    m_pConnectionInfo EDF_JsonFileDbConnectionInfo "{5D6ED6C2A3CA0970}" {
     m_sDatabaseName "EnfusionPersistenceFramework.Tests"
+   }
+  }
+  SCR_RespawnSystemComponent "{66BD147E91C4197E}" {
+   m_SpawnLogic EPF_BasicSpawnLogic "{66BD147E817B0282}" {
    }
   }
   RplComponent "{5D6ED6C2B5A94993}" {
@@ -19,5 +21,5 @@ SCR_BaseGameMode Gamemode {
 }
 EPF_SpawnPoint Spawnpoint {
  coords 112.749 1 142.773
- angleY 90
+ angles 0 90 0
 }
