@@ -34,20 +34,10 @@ modded class EDF_DbFindFieldMainConditionBuilder
 	//------------------------------------------------------------------------------------------------
 	EDF_DbFindCondition PrefabEquals(ResourceName prefab)
 	{
-		string prefabString = prefab;
-		if (prefabString.StartsWith("{"))
-			prefabString = EPF_Utils.GetPrefabGUID(prefab);
-
 		// Db might contain full paths so we need to do only contains check to cover both cases
-		#ifdef PERSISTENCE_DEBUG
-		return Field("m_rPrefab").Contains(prefabString);
-		#endif
-
-		// Assume only GUID of prefabs in non debug mode.
-		return Field("m_rPrefab").Equals(prefabString);
+		return Field("m_rPrefab").Contains(EPF_Utils.GetPrefabGUID(prefab));
 	}
-
-};
+}
 
 class EPF_ComponentFieldBuilder
 {

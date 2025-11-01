@@ -26,7 +26,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	ResourceName m_rPrefab;
 	ref EPF_PersistentTransformation m_pTransformation;
 	float m_fRemainingLifetime;
-	ref array<ref EPF_PersistentComponentSaveData> m_aComponents;
+	ref array<ref EPF_PersistentComponentSaveData> m_aComponents = {};
 
 	//------------------------------------------------------------------------------------------------
 	//! Spawn the world entity based on this save-data instance
@@ -85,8 +85,6 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		}
 
 		// Components
-		m_aComponents = {};
-
 		array<Managed> processedComponents();
 
 		// Go through hierarchy sorted component types
@@ -326,28 +324,15 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 		if (!saveContext.IsValid())
 			return false;
 
-		bool isJson = ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BaseJsonSerializationSaveContainer);
-
 		SerializeMetaData(saveContext);
+		saveContext.Write(m_rPrefab);
+		saveContext.Write(m_pTransformation);
 
-		// Prefab - go through string for debugging
-		string prefabString = m_rPrefab;
-		#ifndef PERSISTENCE_DEBUG
-		if (prefabString.StartsWith("{")) //keep this solution even though as of 1.0.0.95 it would be saved as just GUID anyway
-			prefabString = EPF_Utils.GetPrefabGUID(m_rPrefab);
-		#endif
-		saveContext.WriteValue("m_rPrefab", prefabString);
+		if (m_fRemainingLifetime > 0 || !saveContext.CanSeekMembers())
+			saveContext.Write(m_fRemainingLifetime);
 
-		// Transform
-		saveContext.WriteValue("m_pTransformation", m_pTransformation);
-
-		// Lifetime
-		if (m_fRemainingLifetime > 0 || !isJson)
-			saveContext.WriteValue("m_fRemainingLifetime", m_fRemainingLifetime);
-
-		// Components
-		if (!m_aComponents.IsEmpty() || !isJson)
-			saveContext.WriteValue("m_aComponents", m_aComponents);
+		if (!m_aComponents.IsEmpty() || !saveContext.CanSeekMembers())
+			saveContext.Write(m_aComponents);
 
 		return true;
 	}
@@ -359,26 +344,10 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 			return false;
 
 		DeserializeMetaData(loadContext);
-
-		// Prefab
-		string prefabString;
-		loadContext.ReadValue("m_rPrefab", prefabString);
-		if (prefabString && prefabString.Get(0) != "{")
-			prefabString = string.Format("{%1}.et", prefabString);
-
-		m_rPrefab = prefabString;
-
-		// Transform
-		loadContext.ReadValue("m_pTransformation", m_pTransformation);
-
-		// Lifetime
-		loadContext.ReadValue("m_fRemainingLifetime", m_fRemainingLifetime);
-
-		// Components
-		loadContext.ReadValue("m_aComponents", m_aComponents);
-		if (!m_aComponents)
-			m_aComponents = {}; // Info might be omitted in json but code expects an instance.
-
+		loadContext.Read(m_rPrefab);
+		loadContext.Read(m_pTransformation);
+		loadContext.Read(m_fRemainingLifetime);
+		loadContext.Read(m_aComponents);
 		return true;
 	}
 }
