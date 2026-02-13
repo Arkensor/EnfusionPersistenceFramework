@@ -5,7 +5,7 @@ class EPF_HitZoneContainerComponentSaveDataClass : EPF_ComponentSaveDataClass
 	ref array<string> m_aHitzoneFilter;
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_HitZoneContainerComponentSaveData : EPF_ComponentSaveData
 {
 	ref array<ref EPF_PersistentHitZone> m_aHitzones;

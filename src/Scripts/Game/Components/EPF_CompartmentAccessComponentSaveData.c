@@ -5,7 +5,7 @@ class EPF_CompartmentAccessComponentSaveDataClass : EPF_ComponentSaveDataClass
 	int m_iMaxPassangerLoadRange;
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_CompartmentAccessComponentSaveData : EPF_ComponentSaveData
 {
 	string m_sEntity;

@@ -1,6 +1,6 @@
 [
 	EPF_PersistentScriptedStateSettings(EPF_PersistentDoorStateManager),
-	EDF_DbName.Automatic()
+	EDF_DbName()
 ]
 class EPF_PersistentDoorStateManagerSaveData : EPF_ScriptedStateSaveData
 {

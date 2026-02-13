@@ -7,7 +7,7 @@ class EPF_CharacterControllerComponentSaveDataClass : EPF_ComponentSaveDataClass
 	}
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_CharacterControllerComponentSaveData : EPF_ComponentSaveData
 {
 	ECharacterStance m_eStance;

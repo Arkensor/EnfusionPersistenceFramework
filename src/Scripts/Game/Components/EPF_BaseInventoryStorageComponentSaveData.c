@@ -3,7 +3,7 @@ class EPF_BaseInventoryStorageComponentSaveDataClass : EPF_ComponentSaveDataClas
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 {
 	int m_iPriority;

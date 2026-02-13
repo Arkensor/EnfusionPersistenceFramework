@@ -5,7 +5,7 @@ class EPF_CharacterInventoryStorageComponentSaveDataClass : EPF_BaseInventorySto
 	int m_iMaxQuickbarSaveTime;
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_CharacterInventoryStorageComponentSaveData : EPF_BaseInventoryStorageComponentSaveData
 {
 	ref array<ref EPF_PersistentQuickSlotItem> m_aQuickSlotEntities;

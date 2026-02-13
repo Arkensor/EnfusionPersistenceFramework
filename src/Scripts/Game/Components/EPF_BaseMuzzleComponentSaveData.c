@@ -3,7 +3,7 @@ class EPF_BaseMuzzleComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_BaseMuzzleComponentSaveData : EPF_ComponentSaveData
 {
 	EMuzzleType m_eMuzzleType;

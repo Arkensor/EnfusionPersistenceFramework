@@ -3,7 +3,7 @@ class EPF_BaseSlotComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_BaseSlotComponentSaveData : EPF_ComponentSaveData
 {
 	ref EPF_EntitySaveData m_pEntity;

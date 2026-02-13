@@ -3,7 +3,7 @@ class EPF_WeaponSlotComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_WeaponSlotComponentSaveData : EPF_ComponentSaveData
 {
 	int m_iSlotIndex;

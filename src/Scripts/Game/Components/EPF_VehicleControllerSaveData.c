@@ -3,7 +3,7 @@ class EPF_VehicleControllerSaveDataClass : EPF_ComponentSaveDataClass
 {
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_VehicleControllerSaveData : EPF_ComponentSaveData
 {
 	bool m_bEngineOn;

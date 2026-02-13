@@ -8,7 +8,7 @@ class EPF_WeaponAttachmentsStorageComponentSaveDataClass : EPF_BaseInventoryStor
 	}
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_WeaponAttachmentsStorageComponentSaveData : EPF_BaseInventoryStorageComponentSaveData
 {
 };

@@ -63,7 +63,7 @@ class PersistentWorldEntityLoaderBase : SCR_AutotestCaseBase
 	}
 }
 
-[Test("EPF_PersistentWorldEntityLoaderTests", 3)]
+[Test("EPF_PersistentWorldEntityLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWorldEntityLoaderBase
 {
 	[Step(EStage.Main)]
@@ -83,7 +83,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWor
 	}
 }
 
-[Test("EPF_PersistentWorldEntityLoaderTests", 3)]
+[Test("EPF_PersistentWorldEntityLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : PersistentWorldEntityLoaderBase
 {
 	[Step(EStage.Main)]
@@ -111,7 +111,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : Persiste
 	}
 }
 
-[Test("EPF_PersistentWorldEntityLoaderTests", 3)]
+[Test("EPF_PersistentWorldEntityLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : PersistentWorldEntityLoaderBase
 {
 	EPF_PersistenceComponent m_pExisting2;
@@ -159,7 +159,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : Persi
 	}
 }
 
-[Test("EPF_PersistentWorldEntityLoaderTests", 3)]
+[Test("EPF_PersistentWorldEntityLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentWorldEntityLoader_LoadAsync_MultiExisting_AllSpawned : EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned
 {
 	[Step(EStage.Main)]

@@ -49,7 +49,7 @@ class EPF_Test_ScriptedStateLoaderDummySaveData : EPF_ScriptedStateSaveData
 	int m_iIntValue;
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_NotExisting_Created : SCR_AutotestCaseBase
 {
 	//------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_NotExisting_Created :
 	}
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_Existing_Returned : SCR_AutotestCaseBase
 {
 	ref EPF_Test_ScriptedStateLoaderDummy m_pExisting;
@@ -99,7 +99,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_Existing_Returned : S
 	}
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_NotExisting_Created : SCR_AutotestCaseBase
 {
 	//------------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_NotExisting_Crea
 	}
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_Existing_Returned : SCR_AutotestCaseBase
 {
 	ref EPF_Test_ScriptedStateLoaderDummy m_pExisting;
@@ -169,7 +169,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_Existing_Returne
 	}
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadAsync_Existing_Returned : SCR_AutotestCaseBase
 {
 	ref EPF_Test_ScriptedStateLoaderDummy m_pExisting;
@@ -214,7 +214,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadAsync_Existing_Returned : SCR_A
 	}
 }
 
-[Test("EPF_PersistentScriptedStateLoaderTests", 3)]
+[Test("EPF_PersistentScriptedStateLoaderTests", timeoutS: 3)]
 class EPF_Test_PersistentScriptedStateLoader_LoadAsync_MultipleExisting_AllReturned : SCR_AutotestCaseBase
 {
 	ref EPF_Test_ScriptedStateLoaderDummy m_pExisting1;

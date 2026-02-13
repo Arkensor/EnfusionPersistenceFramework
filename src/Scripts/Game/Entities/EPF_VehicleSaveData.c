@@ -3,7 +3,7 @@ class EPF_VehicleSaveDataClass : EPF_EntitySaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_VehicleSaveData : EPF_EntitySaveData
 {
 };
@@ -13,7 +13,7 @@ class EPF_VehiclePartSaveDataClass : EPF_EntitySaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_VehiclePartSaveData : EPF_EntitySaveData
 {
 };

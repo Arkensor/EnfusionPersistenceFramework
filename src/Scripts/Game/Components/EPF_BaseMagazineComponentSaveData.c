@@ -3,7 +3,7 @@ class EPF_BaseMagazineComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_BaseMagazineComponentSaveData : EPF_ComponentSaveData
 {
 	int m_iAmmoCount;

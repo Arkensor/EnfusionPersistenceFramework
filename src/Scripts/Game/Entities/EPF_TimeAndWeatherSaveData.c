@@ -3,7 +3,7 @@ class EPF_TimeAndWeatherSaveDataClass : EPF_EntitySaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_TimeAndWeatherSaveData : EPF_EntitySaveData
 {
 	string m_sWeatherState;

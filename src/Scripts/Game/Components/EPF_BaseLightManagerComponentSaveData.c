@@ -3,7 +3,7 @@ class EPF_BaseLightManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 };
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_BaseLightManagerComponentSaveData : EPF_ComponentSaveData
 {
 	ref array<ref EPF_PersistentLightSlot> m_aLightSlots;

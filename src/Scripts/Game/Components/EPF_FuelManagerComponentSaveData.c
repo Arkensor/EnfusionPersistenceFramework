@@ -3,7 +3,7 @@ class EPF_FuelManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_FuelManagerComponentSaveData : EPF_ComponentSaveData
 {
 	ref array<ref EPF_PersistentFuelNode> m_aFuelNodes;

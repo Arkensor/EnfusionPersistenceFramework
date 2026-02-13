@@ -5,7 +5,7 @@ class EPF_SlotManagerComponentSaveDataClass : EPF_ComponentSaveDataClass
 	bool m_bSkipDefaultNonBaked;
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_SlotManagerComponentSaveData : EPF_ComponentSaveData
 {
 	ref array<ref EPF_PersistentEntitySlot> m_aSlots;

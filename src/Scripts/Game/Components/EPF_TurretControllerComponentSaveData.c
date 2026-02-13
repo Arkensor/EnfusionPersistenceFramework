@@ -3,7 +3,7 @@ class EPF_TurretControllerComponentSaveDataClass : EPF_ComponentSaveDataClass
 {
 }
 
-[EDF_DbName.Automatic()]
+[EDF_DbName()]
 class EPF_TurretControllerComponentSaveData : EPF_ComponentSaveData
 {
 	float m_fYaw;
