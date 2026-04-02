@@ -242,7 +242,7 @@ class EPF_PersistentEntitySlot
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		if (!saveContext.IsValid())
 			return false;
@@ -262,7 +262,7 @@ class EPF_PersistentEntitySlot
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		if (!loadContext.IsValid())
 			return false;

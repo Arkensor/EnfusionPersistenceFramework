@@ -60,7 +60,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_NotExisting_Created :
 		EPF_Test_ScriptedStateLoaderDummy instance = EPF_PersistentScriptedStateLoader<EPF_Test_ScriptedStateLoaderDummy>.LoadSingleton();
 
 		// Assert
-		SetResult(new SCR_AutotestResult(instance && instance.GetPersistentId()));
+		SetResult(EDF_AutotestResult.FromResult(instance && instance.GetPersistentId()));
 	}
 }
 
@@ -85,7 +85,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingleton_Existing_Returned : S
 		EPF_Test_ScriptedStateLoaderDummy instance = EPF_PersistentScriptedStateLoader<EPF_Test_ScriptedStateLoaderDummy>.LoadSingleton();
 
 		// Assert
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			instance &&
 			instance.GetPersistentId() == m_pExisting.GetPersistentId() &&
 			instance.m_iIntValue == m_pExisting.m_iIntValue));
@@ -113,7 +113,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_NotExisting_Crea
 	//------------------------------------------------------------------------------------------------
 	void Assert(EPF_Test_ScriptedStateLoaderDummy instance, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(instance && instance.GetPersistentId()));
+		SetResult(EDF_AutotestResult.FromResult(instance && instance.GetPersistentId()));
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadSingletonAsync_Existing_Returne
 	//------------------------------------------------------------------------------------------------
 	void Assert(EPF_Test_ScriptedStateLoaderDummy instance, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			instance &&
 			instance.GetPersistentId() == m_pExisting.GetPersistentId() &&
 			instance.m_iIntValue == m_pExisting.m_iIntValue));
@@ -193,7 +193,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadAsync_Existing_Returned : SCR_A
 	//------------------------------------------------------------------------------------------------
 	void Assert(EPF_Test_ScriptedStateLoaderDummy instance, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			instance &&
 			instance.GetPersistentId() == m_pExisting.GetPersistentId() &&
 			instance.m_iIntValue == m_pExisting.m_iIntValue));
@@ -244,7 +244,7 @@ class EPF_Test_PersistentScriptedStateLoader_LoadAsync_MultipleExisting_AllRetur
 	//------------------------------------------------------------------------------------------------
 	void Assert(array<EPF_Test_ScriptedStateLoaderDummy> instances, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			instances &&
 			instances.Count() == 2 &&
 			m_aIds.Contains(instances.Get(0).GetPersistentId()) &&

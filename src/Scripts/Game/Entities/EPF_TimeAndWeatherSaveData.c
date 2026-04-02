@@ -39,7 +39,7 @@ class EPF_TimeAndWeatherSaveData : EPF_EntitySaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	override protected bool SerializationSave(SaveContext saveContext)
 	{
 		SerializeMetaData(saveContext);
 
@@ -56,7 +56,7 @@ class EPF_TimeAndWeatherSaveData : EPF_EntitySaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	override protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	override protected bool SerializationLoad(LoadContext loadContext)
 	{
 		DeserializeMetaData(loadContext);
 

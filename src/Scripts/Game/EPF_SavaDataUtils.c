@@ -9,15 +9,15 @@ class EPF_SavaDataUtils
 	//------------------------------------------------------------------------------------------------
 	protected static string GetCleanedComparisonString(notnull Managed inst, bool floatingPrecision)
 	{
-		SCR_JsonSaveContext writer();
+		JsonSaveContext writer();
 		JsonSaveContainer.Cast(writer.GetContainer()).SetMaxDecimalPlaces(floatingPrecision);
 		if (!writer.WriteValue("", inst))
 			return string.Empty;
 
 		// Replace the UTC timestamp with XXXX so that the compare for the other data can be true
-		string data = writer.ExportToString();
-		int layoutStart = data.IndexOf("m_iDataLayoutVersion");
-		int lastSavedStop = layoutStart + 49;
+		const string data = writer.SaveToString();
+		const int layoutStart = data.IndexOf("m_iDataLayoutVersion");
+		const int lastSavedStop = layoutStart + 49;
 		return data.Substring(0, layoutStart + 39) + "XXXXXXXXXX" + data.Substring(lastSavedStop, data.Length() - lastSavedStop);
 	}
 };

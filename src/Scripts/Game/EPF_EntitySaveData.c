@@ -319,7 +319,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		if (!saveContext.IsValid())
 			return false;
@@ -338,7 +338,7 @@ class EPF_EntitySaveData : EPF_MetaDataDbEntity
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		if (!loadContext.IsValid())
 			return false;
@@ -423,7 +423,7 @@ class EPF_PersistentTransformation
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		if (!saveContext.IsValid()) return false;
 
@@ -455,12 +455,12 @@ class EPF_PersistentTransformation
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		if (!loadContext.IsValid()) return false;
 
 		EPF_ETransformSaveFlags flags = EPF_ETransformSaveFlags.COORDS | EPF_ETransformSaveFlags.ANGLES | EPF_ETransformSaveFlags.SCALE;
-		if (ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(BinSerializationLoadContainer))
+		if (LoadContainerContext.Cast(loadContext).GetContainer().IsInherited(BinSerializationLoadContainer))
 			loadContext.ReadValue("transformSaveFlags", flags);
 
 		if (flags & EPF_ETransformSaveFlags.COORDS)
@@ -487,7 +487,7 @@ class EPF_PersistentComponentSaveData
 	ref EPF_ComponentSaveData m_pData;
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		if (!saveContext.IsValid())
 			return false;

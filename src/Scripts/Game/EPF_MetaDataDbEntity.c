@@ -21,11 +21,11 @@ class EPF_MetaDataDbEntity : EDF_DbEntity
 
 	//------------------------------------------------------------------------------------------------
 	//! Utility function to write meta-data to serializer
-	void SerializeMetaData(notnull BaseSerializationSaveContext saveContext)
+	void SerializeMetaData(notnull SaveContext saveContext)
 	{
 		WriteId(saveContext);
 
-		if (m_iDataLayoutVersion != 1 || !ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BaseJsonSerializationSaveContainer))
+		if (m_iDataLayoutVersion != 1 || !SaveContainerContext.Cast(saveContext).GetContainer().IsInherited(BaseJsonSaveContainer))
 			saveContext.WriteValue("m_iDataLayoutVersion", m_iDataLayoutVersion);
 
 		saveContext.WriteValue("m_iLastSaved", m_iLastSaved);
@@ -33,7 +33,7 @@ class EPF_MetaDataDbEntity : EDF_DbEntity
 
 	//------------------------------------------------------------------------------------------------
 	//! Utility function to read meta-data from serializer
-	void DeserializeMetaData(notnull BaseSerializationLoadContext loadContext)
+	void DeserializeMetaData(notnull LoadContext loadContext)
 	{
 		ReadId(loadContext);
 		loadContext.ReadValue("m_iDataLayoutVersion", m_iDataLayoutVersion);

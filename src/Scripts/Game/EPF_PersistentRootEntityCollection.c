@@ -83,7 +83,7 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		if (!saveContext.IsValid())
 			return false;
@@ -109,7 +109,7 @@ class EPF_PersistentRootEntityCollection : EPF_MetaDataDbEntity
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		if (!loadContext.IsValid())
 			return false;

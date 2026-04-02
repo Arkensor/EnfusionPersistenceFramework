@@ -66,7 +66,7 @@ class EPF_PersistentDoorStateManagerSaveData : EPF_ScriptedStateSaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationSave(BaseSerializationSaveContext saveContext)
+	protected bool SerializationSave(SaveContext saveContext)
 	{
 		m_iDataLayoutVersion = 2;
 		SerializeMetaData(saveContext);
@@ -75,7 +75,7 @@ class EPF_PersistentDoorStateManagerSaveData : EPF_ScriptedStateSaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		DeserializeMetaData(loadContext);
 

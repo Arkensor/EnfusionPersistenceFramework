@@ -73,7 +73,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_Existing_Spawned : PersistentWor
 		IEntity worldEntity = EPF_PersistentWorldEntityLoader.Load(EPF_Utils.GetPrefabName(m_pExisting.GetOwner()), m_pExisting.GetPersistentId());
 
 		// Assert
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			worldEntity &&
 			m_pExisting.GetPersistentId() &&
 			EPF_PersistenceComponent.GetPersistentId(worldEntity) == m_pExisting.GetPersistentId()));
@@ -95,7 +95,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_Existing_Spawned : Persiste
 
 	void Assert(IEntity worldEntity, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			worldEntity &&
 			m_pExisting.GetPersistentId() &&
 			EPF_PersistenceComponent.GetPersistentId(worldEntity) == m_pExisting.GetPersistentId()));
@@ -131,7 +131,7 @@ class EPF_Test_PersistentWorldEntityLoader_Load_MultiExisting_AllSpawned : Persi
 		array<IEntity> worldEntities = EPF_PersistentWorldEntityLoader.Load(EPF_ItemSaveData, m_aIds);
 
 		// Assert
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			worldEntities &&
 			worldEntities.Count() == 2 &&
 			m_aIds.Contains(EPF_PersistenceComponent.GetPersistentId(worldEntities.Get(0))) &&
@@ -171,7 +171,7 @@ class EPF_Test_PersistentWorldEntityLoader_LoadAsync_MultiExisting_AllSpawned : 
 
 	void Assert(array<IEntity> worldEntities, Managed context)
 	{
-		SetResult(new SCR_AutotestResult(
+		SetResult(EDF_AutotestResult.FromResult(
 			worldEntities &&
 			worldEntities.Count() == 2 &&
 			m_aIds.Contains(EPF_PersistenceComponent.GetPersistentId(worldEntities.Get(0))) &&
