@@ -499,7 +499,7 @@ class EPF_PersistentComponentSaveData
 	}
 
 	//------------------------------------------------------------------------------------------------
-	protected bool SerializationLoad(BaseSerializationLoadContext loadContext)
+	protected bool SerializationLoad(LoadContext loadContext)
 	{
 		if (!loadContext.IsValid())
 			return false;
