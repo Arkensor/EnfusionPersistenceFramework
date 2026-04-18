@@ -280,7 +280,7 @@ class EPF_PersistentInventoryStorageSlot
 		loadContext.ReadValue("_type", entityTypeString);
 
 		// TODO: Remove backwards compatiblity in 0.9.9
-		if (!entityTypeString && ContainerSerializationLoadContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
+		if (!entityTypeString && LoadContainerContext.Cast(loadContext).GetContainer().IsInherited(JsonLoadContainer))
 			loadContext.ReadValue("entityType", entityTypeString);
 
 		if (entityTypeString == "EMPTY")

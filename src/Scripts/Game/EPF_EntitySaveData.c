@@ -439,7 +439,7 @@ class EPF_PersistentTransformation
 		if (!EPF_Const.IsUnset(m_fScale))
 			flags |= EPF_ETransformSaveFlags.SCALE;
 
-		if (ContainerSerializationSaveContext.Cast(saveContext).GetContainer().IsInherited(BinSerializationSaveContainer))
+		if (SaveContainerContext.Cast(saveContext).GetContainer().IsInherited(BinarySaveContainer))
 			saveContext.WriteValue("transformSaveFlags", flags);
 
 		if (flags & EPF_ETransformSaveFlags.COORDS)
@@ -460,7 +460,7 @@ class EPF_PersistentTransformation
 		if (!loadContext.IsValid()) return false;
 
 		EPF_ETransformSaveFlags flags = EPF_ETransformSaveFlags.COORDS | EPF_ETransformSaveFlags.ANGLES | EPF_ETransformSaveFlags.SCALE;
-		if (LoadContainerContext.Cast(loadContext).GetContainer().IsInherited(BinSerializationLoadContainer))
+		if (LoadContainerContext.Cast(loadContext).GetContainer().IsInherited(BinaryLoadContainer))
 			loadContext.ReadValue("transformSaveFlags", flags);
 
 		if (flags & EPF_ETransformSaveFlags.COORDS)
