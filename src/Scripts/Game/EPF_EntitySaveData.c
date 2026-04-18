@@ -489,7 +489,7 @@ class EPF_PersistentComponentSaveData
 	//------------------------------------------------------------------------------------------------
 	protected bool SerializationSave(SaveContext saveContext)
 	{
-		if (!saveContext.IsValid())
+		if (!saveContext.IsValid() || !m_pData)
 			return false;
 
 		saveContext.WriteValue("_type", EDF_DbName.Get(m_pData.Type()));
